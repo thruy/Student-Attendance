@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const classSchema = new mongoose.Schema({
+const classesSchema = new mongoose.Schema({
     code: {
         type: String,
         required: true,
@@ -38,4 +38,4 @@ const classSchema = new mongoose.Schema({
     timestamps: true
 });
 
-module.exports = mongoose.model('Class', classSchema);
+module.exports = mongoose.model('Classes', classesSchema);
