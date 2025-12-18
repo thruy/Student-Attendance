@@ -1,0 +1,43 @@
+collection users: {
+    id: ObjectId,
+    name: string,
+    code: string,
+    email: string,
+    password: string, // hash
+    role: "student" || "teacher" || "admin",
+    faceData: {
+        embeddings: [],
+        createAt: Date
+    }
+}
+
+collection classes: {
+    _id: ObjectId,
+    name: string,
+    code: string,
+    type: "theory" || "exercise" || "practice"
+    semester: string,
+    teacherId: ObjectId,
+    students: [ObjectId],
+    createAt: Date
+}
+
+collection attendance: {
+    _id: ObjectId,
+    classId: ObjectId,
+    teacherId: ObjectId,
+    date: Date,
+    type: "manual" || "qr",
+    qrToken: String, 
+    expiresAt: Date,        
+    createdAt: Date
+}
+
+collection attendanceRecords {
+    _id: ObjectId,
+    attendanceId: ObjectId,
+    studentId: ObjectId,
+    status: Boolean,
+    checkInTime: Date,
+    type: "manual" || "qr"
+}
