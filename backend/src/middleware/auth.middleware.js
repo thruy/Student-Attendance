@@ -2,11 +2,10 @@ const jwt = require('jsonwebtoken');
 
 const verifyToken = (req, res, next) => {
     try {
-        const tokenHeader = req.headers.authorization;
-        if (!tokenHeader || !tokenHeader.startsWith('Bearer ')) {
+        const token = req.cookies.access_token;
+        if (!token) {
             return res.status(401).json({ message: 'No token provided' });
         }
-        const token = tokenHeader.split(' ')[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded;
         next();

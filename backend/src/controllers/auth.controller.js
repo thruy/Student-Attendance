@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/user.model');
+const User = require('../models/Users');
 
 const register = async (req, res) => {
     try {
@@ -25,11 +25,12 @@ const login = async (req, res) => {
         if (!user) {
             return res.status(400).json({ message: 'Invalid email or password, please try again' });
         }
-        const isMatch = await bscript.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid email or password, please try again' });
         }
         const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES });
+        res.cookie('access_token', token, { httpOnly: true, secure: false, sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
         res.json({ message: 'Login successful', token });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
