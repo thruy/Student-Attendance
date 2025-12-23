@@ -8,7 +8,6 @@ function PrivateRoute({ children }) {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                // Gọi API để verify token từ cookie
                 await axios.get('http://localhost:8000/api/auth/verify', { withCredentials: true });
                 setIsAuthenticated(true);
             } catch (error) {
