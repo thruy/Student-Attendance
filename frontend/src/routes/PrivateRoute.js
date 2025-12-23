@@ -9,7 +9,7 @@ function PrivateRoute({ children }) {
         const checkAuth = async () => {
             try {
                 // Gọi API để verify token từ cookie
-                await axios.get('http://localhost:5000/api/auth/verify', { withCredentials: true });
+                await axios.get('http://localhost:8000/api/auth/verify', { withCredentials: true });
                 setIsAuthenticated(true);
             } catch (error) {
                 setIsAuthenticated(false);
@@ -19,7 +19,7 @@ function PrivateRoute({ children }) {
     }, []);
 
     if (isAuthenticated === null) {
-        return <div>Loading...</div>; // Hoặc spinner
+        return <div>Loading...</div>;
     }
 
     if (!isAuthenticated) {

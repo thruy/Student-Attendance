@@ -15,6 +15,7 @@ function Register() {
         event.preventDefault();
         try {
             await authService.register(name, email, password, code, role);
+            await authService.login(email, password);
             navigate("/main");
         } catch (err) {
             setError(err.response?.data?.message || "Registration failed");
