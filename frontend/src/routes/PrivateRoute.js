@@ -1,9 +1,28 @@
+import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
+import axios from 'axios';
 
 function PrivateRoute({ children }) {
-    const token = localStorage.getItem('token');
+    const [isAuthenticated, setIsAuthenticated] = useState(null);
 
-    if (!token) {
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                // Gọi API để verify token từ cookie
+                await axios.get('http://localhost:5000/api/auth/verify', { withCredentials: true });
+                setIsAuthenticated(true);
+            } catch (error) {
+                setIsAuthenticated(false);
+            }
+        };
+        checkAuth();
+    }, []);
+
+    if (isAuthenticated === null) {
+        return <div>Loading...</div>; // Hoặc spinner
+    }
+
+    if (!isAuthenticated) {
         return <Navigate to="/login" />;
     }
 

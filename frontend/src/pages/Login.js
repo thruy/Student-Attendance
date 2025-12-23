@@ -1,17 +1,18 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import authService from "../services/authService";
 
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            const data = await authService.login(email, password);
-            localStorage.setItem("token", data.token);
-            alert("Login successful!");
+            await authService.login(email, password);
+            navigate("/main");
         } catch (error) {
             setError(error.response?.data?.message || "Login failed, please try again.");
         }
