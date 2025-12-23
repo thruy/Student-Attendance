@@ -24,7 +24,6 @@ function PrivateRoute({ children }) {
     if (!isAuthenticated) {
         return <Navigate to="/login" />;
     }
-
     return children;
 }
 
