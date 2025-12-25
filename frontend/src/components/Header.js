@@ -1,5 +1,3 @@
-import appIcon from '../assets/logo192.png';
-
 function Header() {
     return (
         <div className="bg-light">

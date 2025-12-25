@@ -11,7 +11,12 @@ const register = async (name, email, password, code, role) => {
     return response.data;
 }
 
+const logout = async () => {
+    const response = await axios.post(`${API_URL}/logout`, {}, { withCredentials: true });
+    return response.data;
+}
+
 export default {
     login,
-    register
+    register, logout
 };
