@@ -19,16 +19,28 @@ function Login() {
     }
 
     return (
-        <form className="login-form" onSubmit={handleSubmit}>
-            <h2>Đăng nhập</h2>
+        <div className="container d-flex justify-content-center mt-5">
+            <div className="card shadow p-4" style={{ width: "500px" }}>
+                <h3 className="text-center mb-4">Đăng nhập</h3>
 
-            <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-            <input type="password" placeholder="Mật khẩu" value={password} onChange={e => setPassword(e.target.value)} />
-            <button type="submit">Đăng nhập</button>
+                {error && <div className="alert alert-danger">{error}</div>}
 
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-        </form>
-    )
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-3">
+                        <label className="form-label">Email</label>
+                        <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                    </div>
+
+                    <div className="mb-3">
+                        <label className="form-label">Mật khẩu</label>
+                        <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    </div>
+
+                    <button type="submit" className="btn btn-dark w-100"> Đăng nhập </button>
+                </form>
+            </div>
+        </div>
+    );
 }
 
 export default Login;
