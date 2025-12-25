@@ -16,7 +16,11 @@ const logout = async () => {
     return response.data;
 }
 
+const getUserInfo = async () => {
+    const response = await axios.get(`${API_URL}/verify`, { withCredentials: true });
+    return response.data;
+}
+
 export default {
-    login,
-    register, logout
+    login, register, logout, getUserInfo
 };

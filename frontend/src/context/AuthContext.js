@@ -6,6 +6,9 @@ export const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(null);
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
         const verifyAuth = async () => {
             try {
@@ -16,6 +19,18 @@ const AuthProvider = ({ children }) => {
             }
         }
         verifyAuth();
+
+        const fetchUser = async () => {
+            try {
+                const userData = await authService.getUserInfo();
+                setUser(userData);
+            } catch {
+                setUser(null);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchUser();
     }, [])
 
     const logout = async () => {
@@ -28,10 +43,10 @@ const AuthProvider = ({ children }) => {
         }
     }
     return (
-        <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
+        <AuthContext.Provider value={{ isAuthenticated, logout, user, loading }}>
             {children}
         </AuthContext.Provider>
     )
 }
-
+export const useAuth = () => useContext(AuthContext);
 export default AuthProvider;

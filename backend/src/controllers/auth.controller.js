@@ -40,11 +40,11 @@ const login = async (req, res) => {
 
 const verify = async (req, res) => {
     try {
-        const user = await User.findById(req.user.userId).select('name email role');
+        const user = await User.findById(req.user.userId).select('name code email role');
         if (!user) {
             return res.status(404).json({ message: 'Không tìm thấy người dùng' });
         }
-        res.json({ message: 'Đã xác thực', user });
+        res.status(200).json({ message: 'Đã xác thực', user });
     } catch (error) {
         res.status(500).json({ message: 'Lỗi Server!', error: error.message });
     }

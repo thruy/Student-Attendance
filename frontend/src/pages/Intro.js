@@ -1,13 +1,13 @@
 import videoHome from '../assets/videoHome.mp4'
-import './Home.scss'
+import './Intro.scss'
 
-function Home() {
+function Intro() {
     return (
-        <div className='home-container'>
-            <video autoPlay loop muted width={750} height={500} className='home-video' >
+        <div className='intro-container'>
+            <video autoPlay loop muted width={750} height={500} className='intro-video' >
                 <source src={videoHome} />
             </video>
-            <div className='home-content'>
+            <div className='intro-content'>
                 <h2>Hệ thống quản lý sinh viên</h2>
                 <h1>S-a-S</h1>
                 <p>Quản lý điểm danh nhanh chóng, chính xác và tiện lợi</p>
@@ -18,4 +18,4 @@ function Home() {
     );
 }
 
-export default Home;
+export default Intro;
