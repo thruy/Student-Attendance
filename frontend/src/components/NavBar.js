@@ -27,13 +27,7 @@ const NavBar = (props) => {
                     <Nav.Link to="/support" className="me-4 fs-5 nav-link">Hỗ trợ</Nav.Link>
                 </Nav>
                 <Nav>
-                    {!isAuthenticated && (
-                        <>
-                            <Button as={Link} to="/login" variant="outline-dark">Đăng nhập</Button>
-                            <Button as={Link} to="/register" variant="dark" className="ms-4">Đăng ký</Button>
-                        </>
-                    )}
-                    {isAuthenticated && (
+                    {isAuthenticated ? (
                         <NavDropdown title="Xin chào " id="basic-nav-dropdown">
                             <NavDropdown.Item href="#action/3.1">Thông tin cá nhân</NavDropdown.Item>
                             <NavDropdown.Item href="#action/3.2">Cài đặt</NavDropdown.Item>
@@ -41,6 +35,11 @@ const NavBar = (props) => {
                             <NavDropdown.Divider />
                             <NavDropdown.Item href="#action/3.4">Đăng xuất</NavDropdown.Item>
                         </NavDropdown>
+                    ) : (
+                        <>
+                            <Button as={Link} to="/login" variant="outline-dark">Đăng nhập</Button>
+                            <Button as={Link} to="/register" variant="dark" className="ms-4">Đăng ký</Button>
+                        </>
                     )}
 
                 </Nav>

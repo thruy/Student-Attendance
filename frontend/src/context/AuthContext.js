@@ -1,5 +1,6 @@
 import axios from "axios";
 import { createContext, useEffect, useState } from "react";
+import authService from "../services/authService";
 
 export const AuthContext = createContext();
 
@@ -16,6 +17,16 @@ const AuthProvider = ({ children }) => {
         }
         verifyAuth();
     }, [])
+
+    const logout = async () => {
+        try {
+            await authService.logout();
+        } catch (err) {
+            console.error("Lỗi đăng xuất", err)
+        } finally {
+            setIsAuthenticated(false)
+        }
+    }
     return (
         <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
             {children}
