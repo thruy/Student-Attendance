@@ -4,19 +4,6 @@ import { AuthContext } from '../context/AuthContext';
 
 function PrivateRoute({ children }) {
     const { isAuthenticated } = useContext(AuthContext)
-
-    // useEffect(() => {
-    //     const checkAuth = async () => {
-    //         try {
-    //             await axios.get('http://localhost:8000/api/auth/verify', { withCredentials: true });
-    //             setIsAuthenticated(true);
-    //         } catch (error) {
-    //             setIsAuthenticated(false);
-    //         }
-    //     };
-    //     checkAuth();
-    // }, []);
-
     if (isAuthenticated === null) {
         return <div>Đang tải...</div>;
     }

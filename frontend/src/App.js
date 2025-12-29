@@ -9,6 +9,11 @@ import NavBar from './components/NavBar';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import Intro from './pages/Intro';
+import StudyPage from './pages/StudyPage';
+import ProjectPage from './pages/ProjectPage';
+import ScholarshipPage from './pages/ScholarshipPage';
+import SupportPage from './pages/SupportPage';
+import ContactPage from './pages/ContactPage';
 
 function App() {
   return (
@@ -25,6 +30,11 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/main" element={<PrivateRoute><Main /></PrivateRoute>} />
+          <Route path="/study" element={<PrivateRoute><StudyPage /></PrivateRoute>} />
+          <Route path="/project" element={<PrivateRoute><ProjectPage /></PrivateRoute>} />
+          <Route path='/scholarship' element={<PrivateRoute><ScholarshipPage /></PrivateRoute>} />
+          <Route path='/support' element={<PrivateRoute><SupportPage /></PrivateRoute>} />
+          <Route path='/contact' element={<PrivateRoute><ContactPage /></PrivateRoute>} />
         </Routes>
       </main>
 

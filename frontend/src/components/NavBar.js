@@ -23,11 +23,11 @@ const NavBar = (props) => {
                 </Navbar.Brand>
                 <Nav className="me-auto">
                     <NavLink to="/main" className="me-4 fs-5 nav-link" >Trang chủ</NavLink>
-                    <Nav.Link to="/study" className="me-4 fs-5 nav-link">Học tập</Nav.Link>
-                    <Nav.Link to="/project" className="me-4 fs-5 nav-link">Đồ án</Nav.Link>
-                    <Nav.Link to="/scholarship" className="me-4 fs-5 nav-link">Học bổng</Nav.Link>
-                    <Nav.Link to="/contact" className="me-4 fs-5 nav-link">Liên hệ</Nav.Link>
-                    <Nav.Link to="/support" className="me-4 fs-5 nav-link">Hỗ trợ</Nav.Link>
+                    <NavLink to="/study" className="me-4 fs-5 nav-link">Học tập</NavLink>
+                    <NavLink to="/project" className="me-4 fs-5 nav-link">Đồ án</NavLink>
+                    <NavLink to="/scholarship" className="me-4 fs-5 nav-link">Học bổng</NavLink>
+                    <NavLink to="/contact" className="me-4 fs-5 nav-link">Liên hệ</NavLink>
+                    <NavLink to="/support" className="me-4 fs-5 nav-link">Hỗ trợ</NavLink>
                 </Nav>
                 <Nav>
                     {isAuthenticated ? (
