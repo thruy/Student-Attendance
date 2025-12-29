@@ -1,6 +1,5 @@
 import { createContext, useEffect, useState, useContext } from "react";
 import authService from "../services/authService";
-
 export const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
@@ -12,7 +11,7 @@ const AuthProvider = ({ children }) => {
         const fetchUser = async () => {
             try {
                 const userData = await authService.getUserInfo();
-                setUser(userData);
+                setUser(userData.user);
                 setIsAuthenticated(true);
             } catch {
                 setUser(null);
@@ -22,7 +21,7 @@ const AuthProvider = ({ children }) => {
             }
         }
         fetchUser();
-    }, [])
+    })
 
     const logout = async () => {
         try {
@@ -30,7 +29,8 @@ const AuthProvider = ({ children }) => {
         } catch (err) {
             console.error("Lỗi đăng xuất", err)
         } finally {
-            setIsAuthenticated(false)
+            setIsAuthenticated(false);
+            setUser(null);
         }
     }
 
@@ -40,7 +40,6 @@ const AuthProvider = ({ children }) => {
         setUser(userData);
         setIsAuthenticated(true);
     };
-
 
     return (
         <AuthContext.Provider value={{ isAuthenticated, login, logout, user, loading }}>

@@ -1,20 +1,7 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useAuth } from '../context/AuthContext'
 
 function Main() {
-    const [user, setUser] = useState(null);
-
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const response = await axios.get('http://localhost:8000/api/auth/verify', { withCredentials: true });
-                setUser(response.data.user);
-            } catch (error) {
-                console.error('Error fetching user:', error);
-            }
-        };
-        fetchUser();
-    }, []);
+    const { user } = useAuth();
 
     return (
         <div>

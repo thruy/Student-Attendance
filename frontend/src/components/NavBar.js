@@ -2,15 +2,17 @@ import { Navbar, Nav, Container, Button, NavDropdown } from 'react-bootstrap';
 import { Link, NavLink } from 'react-router-dom';
 import appIcon from '../assets/logo192.png';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from "react-router-dom";
 //import './NavBar.scss';
 
 const NavBar = (props) => {
     const { isAuthenticated, logout, user } = useAuth()
-    // const navigate = useNavigate();
-    // const handleLogout = async () => {
-    //     await logout();
-    //     navigate("/");
-    // }
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        await logout();
+        navigate("/");
+    };
 
     return (
         <Navbar bg="light" expand="lg">
@@ -20,7 +22,7 @@ const NavBar = (props) => {
                     S-a-S
                 </Navbar.Brand>
                 <Nav className="me-auto">
-                    <NavLink to="/" className="me-4 fs-5 nav-link" >Trang chủ</NavLink>
+                    <NavLink to="/main" className="me-4 fs-5 nav-link" >Trang chủ</NavLink>
                     <Nav.Link to="/study" className="me-4 fs-5 nav-link">Học tập</Nav.Link>
                     <Nav.Link to="/project" className="me-4 fs-5 nav-link">Đồ án</Nav.Link>
                     <Nav.Link to="/scholarship" className="me-4 fs-5 nav-link">Học bổng</Nav.Link>
@@ -34,7 +36,7 @@ const NavBar = (props) => {
                             <NavDropdown.Item href="#action/3.2">Cài đặt</NavDropdown.Item>
                             <NavDropdown.Item href="#action/3.3">Đổi mật khẩu</NavDropdown.Item>
                             <NavDropdown.Divider />
-                            <NavDropdown.Item as={Link} onClick={logout}>Đăng xuất</NavDropdown.Item>
+                            <NavDropdown.Item as={Link} onClick={handleLogout}>Đăng xuất</NavDropdown.Item>
                         </NavDropdown>
                     ) : (
                         <>
