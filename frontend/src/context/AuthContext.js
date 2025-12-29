@@ -1,5 +1,4 @@
-import axios from "axios";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useContext } from "react";
 import authService from "../services/authService";
 
 export const AuthContext = createContext();
@@ -10,22 +9,14 @@ const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const verifyAuth = async () => {
-            try {
-                await axios.get('http://localhost:8000/api/auth/verify', { withCredentials: true })
-                setIsAuthenticated(true)
-            } catch {
-                setIsAuthenticated(false)
-            }
-        }
-        verifyAuth();
-
         const fetchUser = async () => {
             try {
                 const userData = await authService.getUserInfo();
                 setUser(userData);
+                setIsAuthenticated(true);
             } catch {
                 setUser(null);
+                setIsAuthenticated(false);
             } finally {
                 setLoading(false);
             }
@@ -42,8 +33,17 @@ const AuthProvider = ({ children }) => {
             setIsAuthenticated(false)
         }
     }
+
+    const login = async (email, password) => {
+        await authService.login(email, password);
+        const userData = await authService.getUserInfo();
+        setUser(userData);
+        setIsAuthenticated(true);
+    };
+
+
     return (
-        <AuthContext.Provider value={{ isAuthenticated, logout, user, loading }}>
+        <AuthContext.Provider value={{ isAuthenticated, login, logout, user, loading }}>
             {children}
         </AuthContext.Provider>
     )

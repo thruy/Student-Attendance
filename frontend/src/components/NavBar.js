@@ -1,12 +1,11 @@
 import { Navbar, Nav, Container, Button, NavDropdown } from 'react-bootstrap';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import appIcon from '../assets/logo192.png';
-import { useContext } from 'react';
 import { useAuth } from '../context/AuthContext';
 //import './NavBar.scss';
 
 const NavBar = (props) => {
-    const { isAuthenticated, logout, loading, user } = useAuth()
+    const { isAuthenticated, logout, user } = useAuth()
     // const navigate = useNavigate();
     // const handleLogout = async () => {
     //     await logout();
@@ -30,12 +29,12 @@ const NavBar = (props) => {
                 </Nav>
                 <Nav>
                     {isAuthenticated ? (
-                        <NavDropdown title={`Xin chào, ${user.name}`} id="basic-nav-dropdown">
+                        <NavDropdown title={`Xin chào, ${user?.name || ""}`} id="basic-nav-dropdown">
                             <NavDropdown.Item href="#action/3.1">Thông tin cá nhân</NavDropdown.Item>
                             <NavDropdown.Item href="#action/3.2">Cài đặt</NavDropdown.Item>
                             <NavDropdown.Item href="#action/3.3">Đổi mật khẩu</NavDropdown.Item>
                             <NavDropdown.Divider />
-                            <NavDropdown.Item as={Link} to="/" onClick={logout}>Đăng xuất</NavDropdown.Item>
+                            <NavDropdown.Item as={Link} onClick={logout}>Đăng xuất</NavDropdown.Item>
                         </NavDropdown>
                     ) : (
                         <>

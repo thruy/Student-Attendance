@@ -7,14 +7,13 @@ function Register() {
     const [code, setCode] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [role, setRole] = useState("student");
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            await authService.register(name, email, password, code, role);
+            await authService.register(name, email, password, code);
             await authService.login(email, password);
             navigate("/main");
         } catch (err) {

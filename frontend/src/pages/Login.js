@@ -1,20 +1,21 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import authService from "../services/authService";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const { login } = useAuth
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            await authService.login(email, password);
+            await login(email, password)
             navigate("/main");
         } catch (error) {
-            setError(error.response?.data?.message || "Login failed, please try again.");
+            setError(error.response?.data?.message || "Lỗi đăng nhập, vui lòng thử lại.");
         }
     }
 

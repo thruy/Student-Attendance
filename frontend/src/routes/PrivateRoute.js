@@ -1,6 +1,5 @@
-import { useState, useEffect, useContext } from 'react';
+import { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
-import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 
 function PrivateRoute({ children }) {
