@@ -22,7 +22,8 @@ const usersSchema = new mongoose.Schema({
 
     password: {
         type: String,
-        required: true
+        required: true,
+        minlength: 6
     },
 
     role: {
@@ -31,6 +32,63 @@ const usersSchema = new mongoose.Schema({
         default: 'student',
         required: true
     },
+
+    dob: {
+        type: Date,
+        required: true
+    },
+
+    gender: {
+        type: String,
+        enum: ['male', 'female', 'others'],
+        required: true
+    },
+
+    ethnic: {
+        type: String
+    },
+
+    university: {
+        type: String,
+        default: 'Đại học Bách Khoa Hà Nội',
+        required: true
+    },
+
+    school: {
+        type: String
+    },
+
+    schoolYear: {
+        type: Number
+    },
+
+    trainingSystem: {
+        type: String,
+        enum: ['Cử nhân', 'Kỹ sư', 'Thạc sĩ', 'Tiến sĩ']
+    },
+
+    branch: {
+        type: String
+    },
+
+    class: {
+        type: String
+    },
+
+    hometown: {
+        type: String
+    },
+
+    identificationNumber: {
+        type: String
+    },
+
+    phone: {
+        type: String,
+        minlength: 10
+    },
+
+
 
     faceData: {
         embeddings: {

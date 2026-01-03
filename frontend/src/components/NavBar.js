@@ -22,12 +22,12 @@ const NavBar = (props) => {
                     S-a-S
                 </Navbar.Brand>
                 <Nav className="me-auto">
-                    <NavLink to="/main" className="me-4 fs-5 nav-link" >Trang chủ</NavLink>
-                    <NavLink to="/study" className="me-4 fs-5 nav-link">Học tập</NavLink>
-                    <NavLink to="/project" className="me-4 fs-5 nav-link">Đồ án</NavLink>
-                    <NavLink to="/scholarship" className="me-4 fs-5 nav-link">Học bổng</NavLink>
-                    <NavLink to="/contact" className="me-4 fs-5 nav-link">Liên hệ</NavLink>
-                    <NavLink to="/support" className="me-4 fs-5 nav-link">Hỗ trợ</NavLink>
+                    <NavLink to="/main" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`} >Trang chủ</NavLink>
+                    <NavLink to="/study" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Học tập</NavLink>
+                    <NavLink to="/project" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Đồ án</NavLink>
+                    <NavLink to="/scholarship" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Học bổng</NavLink>
+                    <NavLink to="/contact" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Liên hệ</NavLink>
+                    <NavLink to="/support" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Hỗ trợ</NavLink>
                 </Nav>
                 <Nav>
                     {isAuthenticated ? (
