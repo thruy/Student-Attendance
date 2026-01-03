@@ -10,13 +10,14 @@ const usersSchema = new mongoose.Schema({
     code: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        match: [/^\d+$/]
     },
 
     email: {
         type: String,
         required: true,
-        match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
+        match: [/^[a-zA-Z]+\.[a-zA-Z]+\d{6}@sis\.hust\.edu\.vn$/, "Định dạng email không hợp lệ."],
         unique: true
     },
 
@@ -80,15 +81,15 @@ const usersSchema = new mongoose.Schema({
     },
 
     identificationNumber: {
-        type: String
+        type: String,
+        match: [/^\d+$/]
     },
 
     phone: {
         type: String,
-        minlength: 10
+        minlength: 10,
+        match: [/^\d+$/]
     },
-
-
 
     faceData: {
         embeddings: {
