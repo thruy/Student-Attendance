@@ -4,17 +4,17 @@ import authService from "../services/authService";
 
 function Register() {
     const [name, setName] = useState("");
-    const [code, setCode] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [gender, setGender] = useState("");
+    const [dob, setDob] = useState();
     const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            await authService.register(name, email, password, code);
+            await authService.register(name, gender, dob, email, password);
             await authService.login(email, password);
             navigate("/main");
         } catch (err) {
@@ -34,8 +34,17 @@ function Register() {
                     </div>
 
                     <div className="mb-3">
-                        <label>Mã số sinh viên:</label>
-                        <input type="text" value={code} className="form-control" onChange={(e) => setCode(e.target.value)} required />
+                        <label className="form-label">Giới tính:</label>
+                        <select class="form-select" aria-label="Default select example" value={gender} onChange={(e) => setGender(e.target.value)} required>
+                            <option value="male">Nam</option>
+                            <option value="female">Nữ</option>
+                            <option value="others">Khác</option>
+                        </select>
+                    </div>
+
+                    <div className="mb-3">
+                        <label className="form-label">Ngày sinh:</label>
+                        <input type="date" className="form-control" value={dob} onChange={(e) => setDob(e.target.value)} required />
                     </div>
 
                     <div className="mb-3">

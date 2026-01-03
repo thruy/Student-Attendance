@@ -4,7 +4,14 @@ const User = require('../models/Users');
 
 const register = async (req, res) => {
     try {
-        const { name, email, password, code } = req.body;
+        const { name, gender, dob, email, password } = req.body;
+        const match = email.match(/(\d{2})(\d{4})@sis\.hust\.edu\.vn$/);
+        const year = match[1];
+        const number = match[2];
+        const studentCode = `20${year}${number}`;
+        const schoolYear = +year;
+        schoolYear += 45;
+
         const existingUser = await User.findOne({ $or: [{ email }, { code }] });
         if (existingUser) {
             return res.status(400).json({ message: "Người dùng đã tồn tại" });
@@ -12,7 +19,7 @@ const register = async (req, res) => {
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        const newUser = await User.create({ name, email, password: hashedPassword, code, role: "student" });
+        const newUser = await User.create({ name, gender, dob, email, password: hashedPassword, code: studentCode, role: "student", schoolYear: schoolYear });
         res.status(201).json({ message: 'Đăng kí người dùng thành công', userId: newUser._id });
     } catch (error) {
         res.status(500).json({ message: 'Lỗi server!', error: error.message });

@@ -1,4 +1,5 @@
 const { body, param, validationResult } = require('express-validator');
+const SIS_EMAIL_REGEX = /^[a-zA-Z]+\.[a-zA-Z]+\d{6}@sis\.hust\.edu\.vn$/;
 
 const validate = (req, res, next) => {
     const errors = validationResult(req);
@@ -14,3 +15,31 @@ const validate = (req, res, next) => {
     next();
 };
 
+const registerValidate = [
+    body('name')
+        .trim()
+        .notEmpty().withMessage('Họ và tên không được để trống')
+        .isLength({ min: 2, max: 30 }).withMessage('Họ và tên có chứa 2 - 30 kí tự')
+        .matches(/^[a-zA-Z]+$/).withMessage('Họ và tên chỉ được chứa chữ cái'),
+    body('email')
+        .trim()
+        .notEmpty().withMessage('Email không được để trống')
+        .matches(SIS_EMAIL_REGEX).withMessage('Email không đúng định dạng')
+        .normalizeEmail(),
+    body('password')
+        .notEmpty().withMessage('Mật khẩu không được để trống')
+        .isLength({ min: 6 }).withMessage('Mật khẩu cần có ít nhất 6 kí tự'),
+    validate
+];
+
+const loginValidate = [
+    body('email')
+        .trim()
+        .notEmpty().withMessage('Email không được để trống')
+        .matches(SIS_EMAIL_REGEX).withMessage('Email không đúng định dạng'),
+    body('password')
+        .notEmpty().withMessage('Mật khẩu không được để trống'),
+    validate
+];
+
+module.exports = { validate, loginValidate, registerValidate }
