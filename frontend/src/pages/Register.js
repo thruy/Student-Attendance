@@ -37,9 +37,9 @@ function Register() {
                         <label className="form-label">Giới tính:</label>
                         <select className="form-select" aria-label="Default select example" value={gender} onChange={(e) => setGender(e.target.value)} required>
                             <option value="">-- Chọn giới tính --</option>
-                            <option value="male">Nam</option>
-                            <option value="female">Nữ</option>
-                            <option value="others">Khác</option>
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                            <option value="Khác">Khác</option>
                         </select>
                     </div>
 
@@ -62,7 +62,6 @@ function Register() {
                     <button type="submit" className="btn btn-dark w-100">Đăng kí</button>
                 </form>
             </div>
-
         </div>
     );
 }

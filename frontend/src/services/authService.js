@@ -17,7 +17,7 @@ const logout = async () => {
 }
 
 const getUserInfo = async () => {
-    const response = await axios.get(`${API_URL}/verify`, { withCredentials: true });
+    const response = await axios.get(`${API_URL}/profile`, { withCredentials: true });
     return response.data;
 }
 

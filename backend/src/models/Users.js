@@ -41,7 +41,7 @@ const usersSchema = new mongoose.Schema({
 
     gender: {
         type: String,
-        enum: ['male', 'female', 'others'],
+        enum: ['Nam', 'Nữ', 'Khác'],
         required: true
     },
 
@@ -59,6 +59,14 @@ const usersSchema = new mongoose.Schema({
         type: String
     },
 
+    branch: {
+        type: String
+    },
+
+    class: {
+        type: String
+    },
+
     schoolYear: {
         type: Number
     },
@@ -66,14 +74,6 @@ const usersSchema = new mongoose.Schema({
     trainingSystem: {
         type: String,
         enum: ['Cử nhân', 'Kỹ sư', 'Thạc sĩ', 'Tiến sĩ']
-    },
-
-    branch: {
-        type: String
-    },
-
-    class: {
-        type: String
     },
 
     hometown: {

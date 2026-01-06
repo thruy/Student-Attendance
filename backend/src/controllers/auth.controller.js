@@ -46,7 +46,7 @@ const login = async (req, res) => {
 
 const verify = async (req, res) => {
     try {
-        const user = await User.findById(req.user.userId).select('name code email role');
+        const user = await User.findById(req.user.userId).select('name code role');
         if (!user) {
             return res.status(404).json({ message: 'Không tìm thấy người dùng' });
         }
@@ -61,4 +61,16 @@ const logout = (req, res) => {
     return res.status(200).json({ message: "Đăng xuất thành công" });
 }
 
-module.exports = { register, login, verify, logout };
+const getInfo = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.userId);
+        if (!user) {
+            return res.status(404).json({ message: 'Không tìm thấy người dùng!' });
+        }
+        res.status(200).json({ user });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi Server!', error: error.message });
+    }
+}
+
+module.exports = { register, login, verify, logout, getInfo };

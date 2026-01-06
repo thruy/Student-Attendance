@@ -32,7 +32,7 @@ const NavBar = (props) => {
                 <Nav>
                     {isAuthenticated ? (
                         <NavDropdown title={`Xin chào, ${user?.name || ""}`} id="basic-nav-dropdown">
-                            <NavDropdown.Item href="#action/3.1">Thông tin cá nhân</NavDropdown.Item>
+                            <NavDropdown.Item as={Link} to="/profile">Thông tin cá nhân</NavDropdown.Item>
                             <NavDropdown.Item href="#action/3.2">Cài đặt</NavDropdown.Item>
                             <NavDropdown.Item href="#action/3.3">Đổi mật khẩu</NavDropdown.Item>
                             <NavDropdown.Divider />

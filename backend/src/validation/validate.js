@@ -32,7 +32,7 @@ const registerValidate = [
         .isLength({ min: 6 }).withMessage('Mật khẩu cần có ít nhất 6 kí tự'),
     body('gender')
         .notEmpty().withMessage('Giới tính không được để trống')
-        .isIn(['male', 'female', 'others']).withMessage('Giới tính không hợp lệ'),
+        .isIn(['Nam', 'Nữ', 'Khác']).withMessage('Giới tính không hợp lệ'),
     body('dob')
         .notEmpty().withMessage('Ngày sinh không được để trống')
         .isDate().withMessage('Ngày sinh không hợp lệ'),
