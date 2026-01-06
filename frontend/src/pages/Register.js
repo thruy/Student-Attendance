@@ -8,7 +8,7 @@ function Register() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [gender, setGender] = useState("");
-    const [dob, setDob] = useState();
+    const [dob, setDob] = useState("");
     const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
@@ -35,7 +35,8 @@ function Register() {
 
                     <div className="mb-3">
                         <label className="form-label">Giới tính:</label>
-                        <select class="form-select" aria-label="Default select example" value={gender} onChange={(e) => setGender(e.target.value)} required>
+                        <select className="form-select" aria-label="Default select example" value={gender} onChange={(e) => setGender(e.target.value)} required>
+                            <option value="">-- Chọn giới tính --</option>
                             <option value="male">Nam</option>
                             <option value="female">Nữ</option>
                             <option value="others">Khác</option>
