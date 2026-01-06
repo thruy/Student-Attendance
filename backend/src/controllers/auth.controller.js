@@ -73,4 +73,18 @@ const getInfo = async (req, res) => {
     }
 }
 
-module.exports = { register, login, verify, logout, getInfo };
+const updateInfo = async (req, res) => {
+    try {
+        const { ethnic, university, school, branch, classname, trainingSystem, hometown, identificationNumber, phone } = req.body;
+        const user = await User.findByIdAndUpdate(
+            req.user.userId,
+            { ethnic, university, school, branch, classname, trainingSystem, hometown, identificationNumber, phone },
+            { new: true }
+        ).select("-password");
+        res.status(204).json({ message: 'Cập nhật thông tin thành công' });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi cập nhật dữ liệu!', error: error.message });
+    }
+}
+
+module.exports = { register, login, verify, logout, getInfo, updateInfo };

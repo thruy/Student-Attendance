@@ -9,5 +9,6 @@ router.post('/login', loginValidate, authController.login)
 router.get('/verify', verifyToken, authController.verify)
 router.post('/logout', authController.logout)
 router.get('/profile', verifyToken, authController.getInfo)
+router.put('/profile', verifyToken, authController.updateInfo)
 
 module.exports = router

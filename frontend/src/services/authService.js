@@ -21,6 +21,11 @@ const getUserInfo = async () => {
     return response.data;
 }
 
+const updateUserInfo = async () => {
+    const response = await axios.put(`${API_URL}/profile`, { withCredentials: true });
+    return response.data;
+}
+
 export default {
-    login, register, logout, getUserInfo
+    login, register, logout, getUserInfo, updateUserInfo
 };
