@@ -66,4 +66,26 @@ const changePasswordValidate = [
     validate
 ];
 
-module.exports = { validate, loginValidate, registerValidate, changePasswordValidate }
+const updateProfileValidate = [
+    body('gender')
+        .optional()
+        .isIn(['Nam', 'Nữ', 'Khác']).withMessage('Giới tính không hợp lệ'),
+    body('ethnic')
+        .optional()
+        .matches(/^[a-zA-Z\s]+$/).withMessage('Dân tộc chỉ được chứa chữ cái'),
+    body('trainingSystem')
+        .optional()
+        .isIn(['Cử nhân', 'Kỹ sư', 'Thạc sĩ', 'Tiến sĩ']).withMessage('Hệ đào tạo không hợp lệ'),
+    body('hometown')
+        .optional()
+        .isLength({ min: 1, max: 200 }).withMessage('Quê quán có độ dài từ 1 đến 200 ký tự'),
+    body('identificationNumber')
+        .optional()
+        .matches(/^\d{12}$/).withMessage('Số CMND/CCCD chứa 12 chữ số'),
+    body('phone')
+        .optional()
+        .matches(/^\d{10}$/).withMessage('Số điện thoại chỉ được chứa 10 chữ số'),
+    validate
+];
+
+module.exports = { validate, loginValidate, registerValidate, changePasswordValidate, updateProfileValidate }
