@@ -31,6 +31,5 @@ const changePassword = async (formData) => {
     return response.data;
 }
 
-export default {
-    login, register, logout, getUserInfo, updateUserInfo, changePassword
-};
+const authService = { login, register, logout, getUserInfo, updateUserInfo, changePassword };
+export default authService;
