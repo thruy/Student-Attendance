@@ -15,6 +15,7 @@ import ScholarshipPage from './pages/ScholarshipPage';
 import SupportPage from './pages/SupportPage';
 import ContactPage from './pages/ContactPage';
 import UserProfilePage from './pages/UserProfilePage';
+import SettingPage from './pages/SettingPage';
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route path='/support' element={<PrivateRoute><SupportPage /></PrivateRoute>} />
           <Route path='/contact' element={<PrivateRoute><ContactPage /></PrivateRoute>} />
           <Route path='/profile' element={<PrivateRoute><UserProfilePage /></PrivateRoute>} />
+          <Route path='/setting' element={<PrivateRoute><SettingPage /></PrivateRoute>} />
         </Routes>
       </main>
 

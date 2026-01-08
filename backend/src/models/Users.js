@@ -63,7 +63,7 @@ const usersSchema = new mongoose.Schema({
         type: String
     },
 
-    class: {
+    className: {
         type: String
     },
 

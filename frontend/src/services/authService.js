@@ -21,11 +21,16 @@ const getUserInfo = async () => {
     return response.data;
 }
 
-const updateUserInfo = async () => {
-    const response = await axios.put(`${API_URL}/profile`, { withCredentials: true });
+const updateUserInfo = async (formData) => {
+    const response = await axios.put(`${API_URL}/profile`, formData, { withCredentials: true });
+    return response.data;
+}
+
+const changePassword = async (formData) => {
+    const response = await axios.put(`${API_URL}/change-password`, formData, { withCredentials: true });
     return response.data;
 }
 
 export default {
-    login, register, logout, getUserInfo, updateUserInfo
+    login, register, logout, getUserInfo, updateUserInfo, changePassword
 };

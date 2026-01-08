@@ -14,6 +14,7 @@ function UserProfilePage() {
             try {
                 const userData = await authService.getUserInfo();
                 setUser(userData.user);
+                setFormData(userData.user);
             } catch {
                 setError("Không thể tải thông tin người dùng!");
             } finally {
@@ -48,8 +49,7 @@ function UserProfilePage() {
     const handleUpdate = async (event) => {
         event.preventDefault();
         try {
-            await authService.updateUserInfo(formData);
-            const userUpdated = await authService.getUserInfo();
+            const userUpdated = await authService.updateUserInfo(formData);
             setUser(userUpdated.user);
             setShowEdit(false);
         } catch (err) {
@@ -90,7 +90,7 @@ function UserProfilePage() {
                         <InfoRow label="Đại học:" value={user.university} />
                         <InfoRow label="Khoa/Viện:" value={user.school} />
                         <InfoRow label="Ngành:" value={user.branch} />
-                        <InfoRow label="Lớp:" value={user.class} />
+                        <InfoRow label="Lớp:" value={user.className} />
                         <InfoRow label="Khóa:" value={user.schoolYear} />
                         <InfoRow label="Hệ đào tạo:" value={user.trainingSystem} />
                         <InfoRow label="Quê quán:" value={user.hometown} />
@@ -141,7 +141,7 @@ function UserProfilePage() {
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Lớp</Form.Label>
-                            <Form.Control value={formData.class} type="text" autoFocus onChange={(e) => setFormData({ ...formData, class: e.target.value })} />
+                            <Form.Control value={formData.className} type="text" autoFocus onChange={(e) => setFormData({ ...formData, class: e.target.value })} />
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Hệ đào tạo</Form.Label>
@@ -168,8 +168,8 @@ function UserProfilePage() {
                 </Modal.Body>
 
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowEdit(false)}> Hủy </Button>
-                    <Button variant="primary" onClick={handleUpdate}> Cập nhật thay đổi </Button>
+                    <Button variant="outline-dark" onClick={() => setShowEdit(false)}> Hủy </Button>
+                    <Button variant="dark" onClick={handleUpdate}> Cập nhật thay đổi </Button>
                 </Modal.Footer>
             </Modal >
         </>

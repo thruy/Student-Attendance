@@ -49,4 +49,21 @@ const loginValidate = [
     validate
 ];
 
-module.exports = { validate, loginValidate, registerValidate }
+const changePasswordValidate = [
+    body('oldPassword')
+        .notEmpty().withMessage('Mật khẩu cũ không được để trống'),
+    body('newPassword')
+        .notEmpty().withMessage('Mật khẩu mới không được để trống')
+        .isLength({ min: 6 }).withMessage('Mật khẩu mới cần có ít nhất 6 kí tự'),
+    body('confirmPassword')
+        .notEmpty().withMessage('Xác nhận mật khẩu không được để trống')
+        .custom((value, { req }) => {
+            if (value !== req.body.newPassword) {
+                throw new Error('Mật khẩu xác nhận không khớp với mật khẩu mới vừa nhập');
+            }
+            return true;
+        }),
+    validate
+];
+
+module.exports = { validate, loginValidate, registerValidate, changePasswordValidate }

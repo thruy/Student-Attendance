@@ -75,16 +75,38 @@ const getInfo = async (req, res) => {
 
 const updateInfo = async (req, res) => {
     try {
-        const { ethnic, university, school, branch, classname, trainingSystem, hometown, identificationNumber, phone } = req.body;
+        const { gender, ethnic, school, branch, className, trainingSystem, hometown, identificationNumber, phone } = req.body;
         const user = await User.findByIdAndUpdate(
             req.user.userId,
-            { ethnic, university, school, branch, classname, trainingSystem, hometown, identificationNumber, phone },
+            { gender, ethnic, school, branch, className, trainingSystem, hometown, identificationNumber, phone },
             { new: true }
         ).select("-password");
-        res.status(204).json({ message: 'Cập nhật thông tin thành công' });
+        res.status(200).json({ message: 'Cập nhật thông tin thành công', user });
     } catch (error) {
         res.status(500).json({ message: 'Lỗi cập nhật dữ liệu!', error: error.message });
     }
 }
 
-module.exports = { register, login, verify, logout, getInfo, updateInfo };
+const changePassword = async (req, res) => {
+    try {
+        const { oldPassword, newPassword, confirmPassword } = req.body;
+        const user = await User.findById(req.user.userId);
+        if (!user) {
+            return res.status(404).json({ message: 'Người dùng không tồn tại' });
+        }
+
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Mật khẩu cũ không đúng' });
+        }
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        user.password = hashedPassword;
+        await user.save();
+        res.status(200).json({ message: 'Đổi mật khẩu thành công' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = { register, login, verify, logout, getInfo, updateInfo, changePassword };
