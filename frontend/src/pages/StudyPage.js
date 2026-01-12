@@ -1,18 +1,97 @@
 import { useAuth } from '../context/AuthContext'
+import { useEffect, useState } from 'react';
+import { Table, Spinner, Alert, Button } from 'react-bootstrap';
+import studentService from '../services/studentService';
 
 function StudyPage() {
     const { user } = useAuth();
+    const [timetable, setTimetable] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+
+    const sortSchedulesByDay = (schedules) => {
+        return schedules.sort((a, b) => a.dayOfWeek - b.dayOfWeek);
+    };
+
+    const formatSchedule = (schedules) => {
+        if (!schedules || schedules.length === 0) {
+            return 'Bạn chưa có lịch học nào.';
+        }
+        const sorted = sortSchedulesByDay(schedules);
+        return sorted.map(s => `${s.dayOfWeek}, ${s.startTime}–${s.endTime}, phòng ${s.room}`).join(' | ');
+    };
+
+    useEffect(() => {
+        const fetchTimetable = async () => {
+            try {
+                const data = await studentService.getStudentTimetable();
+                setTimetable(data.timetable);
+            } catch (err) {
+                setError('Lỗi khi tải thời khóa biểu.', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchTimetable();
+    }, []);
+
+    if (loading) {
+        return (
+            <div>
+                <Spinner animation="border" role="status"></Spinner>
+                <span>Đang tải thông tin...</span>
+            </div>
+        )
+    }
+
+    if (timetable.length === 0) {
+        return <Alert variant="info">
+            <Alert.Heading>Bạn chưa có lịch!</Alert.Heading>
+        </Alert>;
+    }
+
+    if (error) {
+        return (
+            <Alert variant="secondary">
+                <Alert.Heading>Lỗi khi tải dữ liệu</Alert.Heading>
+                <p>{error}</p>
+            </Alert>
+        )
+    }
 
     return (
         <div>
-            <h2>Trang học tập</h2>
-            {user ? (
-                <p>Chào {user.name}, bạn đang ở trang học tập.</p>
-            ) : (
-                <p>Đang tải...</p>
-            )}
+            <h2>Thời khóa biểu của {user.name}</h2>
+            <Table striped bordered hover>
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Học phần</th>
+                        <th>Mã học phần</th>
+                        <th>Mã lớp học</th>
+                        <th>Loại lớp</th>
+                        <th>Giảng viên</th>
+                        <th>Lịch học</th>
+                        <th>Ghi chú</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {timetable.map((item, index) => (
+                        <tr key={index}>
+                            <td>{index + 1}</td>
+                            <td>{item.subjectName}</td>
+                            <td>{item.subjectCode}</td>
+                            <td>{item.classCode}</td>
+                            <td>{item.classType}</td>
+                            <td>{item.teacherName}</td>
+                            <td>{formatSchedule(item.schedules)}</td>
+                            <td><Button variant="outline-dark">Chi tiết</Button></td>
+                        </tr>
+                    ))}
+                </tbody>
+            </Table>
         </div>
     );
 }
-
 export default StudyPage;
