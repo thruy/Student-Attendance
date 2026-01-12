@@ -1,15 +1,20 @@
 const mongoose = require('mongoose');
 
 const classesSchema = new mongoose.Schema({
-    code: {
+    subjectCode: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
 
     name: {
         type: String,
         required: true
+    },
+
+    classCode: {
+        type: String,
+        required: true,
+        unique: true
     },
 
     type: {
@@ -20,6 +25,8 @@ const classesSchema = new mongoose.Schema({
 
     semester: {
         type: String,
+        match: [/^\d+$/],
+        length: 5,
         required: true
     },
 
