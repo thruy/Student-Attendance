@@ -41,7 +41,7 @@ const classesSchema = new mongoose.Schema({
 
     type: {
         type: String,
-        enum: ["theory", "exercise", "practice"],
+        enum: ["Lý thuyết", "Bài tập", "Thực hành"],
         required: true
     },
 
