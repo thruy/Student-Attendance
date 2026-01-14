@@ -33,4 +33,18 @@ const getStudentTimetable = async (req, res) => {
     }
 }
 
-module.exports = { getStudentTimetable };
+const getStudentOfClasses = async (req, res) => {
+    try {
+        const studentId = req.user.userId;
+        const student = await Users.findById(studentId);
+        if (!student) {
+            return res.status(404).json({ message: 'Không tìm thấy sinh viên' });
+        }
+        const studentInClasses = await Classes.find({ students: studentId });
+        res.status(200).json({ studentInClasses });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi khi lấy danh sách lớp', error });
+    }
+}
+
+module.exports = { getStudentTimetable, getStudentOfClasses };
