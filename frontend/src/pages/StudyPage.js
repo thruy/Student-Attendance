@@ -80,10 +80,10 @@ function StudyPage() {
                     {timetable.map((item, index) => (
                         <tr key={index}>
                             <td>{index + 1}</td>
-                            <td>{item.subjectName}</td>
+                            <td>{item.name}</td>
                             <td>{item.subjectCode}</td>
                             <td>{item.classCode}</td>
-                            <td>{item.classType}</td>
+                            <td>{item.type}</td>
                             <td>{item.teacherName}</td>
                             <td>{formatSchedule(item.schedules)}</td>
                             <td><Button variant="outline-dark">Chi tiết</Button></td>
