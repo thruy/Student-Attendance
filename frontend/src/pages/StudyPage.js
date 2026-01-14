@@ -2,16 +2,32 @@ import { useAuth } from '../context/AuthContext'
 import { useEffect, useState } from 'react';
 import { Table, Spinner, Alert, Button } from 'react-bootstrap';
 import studentService from '../services/studentService';
+import ClassInfoModal from '../components/ClassInfoModal';
 
 function StudyPage() {
     const { user } = useAuth();
     const [timetable, setTimetable] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    //const [students, setStudents] = useState([]);
+    const [selectedClass, setSelectedClass] = useState(null);
+    //const [teacher, setTeacher] = useState(null);
 
+    const dayOrder = {
+        'Thứ Hai': 1,
+        'Thứ Ba': 2,
+        'Thứ Tư': 3,
+        'Thứ Năm': 4,
+        'Thứ Sáu': 5,
+        'Thứ Bảy': 6,
+        'Chủ Nhật': 7
+    };
 
     const sortSchedulesByDay = (schedules) => {
-        return schedules.sort((a, b) => a.dayOfWeek - b.dayOfWeek);
+        return [...schedules].sort(
+            (a, b) => dayOrder[a.dayOfWeek] - dayOrder[b.dayOfWeek]
+        );
     };
 
     const formatSchedule = (schedules) => {
@@ -35,6 +51,19 @@ function StudyPage() {
         };
         fetchTimetable();
     }, []);
+
+    const getInfoOfClass = async (id) => {
+        try {
+            const data = await studentService.getInfoOfClass(id);
+            setShowModal(true);
+            //setStudents(data.classInfo.students);
+            setSelectedClass(data.classInfo);
+            //setTeacher(data.classInfo.teacher);
+            return data;
+        } catch (err) {
+            setError('Lỗi khi tải danh sách sinh viên.', err);
+        }
+    }
 
     if (loading) {
         return (
@@ -84,13 +113,15 @@ function StudyPage() {
                             <td>{item.subjectCode}</td>
                             <td>{item.classCode}</td>
                             <td>{item.type}</td>
-                            <td>{item.teacherName}</td>
-                            <td>{formatSchedule(item.schedules)}</td>
-                            <td><Button variant="outline-dark">Chi tiết</Button></td>
+                            <td>{item.teacher.name}</td>
+                            <td>{formatSchedule(item.schedule)}</td>
+                            <td><Button variant="outline-dark" onClick={() => { getInfoOfClass(item.classId) }}>Chi tiết</Button></td>
                         </tr>
                     ))}
                 </tbody>
             </Table>
+
+            <ClassInfoModal show={showModal} handleClose={() => setShowModal(false)} selectedClass={selectedClass} />
         </div>
     );
 }
