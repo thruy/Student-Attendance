@@ -13,10 +13,10 @@ const attendancesSchema = new mongoose.Schema({
         required: true
     },
 
-    date: {
+    date: [{
         type: Date,
         required: true
-    },
+    }],
 
     type: {
         type: String,

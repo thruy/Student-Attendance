@@ -63,9 +63,7 @@ const classesSchema = new mongoose.Schema({
         ref: 'Users'
     }],
 
-    // 🔥 LỊCH HỌC GẮN TRONG CLASS
     schedule: [scheduleSchema]
-
 }, {
     timestamps: true
 });
