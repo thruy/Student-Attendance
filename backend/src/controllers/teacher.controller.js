@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const getTeacherTimetable = async (req, res) => {
     try {
         const teacherId = req.user.userId;
-        const classes = await Classes.find({ teacherId: teacherId });
+        const classes = await Classes.find({ teacherId });
 
         const timetable = classes.map(cls => ({
             classId: cls._id,

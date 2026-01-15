@@ -29,10 +29,10 @@ function TeachingPage() {
 
     const formatSchedule = (schedules) => {
         if (!schedules || schedules.length === 0) {
-            return 'Bạn chưa có lịch giang day nào.';
+            return 'Bạn chưa có lịch giảng dạy nào.';
         }
         const sorted = sortSchedulesByDay(schedules);
-        return sorted.map(s => `${s.dayOfWeek}, ${s.startTime}–${s.endTime}, phòng ${s.room}`).join(' | ');
+        return sorted.map(s => `${s.dayOfWeek}, ${s.startTime} – ${s.endTime}, phòng ${s.room}`).join(' | ');
     };
 
     useEffect(() => {
@@ -60,7 +60,7 @@ function TeachingPage() {
 
     if (timetable.length === 0) {
         return <Alert variant="info">
-            <Alert.Heading>Bạn chưa có lịch!</Alert.Heading>
+            <Alert.Heading>Bạn chưa có lịch giảng dạy!</Alert.Heading>
         </Alert>;
     }
 
@@ -75,7 +75,7 @@ function TeachingPage() {
 
     return (
         <div>
-            <h2>Thời khóa biểu của {user.name}</h2>
+            <h2>Thời khóa biểu của giảng viên {user.name}</h2>
             <Table striped bordered hover>
                 <thead>
                     <tr>
@@ -105,7 +105,6 @@ function TeachingPage() {
                 </tbody>
             </Table>
 
-            {/* <ClassInfoModal show={showModal} handleClose={() => setShowModal(false)} selectedClass={selectedClass} /> */}
         </div>
     );
 }
