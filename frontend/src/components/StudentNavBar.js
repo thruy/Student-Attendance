@@ -6,8 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { useState } from 'react';
 import ChangePasswordModal from './ChangePassword';
 
-const NavBar = (props) => {
-    const { isAuthenticated, logout, user } = useAuth()
+const StudentNavBar = (props) => {
+    const { logout, user } = useAuth()
     const navigate = useNavigate();
     const [showChangePassword, setShowChangePassword] = useState(false);
 
@@ -33,7 +33,7 @@ const NavBar = (props) => {
                         <NavLink to="/support" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Hỗ trợ</NavLink>
                     </Nav>
                     <Nav>
-                        {isAuthenticated ? (
+                        {user && (
                             <NavDropdown title={`Xin chào, ${user?.name || ""}`} id="basic-nav-dropdown">
                                 <NavDropdown.Item as={Link} to="/profile">Thông tin cá nhân</NavDropdown.Item>
                                 <NavDropdown.Item as={Link} to="/setting">Cài đặt</NavDropdown.Item>
@@ -41,11 +41,6 @@ const NavBar = (props) => {
                                 <NavDropdown.Divider />
                                 <NavDropdown.Item as={Link} onClick={handleLogout}>Đăng xuất</NavDropdown.Item>
                             </NavDropdown>
-                        ) : (
-                            <>
-                                <Button as={Link} to="/login" variant="outline-dark">Đăng nhập</Button>
-                                <Button as={Link} to="/register" variant="dark" className="ms-4">Đăng ký</Button>
-                            </>
                         )}
 
                     </Nav>
@@ -58,4 +53,4 @@ const NavBar = (props) => {
     )
 }
 
-export default NavBar;
+export default StudentNavBar;

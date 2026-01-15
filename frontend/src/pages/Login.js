@@ -9,7 +9,7 @@ function Login() {
     const navigate = useNavigate();
     const { login } = useAuth();
 
-    const handleSubmit = async (event) => {
+    const handleLogin = async (event) => {
         event.preventDefault();
         try {
             await login(email, password)
@@ -26,7 +26,7 @@ function Login() {
 
                 {error && <div className="alert alert-danger">{error}</div>}
 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleLogin}>
                     <div className="mb-3">
                         <label className="form-label">Email</label>
                         <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />

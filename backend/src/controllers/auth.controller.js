@@ -28,7 +28,7 @@ const register = async (req, res) => {
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email }).select('name email code role');
         if (!user) {
             return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng, vui lòng thử lại' });
         }
@@ -38,7 +38,7 @@ const login = async (req, res) => {
         }
         const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES });
         res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', maxAge: 7 * 24 * 3600 * 1000 });
-        res.json({ message: 'Đăng nhập thành công' });
+        res.json({ message: 'Đăng nhập thành công', user });
     } catch (error) {
         res.status(500).json({ message: 'Lỗi server!', error: error.message });
     }
