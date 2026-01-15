@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from 'react';
 import ChangePasswordModal from './ChangePassword';
 
-const StudentNavBar = (props) => {
+const TeacherNavBar = (props) => {
     const { logout, user } = useAuth();
     const navigate = useNavigate();
     const [showChangePassword, setShowChangePassword] = useState(false);
@@ -26,9 +26,8 @@ const StudentNavBar = (props) => {
                     </Navbar.Brand>
                     <Nav className="me-auto">
                         <NavLink to="/main" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`} >Trang chủ</NavLink>
-                        <NavLink to="/study" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Học tập</NavLink>
+                        <NavLink to="/teaching" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Giảng dạy</NavLink>
                         <NavLink to="/project" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Đồ án</NavLink>
-                        <NavLink to="/scholarship" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Học bổng</NavLink>
                         <NavLink to="/contact" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Liên hệ</NavLink>
                         <NavLink to="/support" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Hỗ trợ</NavLink>
                     </Nav>
@@ -49,8 +48,7 @@ const StudentNavBar = (props) => {
 
             <ChangePasswordModal show={showChangePassword} handleClose={() => setShowChangePassword(false)} />
         </>
-
     )
 }
 
-export default StudentNavBar;
+export default TeacherNavBar;
