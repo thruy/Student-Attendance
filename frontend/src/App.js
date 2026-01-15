@@ -1,14 +1,15 @@
 //import logo from './logo.svg';
 import './App.css';
 import { Routes, Route } from 'react-router-dom';
+import RoleRoute from './routes/RoleRoute';
+import Intro from './pages/Intro';
 import Login from './pages/Login';
 import Register from './pages/Register';
+
 import Main from './pages/Main';
-import PrivateRoute from './routes/PrivateRoute';
-import NavBar from './components/NavBar';
 import Footer from './components/Footer';
 import Header from './components/Header';
-import Intro from './pages/Intro';
+
 import StudyPage from './pages/StudyPage';
 import ProjectPage from './pages/ProjectPage';
 import ScholarshipPage from './pages/ScholarshipPage';
@@ -16,6 +17,9 @@ import SupportPage from './pages/SupportPage';
 import ContactPage from './pages/ContactPage';
 import UserProfilePage from './pages/UserProfilePage';
 import SettingPage from './pages/SettingPage';
+import TeachingPage from './pages/TeachingPage';
+import TeacherLayout from './layouts/TeacherLayout';
+import StudentLayout from './layouts/StudentLayout';
 
 function App() {
   return (
@@ -23,28 +27,32 @@ function App() {
       <div className='header-container'>
         <Header />
       </div>
-      <div className='navbar-container'>
-        <NavBar />
-      </div>
+
       <main>
         <Routes>
           <Route path="/" element={<Intro />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/main" element={<PrivateRoute><Main /></PrivateRoute>} />
-          <Route path="/study" element={<PrivateRoute><StudyPage /></PrivateRoute>} />
-          <Route path="/project" element={<PrivateRoute><ProjectPage /></PrivateRoute>} />
-          <Route path='/scholarship' element={<PrivateRoute><ScholarshipPage /></PrivateRoute>} />
-          <Route path='/support' element={<PrivateRoute><SupportPage /></PrivateRoute>} />
-          <Route path='/contact' element={<PrivateRoute><ContactPage /></PrivateRoute>} />
-          <Route path='/profile' element={<PrivateRoute><UserProfilePage /></PrivateRoute>} />
-          <Route path='/setting' element={<PrivateRoute><SettingPage /></PrivateRoute>} />
+          {/* student */}
+          <Route path='/student' element={<RoleRoute roles={['student']}><StudentLayout /></RoleRoute>}>
+            <Route index element={<Main />} />
+            <Route path='study' element={<StudyPage />} />
+            <Route path='project' element={<ProjectPage />} />
+            <Route path='scholarship' element={<ScholarshipPage />} />
+            <Route path='support' element={<SupportPage />} />
+            <Route path='contact' element={<ContactPage />} />
+            <Route path='profile' element={<UserProfilePage />} />
+            <Route path='setting' element={<SettingPage />} />
+          </Route>
+          {/* teacher */}
+          <Route path='/teacher' element={<RoleRoute roles={['teacher']}><TeacherLayout /></RoleRoute>}>
+            <Route index element={<Main />} />
+            <Route path='teaching' element={<TeachingPage />} />
+          </Route>
         </Routes>
       </main>
-
       <Footer />
     </div>
-
   );
 }
 

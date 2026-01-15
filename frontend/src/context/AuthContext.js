@@ -3,7 +3,6 @@ import authService from "../services/authService";
 export const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(null);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -12,10 +11,8 @@ const AuthProvider = ({ children }) => {
             try {
                 const userData = await authService.getUserInfo();
                 setUser(userData.user);
-                setIsAuthenticated(true);
             } catch {
                 setUser(null);
-                setIsAuthenticated(false);
             } finally {
                 setLoading(false);
             }
@@ -29,7 +26,6 @@ const AuthProvider = ({ children }) => {
         } catch (err) {
             console.error("Lỗi đăng xuất", err)
         } finally {
-            setIsAuthenticated(false);
             setUser(null);
         }
     }
@@ -38,11 +34,10 @@ const AuthProvider = ({ children }) => {
         await authService.login(email, password);
         const userData = await authService.getUserInfo();
         setUser(userData);
-        setIsAuthenticated(true);
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, login, logout, user, loading }}>
+        <AuthContext.Provider value={{ login, logout, user, role: user?.role || null, loading }}>
             {children}
         </AuthContext.Provider>
     )
