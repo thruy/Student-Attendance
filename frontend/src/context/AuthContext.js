@@ -18,7 +18,7 @@ const AuthProvider = ({ children }) => {
             }
         }
         fetchUser();
-    })
+    });
 
     const logout = async () => {
         try {
@@ -31,9 +31,9 @@ const AuthProvider = ({ children }) => {
     }
 
     const login = async (email, password) => {
-        await authService.login(email, password);
-        const userData = await authService.getUserInfo();
-        setUser(userData);
+        const userData = await authService.login(email, password);
+        setUser(userData.user);
+        return userData.user;
     };
 
     return (

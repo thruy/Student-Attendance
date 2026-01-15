@@ -34,7 +34,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           {/* student */}
-          <Route path='/student' element={<RoleRoute roles={['student']}><StudentLayout /></RoleRoute>}>
+          <Route path='/student' element={<RoleRoute allowedRoles={['student']}><StudentLayout /></RoleRoute>}>
             <Route index element={<Main />} />
             <Route path='study' element={<StudyPage />} />
             <Route path='project' element={<ProjectPage />} />
@@ -45,7 +45,7 @@ function App() {
             <Route path='setting' element={<SettingPage />} />
           </Route>
           {/* teacher */}
-          <Route path='/teacher' element={<RoleRoute roles={['teacher']}><TeacherLayout /></RoleRoute>}>
+          <Route path='/teacher' element={<RoleRoute allowedRoles={['teacher']}><TeacherLayout /></RoleRoute>}>
             <Route index element={<Main />} />
             <Route path='teaching' element={<TeachingPage />} />
             <Route path='project' element={<ProjectPage />} />

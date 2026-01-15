@@ -20,22 +20,22 @@ const TeacherNavBar = (props) => {
         <>
             <Navbar bg="light" expand="lg">
                 <Container>
-                    <Navbar.Brand as={Link} to='/' className="d-flex align-items-center fs-4 fw-semibold">
+                    <Navbar.Brand as={Link} to='/teacher' className="d-flex align-items-center fs-4 fw-semibold">
                         <img src={appIcon} alt="App Icon" width="32" height="32" className=" me-2" />
                         S-a-S
                     </Navbar.Brand>
                     <Nav className="me-auto">
-                        <NavLink to="/main" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`} >Trang chủ</NavLink>
-                        <NavLink to="/teaching" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Giảng dạy</NavLink>
-                        <NavLink to="/project" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Đồ án</NavLink>
-                        <NavLink to="/contact" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Liên hệ</NavLink>
-                        <NavLink to="/support" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Hỗ trợ</NavLink>
+                        <NavLink to="/teacher" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`} >Trang chủ</NavLink>
+                        <NavLink to="/teacher/teaching" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Giảng dạy</NavLink>
+                        <NavLink to="/teacher/project" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Đồ án</NavLink>
+                        <NavLink to="/teacher/contact" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Liên hệ</NavLink>
+                        <NavLink to="/teacher/support" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Hỗ trợ</NavLink>
                     </Nav>
                     <Nav>
                         {user && (
                             <NavDropdown title={`Xin chào, ${user?.name || ""}`} id="basic-nav-dropdown">
-                                <NavDropdown.Item as={Link} to="/profile">Thông tin cá nhân</NavDropdown.Item>
-                                <NavDropdown.Item as={Link} to="/setting">Cài đặt</NavDropdown.Item>
+                                <NavDropdown.Item as={Link} to="/teacher/profile">Thông tin cá nhân</NavDropdown.Item>
+                                <NavDropdown.Item as={Link} to="/teacher/setting">Cài đặt</NavDropdown.Item>
                                 <NavDropdown.Item onClick={() => setShowChangePassword(true)}>Đổi mật khẩu</NavDropdown.Item>
                                 <NavDropdown.Divider />
                                 <NavDropdown.Item as={Link} onClick={handleLogout}>Đăng xuất</NavDropdown.Item>

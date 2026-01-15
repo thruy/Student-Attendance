@@ -12,8 +12,14 @@ function Login() {
     const handleLogin = async (event) => {
         event.preventDefault();
         try {
-            await login(email, password)
-            navigate("/main");
+            const loginUser = await login(email, password);
+            if (loginUser.role === 'student') {
+                navigate("/student");
+                return;
+            } else if (loginUser.role === 'teacher') {
+                navigate("/teacher");
+                return;
+            }
         } catch (error) {
             setError(error.response?.data?.message || "Lỗi đăng nhập, vui lòng thử lại.");
         }

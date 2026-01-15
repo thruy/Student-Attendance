@@ -1,12 +1,11 @@
-import { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
-function RoleRoute({ role, children }) {
-    const { user, loading } = useContext(AuthContext)
+function RoleRoute({ allowedRoles = [], children }) {
+    const { user, role, loading } = useAuth();
     if (loading) return <div>Đang tải...</div>;
     if (!user) return <Navigate to="/login" />;
-    if (!role.includes(user.role)) return <Navigate to="/login" replace />;
+    if (!allowedRoles.includes(role)) return <Navigate to="/login" replace />;
 
     return children;
 }
