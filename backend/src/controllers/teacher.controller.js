@@ -15,6 +15,7 @@ const getTeacherTimetable = async (req, res) => {
             classCode: cls.classCode,
             type: cls.type,
             numberOfStudents: cls.students.length,
+            semester: cls.semester,
             schedule: cls.schedule.map(s => ({
                 dayOfWeek: s.dayOfWeek,
                 startTime: s.startTime,
@@ -27,5 +28,7 @@ const getTeacherTimetable = async (req, res) => {
         res.status(500).json({ message: 'Lỗi khi lấy thời khóa biểu', error: error.message });
     }
 }
+
+
 
 module.exports = { getTeacherTimetable };

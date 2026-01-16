@@ -13,10 +13,10 @@ const attendancesSchema = new mongoose.Schema({
         required: true
     },
 
-    date: [{
+    date: {
         type: Date,
         required: true
-    }],
+    },
 
     type: {
         type: String,
@@ -35,8 +35,20 @@ const attendancesSchema = new mongoose.Schema({
 
     expiresAt: {
         type: Date
-    }
+    },
 
+    records: [{
+        studentId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Users',
+            required: true
+        },
+        status: {
+            type: String,
+            enum: ['yes', 'no', 'na'],
+            default: 'no'
+        }
+    }]
 }, {
     timestamps: true
 });

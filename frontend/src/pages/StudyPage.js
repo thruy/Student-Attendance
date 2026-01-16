@@ -10,9 +10,7 @@ function StudyPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    //const [students, setStudents] = useState([]);
     const [selectedClass, setSelectedClass] = useState(null);
-    //const [teacher, setTeacher] = useState(null);
 
     const dayOrder = {
         'Thứ Hai': 1,
@@ -56,9 +54,7 @@ function StudyPage() {
         try {
             const data = await studentService.getInfoOfClass(id);
             setShowModal(true);
-            //setStudents(data.classInfo.students);
             setSelectedClass(data.classInfo);
-            //setTeacher(data.classInfo.teacher);
             return data;
         } catch (err) {
             setError('Lỗi khi tải danh sách sinh viên.', err);

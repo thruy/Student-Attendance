@@ -1,7 +1,6 @@
 import { useAuth } from '../context/AuthContext'
 import { useEffect, useState } from 'react';
 import { Table, Spinner, Alert, Button } from 'react-bootstrap';
-import ClassInfoModal from '../components/ClassInfoModal';
 import teacherService from '../services/teacherService';
 
 function TeachingPage() {
