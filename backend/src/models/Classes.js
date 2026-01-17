@@ -63,6 +63,11 @@ const classesSchema = new mongoose.Schema({
         ref: 'Users'
     }],
 
+    date: [{
+        type: Date,
+        required: true
+    }],
+
     schedule: [scheduleSchema]
 }, {
     timestamps: true
