@@ -12,7 +12,7 @@ function AttendancePage() {
     const [attendances, setAttendances] = useState([]);
     const [attendanceDates, setAttendanceDates] = useState([]);
     const [attendanceMap, setAttendanceMap] = useState({});
-
+    const [loading, setLoading] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
     const [editMode, setEditMode] = useState(false);
     const { classId } = useParams();
@@ -78,18 +78,18 @@ function AttendancePage() {
                     <InfoRow label="Số lượng sinh viên" value={students?.length} />
                 </Container>
 
-                {/* <Container className="mt-4">
+                <Container className="mt-4">
                     <Button variant="dark" onClick={() => setEditMode(true)}>Điểm danh thủ công</Button>
                     <Button variant="dark" className="ms-2" disabled>Điểm danh tự động</Button>
                     {editMode && (
-                        <Form.Select value={selectedDate || ''} onChange={(e) => setSelectedDate(e.target.value)} className="mt-3" >
+                        <Form.Select value={selectedDate || ''} onChange={(e) => setSelectedDate(e.target.value)} className="mt-3" style={{ width: '300px' }}>
                             <option value="">Chọn ngày điểm danh</option>
                             {dates.map(date => (
                                 <option key={date} value={date}>{date}</option>
                             ))}
                         </Form.Select>
                     )}
-                </Container> */}
+                </Container>
 
                 <Table striped bordered hover className="mt-4">
                     <thead>
@@ -120,6 +120,13 @@ function AttendancePage() {
                     </tbody>
                 </Table>
             </Card.Body>
+
+            <Card.Footer>
+                {selectedDate && (<div className="d-flex gap-3">
+                    <Button variant="outline-danger" onClick={() => { setEditMode(false); setSelectedDate(null) }}>Hủy điểm danh</Button>
+                    <Button variant="success" disabled={loading}> {loading ? 'Đang lưu...' : 'Lưu kết quả'}</Button>
+                </div>)}
+            </Card.Footer>
         </Card>
     )
 }
