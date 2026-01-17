@@ -25,7 +25,6 @@ const StudentNavBar = (props) => {
                         S-a-S
                     </Navbar.Brand>
                     <Nav className="me-auto">
-                        <NavLink to="/student" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`} >Trang chủ</NavLink>
                         <NavLink to="/student/study" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Học tập</NavLink>
                         <NavLink to="/student/project" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Đồ án</NavLink>
                         <NavLink to="/student/scholarship" className={({ isActive }) => `me-4 fs-5 nav-link ${isActive ? "active fw-semibold" : ""}`}>Học bổng</NavLink>
