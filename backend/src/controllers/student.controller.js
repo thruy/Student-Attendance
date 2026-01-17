@@ -50,6 +50,7 @@ const getInfoOfClasses = async (req, res) => {
             classCode: cls.classCode,
             type: cls.type,
             semester: cls.semester,
+            schedule: cls.schedule,
             teacher: {
                 name: cls.teacherId?.name,
                 email: cls.teacherId?.email,

@@ -117,7 +117,7 @@ function StudyPage() {
                 </tbody>
             </Table>
 
-            <ClassInfoModal show={showModal} handleClose={() => setShowModal(false)} selectedClass={selectedClass} />
+            <ClassInfoModal show={showModal} handleClose={() => setShowModal(false)} selectedClass={selectedClass} formatSchedule={formatSchedule} />
         </div>
     );
 }

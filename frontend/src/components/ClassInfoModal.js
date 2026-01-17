@@ -1,6 +1,6 @@
 import { Modal, Row, Col, Table } from 'react-bootstrap';
 
-function ClassInfoModal({ show, handleClose, selectedClass }) {
+function ClassInfoModal({ show, handleClose, selectedClass, formatSchedule }) {
     const InfoRow = ({ label, value }) => (
         <Row className="mb-3 align-items-center">
             <Col md={4} className="fw-bold">
@@ -26,6 +26,7 @@ function ClassInfoModal({ show, handleClose, selectedClass }) {
                         <InfoRow label="Mã lớp học" value={selectedClass.classCode} />
                         <InfoRow label="Loại lớp" value={selectedClass.type} />
                         <InfoRow label="Học kỳ" value={selectedClass.semester} />
+                        <InfoRow label="Lịch học" value={formatSchedule(selectedClass.schedule)} />
                         <InfoRow label="Giảng viên" value={selectedClass.teacher.name} />
                         <InfoRow label="Email giảng viên" value={selectedClass.teacher.email} />
                         <InfoRow label="Mã giảng viên" value={selectedClass.teacher.code} />
