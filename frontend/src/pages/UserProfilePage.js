@@ -168,8 +168,8 @@ function UserProfilePage() {
                 </Modal.Body>
 
                 <Modal.Footer>
-                    <Button variant="outline-dark" onClick={() => setShowEdit(false)}> Hủy </Button>
-                    <Button variant="dark" onClick={handleUpdate}> Cập nhật thay đổi </Button>
+                    <Button variant="danger" onClick={() => setShowEdit(false)}> Hủy </Button>
+                    <Button variant="success" onClick={handleUpdate}> Cập nhật thay đổi </Button>
                 </Modal.Footer>
             </Modal >
         </>

@@ -67,8 +67,8 @@ function ChangePasswordModal({ show, handleClose }) {
             </Modal.Body>
 
             <Modal.Footer>
-                <Button variant="outline-dark" onClick={() => { handleClose(); setError(''); }}>Hủy</Button>
-                <Button variant="dark" onClick={handleSubmit} disabled={loading}> {loading ? 'Đang lưu...' : 'Lưu'}</Button>
+                <Button variant="outline-danger" onClick={() => { handleClose(); setError(''); }}>Hủy</Button>
+                <Button variant="success" onClick={handleSubmit} disabled={loading}> {loading ? 'Đang lưu...' : 'Lưu'}</Button>
             </Modal.Footer>
         </Modal>
     );

@@ -1,7 +1,7 @@
 import { Button, Card, Container, Form, Table, Row, Col } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import teacherService from "../services/teacherService";
-import { CheckCircle, XCircle, CheckLg, XLg, CheckCircleFill } from 'react-bootstrap-icons';
+import { CheckCircle, XCircleFill } from 'react-bootstrap-icons';
 
 const { useEffect, useState } = require("react");
 
@@ -28,7 +28,7 @@ function AttendancePage() {
                 setAttendances(data.attendances);
                 const map = {};
                 const dates = [];
-                attendances.forEach(a => {
+                data.attendances.forEach(a => {
                     const dateKey = new Date(a.date).toISOString().split("T")[0];
                     dates.push(dateKey);
 
@@ -78,7 +78,7 @@ function AttendancePage() {
                     <InfoRow label="Số lượng sinh viên" value={students?.length} />
                 </Container>
 
-                <Container className="mt-4">
+                {/* <Container className="mt-4">
                     <Button variant="dark" onClick={() => setEditMode(true)}>Điểm danh thủ công</Button>
                     <Button variant="dark" className="ms-2" disabled>Điểm danh tự động</Button>
                     {editMode && (
@@ -89,7 +89,7 @@ function AttendancePage() {
                             ))}
                         </Form.Select>
                     )}
-                </Container>
+                </Container> */}
 
                 <Table striped bordered hover className="mt-4">
                     <thead>
@@ -111,8 +111,8 @@ function AttendancePage() {
                                 <td>{student.code}</td>
                                 {attendanceDates.map(date => (
                                     <td key={date}>
-                                        {attendanceMap[date]?.recordMap?.[student.id] === "yes" && <CheckCircleFill size={20} color="blue" />}
-                                        {attendanceMap[date]?.recordMap?.[student.id] === "no" && <XCircle size={20} color="red" />}
+                                        {attendanceMap[date]?.recordMap?.[student.id] === "yes" && <CheckCircle size={20} color="royalblue" />}
+                                        {attendanceMap[date]?.recordMap?.[student.id] === "no" && <XCircleFill size={20} color="red" />}
                                     </td>
                                 ))}
                             </tr>
