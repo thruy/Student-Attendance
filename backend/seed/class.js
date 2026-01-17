@@ -15,6 +15,17 @@ async function seedClass() {
             process.exit(1);
         }
         const teacher1 = await User.findOne({ role: 'teacher', name: 'Đức Huy' });
+        const dates0 = [], dates1 = [];
+        const startDate0 = new Date('2025-09-15');
+        const startDate1 = new Date('2025-09-18');
+        for (let i = 0; i < 16; i++) {
+            const d0 = new Date(startDate0);
+            const d1 = new Date(startDate1);
+            d0.setDate(d0.getDate() + i * 7);
+            d1.setDate(d1.getDate() + i * 7);
+            dates0.push(d0);
+            dates1.push(d1);
+        }
 
         const existingClass = await Classes.findOne({ classCode: '160000' });
         if (existingClass) {
@@ -30,6 +41,7 @@ async function seedClass() {
             semester: '20251',
             teacherId: teacher._id,
             students: [],
+            date: [],
             schedule: [
                 {
                     dayOfWeek: 'Thứ Ba',
@@ -47,6 +59,7 @@ async function seedClass() {
             semester: '20251',
             teacherId: teacher1._id,
             students: [],
+            date: [],
             schedule: [
                 {
                     dayOfWeek: 'Thứ Năm',
@@ -61,6 +74,8 @@ async function seedClass() {
         const students = await User.find({ role: 'student' }).limit(30);
         newClass.students = students.map(student => student._id);
         newClass1.students = students.map(student => student._id);
+        newClass.date = dates0;
+        newClass1.date = dates1;
 
         await newClass1.save();
         await newClass.save();
