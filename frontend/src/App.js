@@ -20,6 +20,7 @@ import SettingPage from './pages/SettingPage';
 import TeachingPage from './pages/TeachingPage';
 import TeacherLayout from './layouts/TeacherLayout';
 import StudentLayout from './layouts/StudentLayout';
+import AttendancePage from './pages/AttendancePage';
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
           <Route path='/teacher' element={<RoleRoute allowedRoles={['teacher']}><TeacherLayout /></RoleRoute>}>
             <Route index element={<Main />} />
             <Route path='teaching' element={<TeachingPage />} />
+            <Route path="teaching/attendance/:classId" element={<AttendancePage />} />
             <Route path='project' element={<ProjectPage />} />
             <Route path='support' element={<SupportPage />} />
             <Route path='contact' element={<ContactPage />} />

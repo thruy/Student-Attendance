@@ -65,10 +65,7 @@ const getInfoOfClasses = async (req, res) => {
 
         res.status(200).json({ classInfo });
     } catch (error) {
-        res.status(500).json({
-            message: 'Lỗi khi lấy danh sách sinh viên',
-            error: error.message
-        });
+        res.status(500).json({ message: 'Lỗi khi lấy danh sách sinh viên', error: error.message });
     }
 }
 

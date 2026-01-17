@@ -45,8 +45,8 @@ const attendancesSchema = new mongoose.Schema({
         },
         status: {
             type: String,
-            enum: ['yes', 'no', 'na'],
-            default: 'no'
+            enum: ['yes', 'no', null],
+            default: null
         }
     }]
 }, {

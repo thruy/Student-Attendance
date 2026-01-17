@@ -2,6 +2,7 @@ import { useAuth } from '../context/AuthContext'
 import { useEffect, useState } from 'react';
 import { Table, Spinner, Alert, Button } from 'react-bootstrap';
 import teacherService from '../services/teacherService';
+import { useNavigate } from 'react-router-dom';
 
 function TeachingPage() {
     const { user } = useAuth();
@@ -9,6 +10,7 @@ function TeachingPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedClass, setSelectedClass] = useState(null);
+    const navigate = useNavigate();
 
     const dayOrder = {
         'Thứ Hai': 1,
@@ -98,7 +100,7 @@ function TeachingPage() {
                             <td>{item.type}</td>
                             <td>{item.numberOfStudents}</td>
                             <td>{formatSchedule(item.schedule)}</td>
-                            <td><Button variant="outline-dark">Điểm danh</Button></td>
+                            <td><Button variant="dark" onClick={() => navigate(`/teacher/teaching/attendance/${item.classId}`)}>Điểm danh</Button></td>
                         </tr>
                     ))}
                 </tbody>

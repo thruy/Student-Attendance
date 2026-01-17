@@ -111,7 +111,7 @@ function StudyPage() {
                             <td>{item.type}</td>
                             <td>{item.teacher.name}</td>
                             <td>{formatSchedule(item.schedule)}</td>
-                            <td><Button variant="outline-dark" onClick={() => { getInfoOfClass(item.classId) }}>Chi tiết</Button></td>
+                            <td><Button variant="info" onClick={() => { getInfoOfClass(item.classId) }}>Chi tiết</Button></td>
                         </tr>
                     ))}
                 </tbody>

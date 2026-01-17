@@ -32,8 +32,7 @@ async function seedAttendance() {
                     date: d,
                     type: 'manual',
                     records: cls.students.map(studentId => ({
-                        studentId,
-                        status: 'no'
+                        studentId
                     }))
                 });
             }

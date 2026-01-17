@@ -6,5 +6,10 @@ const getTeacherTimetable = async () => {
     return response.data;
 }
 
-const teacherService = { getTeacherTimetable };
+const getAttendancePageData = async (classId) => {
+    const response = await axios.get(`${API_URL}/timetable/${classId}/attendance`, { withCredentials: true });
+    return response.data;
+}
+
+const teacherService = { getTeacherTimetable, getAttendancePageData };
 export default teacherService;
