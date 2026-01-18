@@ -11,5 +11,10 @@ const getAttendancePageData = async (classId) => {
     return response.data;
 }
 
-const teacherService = { getTeacherTimetable, getAttendancePageData };
+const createAttendanceSession = async (classId, date) => {
+    const response = await axios.post(`${API_URL}/timetable/${classId}/attendance/create`, { date }, { withCredentials: true });
+    return response.data;
+}
+
+const teacherService = { getTeacherTimetable, getAttendancePageData, createAttendanceSession };
 export default teacherService;

@@ -75,7 +75,32 @@ const getAttendancePageData = async (req, res) => {
 }
 
 const createAttendanceSession = async (req, res) => {
+    try {
+        const { classId, date } = req.body;
+        const teacherId = req.user.userId;
+        const existed = await Attendances.findOne({ classId, date });
+        if (existed) {
+            return res.status(400).json({ message: 'Buổi điểm danh đã tồn tại' });
+        }
 
-}
+        const cls = await Classes.findById(classId);
+        if (!cls) {
+            return res.status(404).json({ message: 'Không tìm thấy lớp học' });
+        }
+
+        const attendance = await Attendances.create({
+            classId,
+            teacherId,
+            date,
+            records: cls.students.map(studentId => ({
+                studentId,
+                status: 'yes'
+            })),
+        });
+        res.status(201).json(attendance);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
 
 module.exports = { getTeacherTimetable, getAttendancePageData, createAttendanceSession };

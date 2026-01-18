@@ -2,6 +2,7 @@ import { Button, Card, Container, Form, Table, Row, Col } from "react-bootstrap"
 import { useParams } from "react-router-dom";
 import teacherService from "../services/teacherService";
 import { CheckCircle, XCircleFill } from 'react-bootstrap-icons';
+import AttendanceModal from "../components/AttendanceModal";
 
 const { useEffect, useState } = require("react");
 
@@ -15,6 +16,9 @@ function AttendancePage() {
     const [loading, setLoading] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
     const [editMode, setEditMode] = useState(false);
+    const [error, setError] = useState('');
+    const [showModal, setShowModal] = useState(false);
+    const [newAttendance, setNewAttendance] = useState(null)
     const { classId } = useParams();
 
     useEffect(() => {
@@ -54,6 +58,20 @@ function AttendancePage() {
         return schedules.map(s => `${s.dayOfWeek}, ${s.startTime} – ${s.endTime}, phòng ${s.room}`).join(' | ');
     };
 
+    const handleCreateAttendance = async (selectedDate) => {
+        try {
+            setLoading(true);
+            const data = await teacherService.createAttendanceSession(classId, selectedDate);
+            setAttendances(prev => [...prev, data]);
+            setNewAttendance(data);
+            setShowModal(true);
+        } catch {
+            setError(err.response?.data?.message || 'Lỗi tạo phiên điểm danh')
+        } finally {
+            setLoading(false);
+        }
+    }
+
     const InfoRow = ({ label, value }) => (
         <Row className="mb-3 align-items-center">
             <Col md={4} className="fw-bold">{label}</Col>
@@ -66,68 +84,72 @@ function AttendancePage() {
     );
 
     return (
-        <Card className="container mt-5" variant='dark' style={{ width: "100vw", marginBottom: "3rem" }}>
-            <Card.Header as="h4" className="text-center">Thông tin chi tiết lớp học</Card.Header>
-            <Card.Body className="p-4">
-                <Container>
-                    <Card.Title>{classInfo?.subjectCode} - {classInfo?.name}</Card.Title>
-                    <InfoRow label="Mã lớp học" value={classInfo?.classCode} />
-                    <InfoRow label="Loại lớp" value={classInfo?.type} />
-                    <InfoRow label="Học kỳ" value={classInfo?.semester} />
-                    <InfoRow label="Lịch học" value={formatSchedule(classInfo?.schedule)} />
-                    <InfoRow label="Số lượng sinh viên" value={students?.length} />
-                </Container>
+        <>
+            <Card className="container mt-5" variant='dark' style={{ width: "100vw", marginBottom: "3rem" }}>
+                <Card.Header as="h4" className="text-center">Thông tin chi tiết lớp học</Card.Header>
+                <Card.Body className="p-4">
+                    <Container>
+                        <Card.Title>{classInfo?.subjectCode} - {classInfo?.name}</Card.Title>
+                        <InfoRow label="Mã lớp học" value={classInfo?.classCode} />
+                        <InfoRow label="Loại lớp" value={classInfo?.type} />
+                        <InfoRow label="Học kỳ" value={classInfo?.semester} />
+                        <InfoRow label="Lịch học" value={formatSchedule(classInfo?.schedule)} />
+                        <InfoRow label="Số lượng sinh viên" value={students?.length} />
+                    </Container>
 
-                <Container className="mt-4">
-                    <Button variant="dark" onClick={() => setEditMode(true)}>Điểm danh thủ công</Button>
-                    <Button variant="dark" className="ms-2" disabled>Điểm danh tự động</Button>
-                    {editMode && (
-                        <Form.Select value={selectedDate || ''} onChange={(e) => setSelectedDate(e.target.value)} className="mt-3" style={{ width: '300px' }}>
-                            <option value="">Chọn ngày điểm danh</option>
-                            {dates.map(date => (
-                                <option key={date} value={date}>{date}</option>
-                            ))}
-                        </Form.Select>
-                    )}
-                </Container>
+                    <Container className="mt-4">
+                        <Button variant="dark" onClick={() => setEditMode(true)}>Điểm danh thủ công</Button>
+                        <Button variant="dark" className="ms-2" disabled>Điểm danh tự động</Button>
+                        {editMode && (
+                            <Form.Select
+                                value={selectedDate || ''}
+                                onChange={(e) => { const d = e.target.value; setSelectedDate(d); handleCreateAttendance(d) }}
+                                className="mt-3" style={{ width: '300px' }}
+                            >
+                                <option value="">Chọn ngày điểm danh</option>
+                                {dates.map(date => (
+                                    <option key={date} value={date}>{date}</option>
+                                ))}
+                            </Form.Select>
+                        )}
+                    </Container>
 
-                <Table striped bordered hover className="mt-4">
-                    <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th>Họ tên</th>
-                            <th>MSSV</th>
-                            {attendanceDates.map(date => (
-                                <th key={date}>{date}</th>
-                            ))}
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {students.map((student, index) => (
-                            <tr key={student._id}>
-                                <td>{index + 1}</td>
-                                <td>{student.name}</td>
-                                <td>{student.code}</td>
+                    <Table striped bordered hover className="mt-4">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Họ tên</th>
+                                <th>MSSV</th>
                                 {attendanceDates.map(date => (
-                                    <td key={date}>
-                                        {attendanceMap[date]?.recordMap?.[student.id] === "yes" && <CheckCircle size={20} color="royalblue" />}
-                                        {attendanceMap[date]?.recordMap?.[student.id] === "no" && <XCircleFill size={20} color="red" />}
-                                    </td>
+                                    <th key={date}>{date}</th>
                                 ))}
                             </tr>
-                        ))}
-                    </tbody>
-                </Table>
-            </Card.Body>
+                        </thead>
 
-            <Card.Footer>
-                {selectedDate && (<div className="d-flex gap-3">
-                    <Button variant="outline-danger" onClick={() => { setEditMode(false); setSelectedDate(null) }}>Hủy điểm danh</Button>
-                    <Button variant="success" disabled={loading}> {loading ? 'Đang lưu...' : 'Lưu kết quả'}</Button>
-                </div>)}
-            </Card.Footer>
-        </Card>
+                        <tbody>
+                            {students.map((student, index) => (
+                                <tr key={student._id}>
+                                    <td>{index + 1}</td>
+                                    <td>{student.name}</td>
+                                    <td>{student.code}</td>
+                                    {attendanceDates.map(date => (
+                                        <td key={date}>
+                                            {attendanceMap[date]?.recordMap?.[student.id] === "yes" && <CheckCircle size={20} color="royalblue" />}
+                                            {attendanceMap[date]?.recordMap?.[student.id] === "no" && <XCircleFill size={20} color="red" />}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
+                </Card.Body>
+
+                <Card.Footer>
+                </Card.Footer>
+            </Card>
+
+            <AttendanceModal show={showModal} onClose={() => setShowModal(false)} students={students} date={selectedDate} initialRecords={newAttendance.records || []} onSave={handleSaveAttendance} loading={loading} />
+        </>
     )
 }
 
