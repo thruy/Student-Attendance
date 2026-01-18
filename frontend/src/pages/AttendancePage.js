@@ -3,22 +3,23 @@ import { useParams } from "react-router-dom";
 import teacherService from "../services/teacherService";
 import { CheckCircle, XCircleFill } from 'react-bootstrap-icons';
 import AttendanceModal from "../components/AttendanceModal";
-
-const { useEffect, useState } = require("react");
+import { useEffect, useState } from "react";
 
 function AttendancePage() {
     const [classInfo, setClassInfo] = useState(null);
-    const [dates, setDates] = useState([]);
     const [students, setStudents] = useState([]);
     const [attendances, setAttendances] = useState([]);
+
     const [attendanceDates, setAttendanceDates] = useState([]);
     const [attendanceMap, setAttendanceMap] = useState({});
+
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+
     const [selectedDate, setSelectedDate] = useState(null);
     const [editMode, setEditMode] = useState(false);
-    const [error, setError] = useState('');
     const [showModal, setShowModal] = useState(false);
-    const [newAttendance, setNewAttendance] = useState(null)
+    const [newAttendanceRecord, setNewAttendanceRecord] = useState(null);
     const { classId } = useParams();
 
     useEffect(() => {
@@ -27,9 +28,9 @@ function AttendancePage() {
                 const data = await teacherService.getAttendancePageData(classId);
                 console.log(data);
                 setClassInfo(data.class);
-                setDates(data.class.date);
                 setStudents(data.class.students);
                 setAttendances(data.attendances);
+                // build map
                 const map = {};
                 const dates = [];
                 data.attendances.forEach(a => {
@@ -47,6 +48,8 @@ function AttendancePage() {
                 setAttendanceMap(map);
             } catch (err) {
                 console.error('Lỗi khi tải dữ liệu điểm danh:', err);
+            } finally {
+                setLoading(false);
             }
         }
         fetchAttendanceData();
@@ -58,19 +61,46 @@ function AttendancePage() {
         return schedules.map(s => `${s.dayOfWeek}, ${s.startTime} – ${s.endTime}, phòng ${s.room}`).join(' | ');
     };
 
-    const handleCreateAttendance = async (selectedDate) => {
-        try {
-            setLoading(true);
-            const data = await teacherService.createAttendanceSession(classId, selectedDate);
-            setAttendances(prev => [...prev, data]);
-            setNewAttendance(data);
-            setShowModal(true);
-        } catch {
-            setError(err.response?.data?.message || 'Lỗi tạo phiên điểm danh')
-        } finally {
-            setLoading(false);
+    const handleOpenAttendanceModal = (date) => {
+        setSelectedDate(date);
+        const existed = attendances.find(a => new Date(a.date).toISOString().split("T")[0] === date);
+        if (existed) {
+            setNewAttendanceRecord(existed.records);
+        } else {
+            setNewAttendanceRecord(students.map(s => ({
+                studentId: s._id,
+                status: "yes",
+            })));
         }
+        setShowModal(true);
     }
+
+    const handleSaveAttendance = async (records) => {
+        try {
+            await teacherService.saveAttendance({ classId, date: selectedDate, records })
+            const data = await teacherService.getAttendancePageData(classId);
+            setAttendances(data.attendances);
+            // build map
+            const map = {};
+            const dates = [];
+            data.attendances.forEach(a => {
+                const dateKey = new Date(a.date).toISOString().split("T")[0];
+                dates.push(dateKey);
+
+                const recordMap = {};
+                a.records.forEach(r => {
+                    recordMap[r.studentId] = r.status;
+                });
+                map[dateKey] = { recordMap };
+            });
+            dates.sort((a, b) => new Date(a) - new Date(b));
+            setAttendanceDates(dates);
+            setAttendanceMap(map);
+            setShowModal(false);
+        } catch (err) {
+            setError("Lỗi lưu điểm danh");
+        }
+    };
 
     const InfoRow = ({ label, value }) => (
         <Row className="mb-3 align-items-center">
@@ -82,6 +112,24 @@ function AttendancePage() {
             </Col>
         </Row>
     );
+
+    if (loading) {
+        return (
+            <div>
+                <Spinner animation="border" role="status"></Spinner>
+                <span>Đang tải thông tin...</span>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <Alert variant="secondary">
+                <Alert.Heading>Lỗi khi tải dữ liệu</Alert.Heading>
+                <p>{error}</p>
+            </Alert>
+        )
+    }
 
     return (
         <>
@@ -103,12 +151,12 @@ function AttendancePage() {
                         {editMode && (
                             <Form.Select
                                 value={selectedDate || ''}
-                                onChange={(e) => { const d = e.target.value; setSelectedDate(d); handleCreateAttendance(d) }}
+                                onChange={(e) => handleOpenAttendanceModal(e.target.value)}
                                 className="mt-3" style={{ width: '300px' }}
                             >
                                 <option value="">Chọn ngày điểm danh</option>
-                                {dates.map(date => (
-                                    <option key={date} value={date}>{date}</option>
+                                {attendanceDates.map(d => (
+                                    <option key={d} value={d}>{d}</option>
                                 ))}
                             </Form.Select>
                         )}
@@ -133,7 +181,7 @@ function AttendancePage() {
                                     <td>{student.name}</td>
                                     <td>{student.code}</td>
                                     {attendanceDates.map(date => (
-                                        <td key={date}>
+                                        <td key={date} className="text-center">
                                             {attendanceMap[date]?.recordMap?.[student.id] === "yes" && <CheckCircle size={20} color="royalblue" />}
                                             {attendanceMap[date]?.recordMap?.[student.id] === "no" && <XCircleFill size={20} color="red" />}
                                         </td>
@@ -148,7 +196,7 @@ function AttendancePage() {
                 </Card.Footer>
             </Card>
 
-            <AttendanceModal show={showModal} onClose={() => setShowModal(false)} students={students} date={selectedDate} initialRecords={newAttendance.records || []} onSave={handleSaveAttendance} loading={loading} />
+            <AttendanceModal show={showModal} onClose={() => setShowModal(false)} students={students} date={selectedDate} initialRecords={newAttendanceRecord} onSave={handleSaveAttendance} />
         </>
     )
 }

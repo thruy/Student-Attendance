@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import { Modal } from "react-bootstrap";
 
-function AttendanceModal({ show, onClose, students, date, initialRecords, onSave, loading }) {
+function AttendanceModal({ show, onClose, students, date, initialRecords, onSave }) {
     const [records, setRecords] = useState({});
     useEffect(() => {
         const init = {};
         initialRecords?.forEach(r => {
-            init[r.studentId] = r.status === 'yes';
+            init[r.studentId] = r.status;
         });
         setRecords(init);
     }, [students, initialRecords])

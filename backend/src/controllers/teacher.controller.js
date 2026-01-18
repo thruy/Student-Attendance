@@ -1,6 +1,5 @@
 const Classes = require('../models/Classes');
 const Users = require('../models/Users');
-const AttendanceRecords = require('../models/AttendanceRecords');
 const Attendances = require('../models/Attendances');
 const mongoose = require('mongoose');
 const { text } = require('express');
@@ -74,33 +73,40 @@ const getAttendancePageData = async (req, res) => {
     }
 }
 
-const createAttendanceSession = async (req, res) => {
+const saveAttendance = async (req, res) => {
     try {
-        const { classId, date } = req.body;
+        const { classId, date, records } = req.body;
         const teacherId = req.user.userId;
-        const existed = await Attendances.findOne({ classId, date });
-        if (existed) {
-            return res.status(400).json({ message: 'Buổi điểm danh đã tồn tại' });
-        }
-
+        if (!classId || !date || !records) { return res.status(400).json({ message: 'Thiếu dữ liệu điểm danh' }); }
         const cls = await Classes.findById(classId);
-        if (!cls) {
-            return res.status(404).json({ message: 'Không tìm thấy lớp học' });
+        if (!cls) { return res.status(404).json({ message: 'Không tìm thấy lớp học' }); }
+
+        const validDate = cls.date.some(
+            d => new Date(d).toISOString().split('T')[0] === date
+        );
+        if (!validDate) { return res.status(400).json({ message: 'Ngày không thuộc lịch học' }); }
+
+        let attendance = await Attendances.findOne({ classId, date });
+        if (!attendance) {
+            attendance = await Attendances.create({
+                classId,
+                teacherId,
+                date,
+                records
+            });
+        } else {
+            attendance.records = records;
+            attendance.teacherId = teacherId;
+            await attendance.save();
         }
 
-        const attendance = await Attendances.create({
-            classId,
-            teacherId,
-            date,
-            records: cls.students.map(studentId => ({
-                studentId,
-                status: 'yes'
-            })),
+        res.json({
+            message: 'Lưu điểm danh thành công',
+            attendance
         });
-        res.status(201).json(attendance);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 };
 
-module.exports = { getTeacherTimetable, getAttendancePageData, createAttendanceSession };
+module.exports = { getTeacherTimetable, getAttendancePageData, saveAttendance };
