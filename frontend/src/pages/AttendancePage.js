@@ -1,4 +1,4 @@
-import { Button, Card, Container, Form, Table, Row, Col } from "react-bootstrap";
+import { Button, Card, Container, Form, Table, Row, Col, Spinner, Alert } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import teacherService from "../services/teacherService";
 import { CheckCircle, XCircleFill } from 'react-bootstrap-icons';
@@ -9,6 +9,7 @@ function AttendancePage() {
     const [classInfo, setClassInfo] = useState(null);
     const [students, setStudents] = useState([]);
     const [attendances, setAttendances] = useState([]);
+    const [scheduleDates, setScheduleDates] = useState(null);
 
     const [attendanceDates, setAttendanceDates] = useState([]);
     const [attendanceMap, setAttendanceMap] = useState({});
@@ -19,7 +20,7 @@ function AttendancePage() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [editMode, setEditMode] = useState(false);
     const [showModal, setShowModal] = useState(false);
-    const [newAttendanceRecord, setNewAttendanceRecord] = useState(null);
+    const [newAttendanceRecord, setNewAttendanceRecord] = useState([]);
     const { classId } = useParams();
 
     useEffect(() => {
@@ -30,6 +31,7 @@ function AttendancePage() {
                 setClassInfo(data.class);
                 setStudents(data.class.students);
                 setAttendances(data.attendances);
+                setScheduleDates(data.class.date);
                 // build map
                 const map = {};
                 const dates = [];
@@ -62,16 +64,19 @@ function AttendancePage() {
     };
 
     const handleOpenAttendanceModal = (date) => {
-        setSelectedDate(date);
+        let records;
         const existed = attendances.find(a => new Date(a.date).toISOString().split("T")[0] === date);
         if (existed) {
-            setNewAttendanceRecord(existed.records);
+            records = existed.records;
         } else {
-            setNewAttendanceRecord(students.map(s => ({
-                studentId: s._id,
+            records = students.map(s => ({
+                studentId: s.id,
                 status: "yes",
-            })));
+            }));
         }
+        setNewAttendanceRecord(records);
+        console.log("students: ", students);
+        console.log("newAttendanceRecord: ", newAttendanceRecord);
         setShowModal(true);
     }
 
@@ -124,7 +129,7 @@ function AttendancePage() {
 
     if (error) {
         return (
-            <Alert variant="secondary">
+            <Alert variant="danger">
                 <Alert.Heading>Lỗi khi tải dữ liệu</Alert.Heading>
                 <p>{error}</p>
             </Alert>
@@ -149,16 +154,19 @@ function AttendancePage() {
                         <Button variant="dark" onClick={() => setEditMode(true)}>Điểm danh thủ công</Button>
                         <Button variant="dark" className="ms-2" disabled>Điểm danh tự động</Button>
                         {editMode && (
-                            <Form.Select
-                                value={selectedDate || ''}
-                                onChange={(e) => handleOpenAttendanceModal(e.target.value)}
-                                className="mt-3" style={{ width: '300px' }}
-                            >
-                                <option value="">Chọn ngày điểm danh</option>
-                                {attendanceDates.map(d => (
-                                    <option key={d} value={d}>{d}</option>
-                                ))}
-                            </Form.Select>
+                            <div className="d-flex align-items-center gap-3 mt-3">
+                                <Form.Select
+                                    value={selectedDate || ''}
+                                    onChange={(e) => setSelectedDate(e.target.value)}
+                                    className="mt-3" style={{ width: '300px' }}
+                                >
+                                    <option value="">Chọn ngày điểm danh</option>
+                                    {scheduleDates.map(d => (
+                                        <option key={d} value={d}>{d}</option>
+                                    ))}
+                                </Form.Select>
+                                <Button className="mt-3" onClick={() => handleOpenAttendanceModal(selectedDate)} disabled={!selectedDate}>Bắt đầu</Button>
+                            </div>
                         )}
                     </Container>
 

@@ -1,20 +1,23 @@
-import { useEffect } from "react";
-import { Modal } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Modal, Table, Button } from "react-bootstrap";
+import { CheckCircle, XCircleFill } from "react-bootstrap-icons";
 
 function AttendanceModal({ show, onClose, students, date, initialRecords, onSave }) {
     const [records, setRecords] = useState({});
     useEffect(() => {
+        console.log("initialRecord: ", initialRecords);
         const init = {};
         initialRecords?.forEach(r => {
             init[r.studentId] = r.status;
         });
         setRecords(init);
+        console.log("record: ", records);
     }, [students, initialRecords])
 
     const toggleStatus = (studentId) => {
         setRecords(prev => ({
             ...prev,
-            [studentId]: prev[studentId] === true ? false : true
+            [studentId]: prev[studentId] === "yes" ? "no" : "yes"
         }));
     };
 
@@ -47,8 +50,12 @@ function AttendanceModal({ show, onClose, students, date, initialRecords, onSave
                                 <td>{index + 1}</td>
                                 <td>{s.code}</td>
                                 <td>{s.name}</td>
-                                <td>
-                                    <input type="checkbox" checked={records[s._id] === true} onChange={() => toggleStatus(s._id)} />
+                                <td className="text-center" style={{ cursor: "pointer" }}>
+                                    {records[s._id] === "yes" ? (
+                                        <CheckCircle size={20} color="royalblue" onClick={() => toggleStatus(s._id)} />
+                                    ) : (
+                                        <XCircleFill size={20} color="red" onClick={() => toggleStatus(s._id)} />
+                                    )}
                                 </td>
                             </tr>
                         ))}
@@ -58,7 +65,7 @@ function AttendanceModal({ show, onClose, students, date, initialRecords, onSave
 
             <Modal.Footer>
                 <Button variant="outline-danger" onClick={onClose}>Hủy điểm danh</Button>
-                <Button variant="success" onClick={handleSave} disabled={loading}> {loading ? 'Đang lưu...' : 'Lưu kết quả'}</Button>
+                <Button variant="success" onClick={handleSave} >Lưu kết quả</Button>
             </Modal.Footer>
         </Modal>
     )
