@@ -75,7 +75,7 @@ const getAttendancePageData = async (req, res) => {
 
 const saveAttendance = async (req, res) => {
     try {
-        const { classId, date, records } = req.body;
+        const { classId, date, type, records } = req.body;
         const teacherId = req.user.userId;
         if (!classId || !date || !records) { return res.status(400).json({ message: 'Thiếu dữ liệu điểm danh' }); }
         const cls = await Classes.findById(classId);
@@ -92,6 +92,7 @@ const saveAttendance = async (req, res) => {
                 classId,
                 teacherId,
                 date,
+                type,
                 records
             });
         } else {

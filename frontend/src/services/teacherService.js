@@ -11,8 +11,8 @@ const getAttendancePageData = async (classId) => {
     return response.data;
 }
 
-const saveAttendance = async (classId, date) => {
-    const response = await axios.post(`${API_URL}/timetable/attendance/save`, { date }, { withCredentials: true });
+const saveAttendance = async ({ classId, date, type, records }) => {
+    const response = await axios.post(`${API_URL}/timetable/attendance/save`, { classId, date, type, records }, { withCredentials: true });
     return response.data;
 }
 

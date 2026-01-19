@@ -21,13 +21,14 @@ function AttendancePage() {
     const [editMode, setEditMode] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [newAttendanceRecord, setNewAttendanceRecord] = useState([]);
+    const [type, setType] = useState("");
     const { classId } = useParams();
 
     useEffect(() => {
         const fetchAttendanceData = async () => {
             try {
                 const data = await teacherService.getAttendancePageData(classId);
-                console.log(data);
+                console.log("data: useEffect in AttendancePage", data);
                 setClassInfo(data.class);
                 setStudents(data.class.students);
                 setAttendances(data.attendances);
@@ -64,6 +65,7 @@ function AttendancePage() {
     };
 
     const handleOpenAttendanceModal = (date) => {
+        setSelectedDate(date);
         let records;
         const existed = attendances.find(a => new Date(a.date).toISOString().split("T")[0] === date);
         if (existed) {
@@ -75,14 +77,15 @@ function AttendancePage() {
             }));
         }
         setNewAttendanceRecord(records);
-        console.log("students: ", students);
-        console.log("newAttendanceRecord: ", newAttendanceRecord);
+        console.log("students: handleOpenAttendance ", students);
+        console.log("newAttendanceRecord: handleOpenAttendance", newAttendanceRecord);
+        console.log("records: handleOpenAttendance", records)
         setShowModal(true);
     }
 
     const handleSaveAttendance = async (records) => {
         try {
-            await teacherService.saveAttendance({ classId, date: selectedDate, records })
+            await teacherService.saveAttendance({ classId, date: selectedDate, type: type, records })
             const data = await teacherService.getAttendancePageData(classId);
             setAttendances(data.attendances);
             // build map
@@ -151,7 +154,7 @@ function AttendancePage() {
                     </Container>
 
                     <Container className="mt-4">
-                        <Button variant="dark" onClick={() => setEditMode(true)}>Điểm danh thủ công</Button>
+                        <Button variant="dark" onClick={() => { setEditMode(true); setType("manual") }}>Điểm danh thủ công</Button>
                         <Button variant="dark" className="ms-2" disabled>Điểm danh tự động</Button>
                         {editMode && (
                             <div className="d-flex align-items-center gap-3 mt-3">

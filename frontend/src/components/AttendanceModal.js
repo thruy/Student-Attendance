@@ -5,13 +5,13 @@ import { CheckCircle, XCircleFill } from "react-bootstrap-icons";
 function AttendanceModal({ show, onClose, students, date, initialRecords, onSave }) {
     const [records, setRecords] = useState({});
     useEffect(() => {
-        console.log("initialRecord: ", initialRecords);
+        console.log("initialRecord: useEffect in AttendanceModal", initialRecords);
         const init = {};
         initialRecords?.forEach(r => {
             init[r.studentId] = r.status;
         });
         setRecords(init);
-        console.log("record: ", records);
+        console.log("records: state in AttendanceModal(useEffect)", records);
     }, [students, initialRecords])
 
     const toggleStatus = (studentId) => {
@@ -46,15 +46,15 @@ function AttendanceModal({ show, onClose, students, date, initialRecords, onSave
                     </thead>
                     <tbody>
                         {students.map((s, index) => (
-                            <tr key={s._id}>
+                            <tr key={s.id}>
                                 <td>{index + 1}</td>
                                 <td>{s.code}</td>
                                 <td>{s.name}</td>
                                 <td className="text-center" style={{ cursor: "pointer" }}>
-                                    {records[s._id] === "yes" ? (
-                                        <CheckCircle size={20} color="royalblue" onClick={() => toggleStatus(s._id)} />
+                                    {records[s.id] === "yes" ? (
+                                        <CheckCircle size={20} color="royalblue" onClick={() => toggleStatus(s.id)} />
                                     ) : (
-                                        <XCircleFill size={20} color="red" onClick={() => toggleStatus(s._id)} />
+                                        <XCircleFill size={20} color="red" onClick={() => toggleStatus(s.id)} />
                                     )}
                                 </td>
                             </tr>
