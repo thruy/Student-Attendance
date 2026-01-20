@@ -45,6 +45,7 @@ function App() {
             <Route path='profile' element={<UserProfilePage />} />
             <Route path='setting' element={<SettingPage />} />
           </Route>
+
           {/* teacher */}
           <Route path='/teacher' element={<RoleRoute allowedRoles={['teacher']}><TeacherLayout /></RoleRoute>}>
             <Route index element={<Main />} />
@@ -55,6 +56,11 @@ function App() {
             <Route path='contact' element={<ContactPage />} />
             <Route path='profile' element={<UserProfilePage />} />
             <Route path='setting' element={<SettingPage />} />
+          </Route>
+
+          {/* admin */}
+          <Route>
+
           </Route>
         </Routes>
       </main>
