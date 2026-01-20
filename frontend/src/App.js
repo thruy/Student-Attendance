@@ -63,7 +63,11 @@ function App() {
           <Route>
             <Route path='/admin' element={<RoleRoute allowedRoles={['admin']}><AdminLayout /></RoleRoute>} >
               <Route index element={<Main />} />
-
+              <Route path='student-manage' />
+              <Route path='teacher-manage' />
+              <Route path='class-manage' />
+              <Route path='project-manage' />
+              <Route path='scholarship-manage' />
             </Route>
           </Route>
         </Routes>
