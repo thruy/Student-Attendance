@@ -1,0 +1,139 @@
+/* Wrapper */
+.landing-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 49px,
+      rgba(0, 0, 0, 0.03) 49px,
+      rgba(0, 0, 0, 0.03) 50px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 49px,
+      rgba(0, 0, 0, 0.03) 49px,
+      rgba(0, 0, 0, 0.03) 50px
+    );
+}
+
+/* Content */
+.landing-content {
+  max-width: 720px;
+}
+
+/* Logo */
+.logo-wrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  color: #000;
+}
+
+/* Title */
+.landing-title {
+  font-size: 5rem;
+  font-weight: 700;
+  letter-spacing: 4px;
+  margin-bottom: 1rem;
+}
+
+/* Subtitle */
+.landing-subtitle {
+  font-size: 1.8rem;
+  font-weight: 400;
+  margin-bottom: 1.5rem;
+}
+
+/* Description */
+.landing-description {
+  font-size: 1.1rem;
+  opacity: 0.85;
+  margin-bottom: 2.5rem;
+  line-height: 1.7;
+}
+
+/* Buttons */
+.landing-actions .btn {
+  padding: 12px 36px;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+/* Login button */
+.btn-login {
+  background-color: #000;
+  border: none;
+}
+
+.btn-login:hover {
+  background-color: #111;
+}
+
+/* Register button */
+.btn-register {
+  border-width: 2px;
+}
+
+.features-wrapper {
+  padding: 5rem 0;
+  background-color: #ffffff;
+}
+
+/* Section title */
+.features-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #000;
+}
+
+/* Card */
+.feature-card {
+  border: none;
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
+}
+
+/* Icon */
+.feature-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+}
+
+/* Title */
+.feature-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+/* Description */
+.feature-desc {
+  font-size: 0.95rem;
+  opacity: 0.75;
+  line-height: 1.6;
+  margin: 0;
+}

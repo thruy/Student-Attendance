@@ -16,6 +16,8 @@ app.use(cookieParser());
 app.use('/api/auth', require('./routes/auth.route'));
 app.use('/api/students', require('./routes/student.route'));
 app.use('/api/teachers', require('./routes/teacher.route'));
+app.use('/api/admin', require('./routes/admin.routes'));
+
 
 app.listen(process.env.PORT, () => {
     console.log(`Server running on http://localhost:${process.env.PORT}`);
