@@ -21,6 +21,7 @@ import TeachingPage from './pages/TeachingPage';
 import TeacherLayout from './layouts/TeacherLayout';
 import StudentLayout from './layouts/StudentLayout';
 import AttendancePage from './pages/AttendancePage';
+import AdminLayout from './layouts/AdminLayout';
 
 function App() {
   return (
@@ -60,7 +61,10 @@ function App() {
 
           {/* admin */}
           <Route>
+            <Route path='/admin' element={<RoleRoute allowedRoles={['admin']}><AdminLayout /></RoleRoute>} >
+              <Route index element={<Main />} />
 
+            </Route>
           </Route>
         </Routes>
       </main>
