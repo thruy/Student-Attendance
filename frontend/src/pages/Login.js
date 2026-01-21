@@ -19,6 +19,9 @@ function Login() {
             } else if (loginUser.role === 'teacher') {
                 navigate("/teacher");
                 return;
+            } else if (loginUser.role === 'admin') {
+                navigate("/admin");
+                return;
             }
         } catch (error) {
             setError(error.response?.data?.message || "Lỗi đăng nhập, vui lòng thử lại.");

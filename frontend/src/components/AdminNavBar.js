@@ -59,11 +59,11 @@ const AdminNavBar = () => {
                     <Navbar.Toggle />
                     <Navbar.Collapse className="justify-content-end">
                         <Nav className="nav-links">
-                            <Nav.Link as={NavLink}>Sinh viên</Nav.Link>
-                            <Nav.Link as={NavLink}>Giảng viên</Nav.Link>
-                            <Nav.Link as={NavLink}>Lớp học</Nav.Link>
-                            <Nav.Link as={NavLink}>Đồ án</Nav.Link>
-                            <Nav.Link as={NavLink}>Học bổng</Nav.Link>
+                            <Nav.Link as={NavLink} to="/admin/student">Sinh viên</Nav.Link>
+                            <Nav.Link as={NavLink} to="/admin/teacher">Giảng viên</Nav.Link>
+                            <Nav.Link as={NavLink} to="/admin/class">Lớp học</Nav.Link>
+                            <Nav.Link as={NavLink} to="/admin/project">Đồ án</Nav.Link>
+                            <Nav.Link as={NavLink} to="/admin/scholarship">Học bổng</Nav.Link>
 
                         </Nav>
                         <Nav>

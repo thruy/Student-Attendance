@@ -1,11 +1,11 @@
 import { useAuth } from '../context/AuthContext'
 
-function StudentManagePage() {
+function ProjectManagePage() {
     const { user } = useAuth();
 
     return (
         <div>
-            <h2>Trang quản lý sinh viên</h2>
+            <h2>Quản lý đồ án</h2>
             {user ? (
                 <p>Chào {user.name}, bạn đã đăng nhập thành công.</p>
             ) : (
@@ -15,4 +15,4 @@ function StudentManagePage() {
     );
 }
 
-export default StudentManagePage;
+export default ProjectManagePage;

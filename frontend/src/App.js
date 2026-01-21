@@ -1,5 +1,3 @@
-//import logo from './logo.svg';
-import './App.css';
 import { Routes, Route } from 'react-router-dom';
 import RoleRoute from './routes/RoleRoute';
 import Intro from './pages/Intro';
@@ -22,7 +20,11 @@ import TeacherLayout from './layouts/TeacherLayout';
 import StudentLayout from './layouts/StudentLayout';
 import AttendancePage from './pages/AttendancePage';
 import AdminLayout from './layouts/AdminLayout';
-import StudentManagePage from './pages/StudentManagePage'
+import StudentManagePage from './pages/StudentManagePage';
+import TeacherManagePage from './pages/TeacherManagePage';
+import ClassManagePage from './pages/ClassManagePage';
+import ScholarshipManagePage from './pages/ScholarshipManagePage';
+import ProjectManagePage from './pages/ProjectManagePage';
 
 function App() {
   return (
@@ -61,16 +63,18 @@ function App() {
           </Route>
 
           {/* admin */}
-          <Route>
-            <Route path='/admin' element={<RoleRoute allowedRoles={['admin']}><AdminLayout /></RoleRoute>} >
-              <Route index element={<Main />} />
-              <Route path='student-manage' element={<StudentManagePage />} />
-              <Route path='teacher-manage' />
-              <Route path='class-manage' />
-              <Route path='project-manage' />
-              <Route path='scholarship-manage' />
-            </Route>
+
+          <Route path='/admin' element={<RoleRoute allowedRoles={['admin']}><AdminLayout /></RoleRoute>} >
+            <Route index element={<Main />} />
+            <Route path='student' element={<StudentManagePage />} />
+            <Route path='teacher' element={<TeacherManagePage />} />
+            <Route path='class' element={<ClassManagePage />} />
+            <Route path='project' element={<ProjectManagePage />} />
+            <Route path='scholarship' element={<ScholarshipManagePage />} />
+            <Route path='profile' element={<UserProfilePage />} />
+            <Route path='setting' element={<SettingPage />} />
           </Route>
+
         </Routes>
       </main>
       <Footer />
