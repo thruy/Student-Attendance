@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Table, Spinner, Alert, Button } from 'react-bootstrap';
 import teacherService from '../services/teacherService';
 import { useNavigate } from 'react-router-dom';
+import './timetable.css'
 
 function TeachingPage() {
     const { user } = useAuth();
@@ -76,31 +77,33 @@ function TeachingPage() {
 
     return (
         <div>
-            <h2>Thời khóa biểu của giảng viên {user.name}</h2>
-            <Table striped bordered hover>
+            <h2 className="timetable-title">Thời khóa biểu của giảng viên {user.name}</h2>
+            <Table bordered hover responsive className="timetable-table">
                 <thead>
                     <tr>
                         <th>STT</th>
-                        <th>Học phần</th>
-                        <th>Mã học phần</th>
-                        <th>Mã lớp học</th>
-                        <th>Loại lớp</th>
-                        <th>Số sinh viên</th>
-                        <th>Lịch học</th>
-                        <th>Ghi chú</th>
+                        <th>HỌC PHẦN</th>
+                        <th>MÃ HỌC PHẦN</th>
+                        <th>MÃ LỚP HỌC</th>
+                        <th>LOẠI LỚP</th>
+                        <th>SỐ SINH VIÊN</th>
+                        <th>LỊCH HỌC</th>
+                        <th>GHI CHÚ</th>
                     </tr>
                 </thead>
                 <tbody>
                     {timetable.map((item, index) => (
                         <tr key={index}>
-                            <td>{index + 1}</td>
-                            <td>{item.name}</td>
+                            <td className="text-center fw-bold">{index + 1}</td>
+                            <td><strong>{item.name}</strong></td>
                             <td>{item.subjectCode}</td>
                             <td>{item.classCode}</td>
                             <td>{item.type}</td>
                             <td>{item.numberOfStudents}</td>
-                            <td>{formatSchedule(item.schedule)}</td>
-                            <td><Button variant="dark" onClick={() => navigate(`/teacher/teaching/attendance/${item.classId}`)}>Điểm danh</Button></td>
+                            <td className="schedule-cell">{formatSchedule(item.schedule)}</td>
+                            <td className="text-center">
+                                <Button variant="dark" onClick={() => navigate(`/teacher/teaching/attendance/${item.classId}`)}>Điểm danh</Button>
+                            </td>
                         </tr>
                     ))}
                 </tbody>
