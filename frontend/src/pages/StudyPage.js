@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Table, Spinner, Alert, Button } from 'react-bootstrap';
 import studentService from '../services/studentService';
 import ClassInfoModal from '../components/ClassInfoModal';
+import './timetable.css';
 
 function StudyPage() {
     const { user } = useAuth();
@@ -87,31 +88,34 @@ function StudyPage() {
 
     return (
         <div>
-            <h2>Thời khóa biểu của {user.name}</h2>
-            <Table striped bordered hover>
+            <h2 className="timetable-title">Thời khóa biểu của {user.name}</h2>
+            <Table bordered hover responsive className="timetable-table">
                 <thead>
                     <tr>
                         <th>STT</th>
-                        <th>Học phần</th>
-                        <th>Mã học phần</th>
-                        <th>Mã lớp học</th>
-                        <th>Loại lớp</th>
-                        <th>Giảng viên</th>
-                        <th>Lịch học</th>
-                        <th>Ghi chú</th>
+                        <th>HỌC PHẦN</th>
+                        <th>MÃ HỌC PHẦN</th>
+                        <th>MÃ LỚP HỌC</th>
+                        <th>LOẠI LỚP</th>
+                        <th>GIẢNG VIÊN</th>
+                        <th>LỊCH HỌC</th>
+                        <th>GHI CHÚ</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     {timetable.map((item, index) => (
                         <tr key={index}>
-                            <td>{index + 1}</td>
-                            <td>{item.name}</td>
+                            <td className="text-center fw-bold">{index + 1}</td>
+                            <td className="subject-name"> {item.name}</td>
                             <td>{item.subjectCode}</td>
                             <td>{item.classCode}</td>
-                            <td>{item.type}</td>
+                            <td>{item.type} </td>
                             <td>{item.teacher.name}</td>
-                            <td>{formatSchedule(item.schedule)}</td>
-                            <td><Button variant="info" onClick={() => { getInfoOfClass(item.classId) }}>Chi tiết</Button></td>
+                            <td className="schedule-cell">{formatSchedule(item.schedule)}</td>
+                            <td className="text-center">
+                                <Button variant="outline-dark" onClick={() => getInfoOfClass(item.classId)}>Chi tiết</Button>
+                            </td>
                         </tr>
                     ))}
                 </tbody>

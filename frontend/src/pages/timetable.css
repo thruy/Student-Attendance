@@ -1,0 +1,70 @@
+/* ===== Title ===== */
+.timetable-title {
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid #333;
+}
+
+/* ===== Table ===== */
+.timetable-table {
+    margin-top: 20px;
+    border: 1px solid #c7c7c7 !important;
+  background-color: #fff;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 12px;
+  overflow: hidden; /* quan trọng để bo góc */
+}
+
+/* ===== Header ===== */
+.timetable-table thead th {
+  background-color: #2b2a2a; /* đen nhạt */
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 15px;
+  text-align: center;
+  vertical-align: middle;
+  padding: 16px 12px;
+  /* bỏ border dọc */
+  border-left: none;
+  border-right: none;
+}
+
+/* ===== Body ===== */
+.timetable-table tbody td {
+  vertical-align: top;
+  font-size: 1rem;
+  padding: 16px 12px;
+  /* bỏ border dọc */
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid #c7c7c7;
+}
+
+/* Chỉ giữ đường kẻ ngang */
+ tbody tr {
+  border-bottom: 1px solid #c7c7c7 !important;
+}
+
+/* Hover nhẹ */
+.timetable-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* ===== STT ===== */
+.timetable-table tbody td:first-child {
+  text-align: center;
+  font-weight: 600;
+}
+
+/* ===== Học phần ===== */
+.subject-name {
+  font-weight: 600;
+}
+
+/* ===== Lịch học ===== */
+.schedule-cell {
+  white-space: pre-line;
+  line-height: 1.4;
+}
