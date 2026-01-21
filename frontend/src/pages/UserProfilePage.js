@@ -100,13 +100,13 @@ function UserProfilePage() {
                 </CardBody>
 
                 <CardFooter>
-                    <Button variant="dark" onClick={() => setShowEdit(true)}>Cập nhật thông tin</Button>
+                    <Button variant="dark" onClick={() => setShowEdit(true)}>Chỉnh sửa thông tin</Button>
                 </CardFooter>
             </Card>
 
             <Modal show={showEdit} onHide={() => setShowEdit(false)} backdrop="static" keyboard={false} centered size="lg">
                 <Modal.Header closeButton>
-                    <Modal.Title>Cập nhật thông tin cá nhân</Modal.Title>
+                    <Modal.Title>Chỉnh sửa thông tin cá nhân</Modal.Title>
                 </Modal.Header>
 
                 <Modal.Body>

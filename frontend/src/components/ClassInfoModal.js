@@ -1,4 +1,5 @@
 import { Modal, Row, Col, Table } from 'react-bootstrap';
+import '../pages/timetable.css';
 
 function ClassInfoModal({ show, handleClose, selectedClass, formatSchedule }) {
     const InfoRow = ({ label, value }) => (
@@ -32,17 +33,19 @@ function ClassInfoModal({ show, handleClose, selectedClass, formatSchedule }) {
                         <InfoRow label="Mã giảng viên" value={selectedClass.teacher.code} />
                         <InfoRow label="Số lượng sinh viên" value={selectedClass.students.length} />
                         <h5 className="mt-4">Danh sách sinh viên</h5>
-                        <Table striped bordered hover>
+                        <Table bordered hover responsive className="timetable-table">
                             <thead>
                                 <tr>
+                                    <th>STT</th>
                                     <th>Mã sinh viên</th>
                                     <th>Họ tên</th>
                                     <th>Email</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {selectedClass.students.map(student => (
-                                    <tr key={student.id}>
+                                {selectedClass.students.map((student, index) => (
+                                    <tr key={index}>
+                                        <td className="text-center fw-bold">{index + 1}</td>
                                         <td>{student.code}</td>
                                         <td>{student.name}</td>
                                         <td>{student.email}</td>
