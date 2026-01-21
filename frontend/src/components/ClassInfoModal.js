@@ -46,7 +46,7 @@ function ClassInfoModal({ show, handleClose, selectedClass, formatSchedule }) {
                                 {selectedClass.students.map((student, index) => (
                                     <tr key={index}>
                                         <td className="text-center fw-bold">{index + 1}</td>
-                                        <td>{student.code}</td>
+                                        <td className='text-center'>{student.code}</td>
                                         <td>{student.name}</td>
                                         <td>{student.email}</td>
                                     </tr>

@@ -4,6 +4,7 @@ import teacherService from "../services/teacherService";
 import { CheckCircle, XCircleFill } from 'react-bootstrap-icons';
 import AttendanceModal from "../components/AttendanceModal";
 import { useEffect, useState } from "react";
+import './timetable.css';
 
 function AttendancePage() {
     const [classInfo, setClassInfo] = useState(null);
@@ -173,7 +174,7 @@ function AttendancePage() {
                         )}
                     </Container>
 
-                    <Table striped bordered hover className="mt-4">
+                    <Table bordered hover responsive className="timetable-table">
                         <thead>
                             <tr>
                                 <th>STT</th>
@@ -190,7 +191,7 @@ function AttendancePage() {
                                 <tr key={student._id}>
                                     <td>{index + 1}</td>
                                     <td>{student.name}</td>
-                                    <td>{student.code}</td>
+                                    <td className="text-center">{student.code}</td>
                                     {attendanceDates.map(date => (
                                         <td key={date} className="text-center">
                                             {attendanceMap[date]?.recordMap?.[student.id] === "yes" && <CheckCircle size={20} color="royalblue" />}
@@ -202,9 +203,6 @@ function AttendancePage() {
                         </tbody>
                     </Table>
                 </Card.Body>
-
-                <Card.Footer>
-                </Card.Footer>
             </Card>
 
             <AttendanceModal show={showModal} onClose={() => setShowModal(false)} students={students} date={selectedDate} initialRecords={newAttendanceRecord} onSave={handleSaveAttendance} />
