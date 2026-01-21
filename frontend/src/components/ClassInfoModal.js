@@ -37,8 +37,8 @@ function ClassInfoModal({ show, handleClose, selectedClass, formatSchedule }) {
                             <thead>
                                 <tr>
                                     <th>STT</th>
-                                    <th>Mã sinh viên</th>
-                                    <th>Họ tên</th>
+                                    <th>Mã số sinh viên</th>
+                                    <th>Họ và tên</th>
                                     <th>Email</th>
                                 </tr>
                             </thead>

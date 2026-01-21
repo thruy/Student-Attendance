@@ -102,7 +102,7 @@ function TeachingPage() {
                             <td>{item.numberOfStudents}</td>
                             <td className="schedule-cell">{formatSchedule(item.schedule)}</td>
                             <td className="text-center">
-                                <Button variant="dark" onClick={() => navigate(`/teacher/teaching/attendance/${item.classId}`)}>Điểm danh</Button>
+                                <Button variant="outline-dark" onClick={() => navigate(`/teacher/teaching/attendance/${item.classId}`)}>Điểm danh</Button>
                             </td>
                         </tr>
                     ))}
