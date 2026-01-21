@@ -22,6 +22,7 @@ import TeacherLayout from './layouts/TeacherLayout';
 import StudentLayout from './layouts/StudentLayout';
 import AttendancePage from './pages/AttendancePage';
 import AdminLayout from './layouts/AdminLayout';
+import StudentManagePage from './pages/StudentManagePage'
 
 function App() {
   return (
@@ -63,7 +64,7 @@ function App() {
           <Route>
             <Route path='/admin' element={<RoleRoute allowedRoles={['admin']}><AdminLayout /></RoleRoute>} >
               <Route index element={<Main />} />
-              <Route path='student-manage' />
+              <Route path='student-manage' element={<StudentManagePage />} />
               <Route path='teacher-manage' />
               <Route path='class-manage' />
               <Route path='project-manage' />
