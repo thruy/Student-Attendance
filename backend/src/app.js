@@ -16,7 +16,7 @@ app.use(cookieParser());
 app.use('/api/auth', require('./routes/auth.route'));
 app.use('/api/students', require('./routes/student.route'));
 app.use('/api/teachers', require('./routes/teacher.route'));
-app.use('/api/admin', require('./routes/admin.routes'));
+app.use('/api/admin', require('./routes/admin.route'));
 
 
 app.listen(process.env.PORT, () => {
