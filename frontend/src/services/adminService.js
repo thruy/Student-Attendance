@@ -2,7 +2,7 @@ import axios from "axios";
 const API_URL = 'http://localhost:8000/api/admin';
 
 const getAllStudent = async () => {
-    const res = await axios.get(`${API_URL}/student`);
+    const res = await axios.get(`${API_URL}/student`, { withCredentials: true });
     return res.data;
 }
 

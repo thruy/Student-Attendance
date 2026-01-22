@@ -5,8 +5,8 @@ const Attendance = require('../models/Attendances');
 const getAllStudents = async (req, res) => {
     try {
         const students = await User.find({ role: 'student' })
-            .select('name code email createdAt')
-            .sort({ createdAt: -1 });
+            .select('name code email')
+            .sort({ code: 1 });
 
         res.json({
             total: students.length,

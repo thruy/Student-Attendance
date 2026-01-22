@@ -79,7 +79,7 @@ function StudyPage() {
 
     if (error) {
         return (
-            <Alert variant="secondary">
+            <Alert variant="danger">
                 <Alert.Heading>Lỗi khi tải dữ liệu</Alert.Heading>
                 <p>{error}</p>
             </Alert>
