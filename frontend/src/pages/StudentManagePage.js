@@ -4,6 +4,7 @@ import adminService from '../services/adminService';
 import { Table, Spinner, Alert, Button, Form, Row, Col, InputGroup, Pagination } from 'react-bootstrap';
 import { Trash3, Pen, InfoCircle, PersonPlus, Search } from 'react-bootstrap-icons'
 import './timetable.css';
+import StudentDetailModal from '../components/StudentDetailModal';
 
 function StudentManagePage() {
     const { user } = useAuth();
@@ -143,6 +144,7 @@ function StudentManagePage() {
                     <Pagination.Next disabled={page === totalPages} onClick={() => setPage(page + 1)} />
                 </Pagination>
             </div>
+            <StudentDetailModal show={showDetails} onHide={() => setShowDetails(false)} student={selectedStudent} />
         </div>
     );
 }

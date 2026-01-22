@@ -7,7 +7,7 @@ const getAllStudent = async ({ page, limit, search }) => {
 }
 
 const getStudentDetail = async (studentId) => {
-    const res = await axios.get(`${API_URL}/student/${studentId}`);
+    const res = await axios.get(`${API_URL}/student/${studentId}`, { withCredentials: true });
     return res.data;
 };
 
