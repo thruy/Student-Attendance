@@ -1,10 +1,15 @@
 import axios from "axios";
 const API_URL = 'http://localhost:8000/api/admin';
 
-const getAllStudent = async () => {
-    const res = await axios.get(`${API_URL}/student`, { withCredentials: true });
+const getAllStudent = async ({ page, limit, search }) => {
+    const res = await axios.get(`${API_URL}/student`, { params: { page, limit, search }, withCredentials: true });
     return res.data;
 }
 
-const adminService = { getAllStudent };
+const getStudentDetail = async (studentId) => {
+    const res = await axios.get(`${API_URL}/student/${studentId}`);
+    return res.data;
+};
+
+const adminService = { getAllStudent, getStudentDetail };
 export default adminService;
