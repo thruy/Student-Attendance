@@ -100,6 +100,10 @@
   color: #dc3545; /* đỏ */
 }
 
+.icon-btn.reset svg {
+  color: #a3a107; 
+}
+
 /* hover */
 .icon-btn:hover svg {
   background-color: #f1f1f1;

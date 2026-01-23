@@ -57,29 +57,24 @@ function UserProfilePage() {
         }
     }
 
-    if (loading) {
-        return (
-            <div>
-                <Spinner animation="border" role="status"></Spinner>
-                <span>Đang tải thông tin...</span>
-            </div>
-        )
-    }
-
-    if (error) {
-        return (
-            <Alert variant="secondary">
-                <Alert.Heading>Lỗi khi tải dữ liệu</Alert.Heading>
-                <p>{error}</p>
-            </Alert>
-        )
-    }
-
     return (
         <>
             <Card className="container mt-5" style={{ width: "800px", marginBottom: "3rem" }}>
                 <CardHeader as="h4" className="text-center">THÔNG TIN CÁ NHÂN</CardHeader>
                 <CardBody className="p-4">
+                    {loading && (
+                        <div>
+                            <Spinner animation="border" role="status"></Spinner>
+                            <span>Đang tải thông tin...</span>
+                        </div>
+                    )}
+
+                    {error && (
+                        <Alert variant="secondary">
+                            <Alert.Heading>Lỗi khi tải dữ liệu</Alert.Heading>
+                            <p>{error}</p>
+                        </Alert>
+                    )}
                     <Container>
                         <InfoRow label="Họ và tên:" value={formatName(user.name)} />
                         <InfoRow label="Email:" value={user.email} />
@@ -141,7 +136,7 @@ function UserProfilePage() {
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Lớp</Form.Label>
-                            <Form.Control value={formData.className} type="text" autoFocus onChange={(e) => setFormData({ ...formData, class: e.target.value })} />
+                            <Form.Control value={formData.className} type="text" autoFocus onChange={(e) => setFormData({ ...formData, className: e.target.value })} />
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Hệ đào tạo</Form.Label>

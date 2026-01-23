@@ -2,7 +2,7 @@ import { useAuth } from '../context/AuthContext'
 import { useEffect, useState } from 'react';
 import adminService from '../services/adminService';
 import { Table, Spinner, Alert, Button, Form, Row, Col, InputGroup, Pagination } from 'react-bootstrap';
-import { Trash3, Pen, InfoCircle, PersonPlus, Search } from 'react-bootstrap-icons'
+import { Trash3, Pen, InfoCircle, PersonPlus, Search, PersonFillLock } from 'react-bootstrap-icons'
 import './timetable.css';
 import StudentDetailModal from '../components/StudentDetailModal';
 
@@ -18,7 +18,7 @@ function StudentManagePage() {
     const [inputValue, setInputValue] = useState('');
     const [selectedStudent, setSelectedStudent] = useState('');
     const [showDetails, setShowDetails] = useState(false);
-
+    const [editingStudent, setEditingStudent] = useState(null);
     const [showEdit, setShowEdit] = useState(false);
 
     useEffect(() => {
@@ -55,10 +55,40 @@ function StudentManagePage() {
             setSelectedStudent(data.student);
             setShowDetails(true);
         } catch (err) {
-            alert('Không thể lấy thông tin sinh viên');
+            setError(err.response?.data?.message || 'Lỗi khi lấy thông tin chi tiết sinh viên');
         }
     };
 
+    const handleEditStudent = async (student) => {
+        const data = await adminService.getStudentDetail(student._id);
+        setEditingStudent(data.student);
+        setShowEdit(true);
+    };
+
+    const handleUpdateStudent = async (id, data) => {
+        try {
+            await adminService.updateStudent(id, data);
+            setShowEdit(false);
+            const res = await adminService.getAllStudent({ page, limit, search });
+            setStudents(res.students);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Lỗi khi cập nhật thông tin sinh viên')
+        }
+    }
+
+    const handleResetPassword = async (student) => {
+        const confirm = window.confirm(
+            `Reset mật khẩu cho sinh viên ${student.name} - ${student.code}?`
+        );
+        if (!confirm) return;
+
+        try {
+            await adminService.resetStudentPassword(student._id);
+            alert('Đã reset mật khẩu về 123456');
+        } catch (err) {
+            alert(err.response?.data?.message || 'Lỗi reset mật khẩu');
+        }
+    };
 
     return (
         <div>
@@ -122,7 +152,8 @@ function StudentManagePage() {
                                 <td className='text-center'>
                                     <div className="action-icons">
                                         <Button variant='link' className="icon-btn info" onClick={() => handleViewDetail(std._id)}><InfoCircle /></Button>
-                                        <Button variant='link' className="icon-btn edit"><Pen /></Button>
+                                        <Button variant='link' className="icon-btn edit" onClick={() => handleEditStudent(std)}><Pen /></Button>
+                                        <Button variant='link' className="icon-btn reset" onClick={() => handleResetPassword(std)}><PersonFillLock /></Button>
                                         <Button variant='link' className="icon-btn delete"><Trash3 /></Button>
                                     </div>
                                 </td>
@@ -145,6 +176,7 @@ function StudentManagePage() {
                 </Pagination>
             </div>
             <StudentDetailModal show={showDetails} onHide={() => setShowDetails(false)} student={selectedStudent} />
+            <EditStudentModal show={showEdit} onHide={() => setShowEdit(false)} student={editingStudent} onSave={handleUpdateStudent} />
         </div>
     );
 }
