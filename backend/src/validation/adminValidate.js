@@ -16,7 +16,7 @@ const validate = (req, res, next) => {
     next();
 };
 
-const studentEditValidate = [
+const editStudentValidate = [
     body('name')
         .trim()
         .notEmpty().withMessage('Họ và tên không được để trống')
@@ -28,14 +28,18 @@ const studentEditValidate = [
         .matches(SIS_EMAIL_REGEX).withMessage('Email không đúng định dạng')
         .normalizeEmail(),
     body('code')
-        .optional()
+        .notEmpty().withMessage('MSSV không được để trống')
         .matches(/^\d{8}$/).withMessage('MSSV gồm 8 chữ số'),
     body('gender')
         .notEmpty().withMessage('Giới tính không được để trống')
         .isIn(['Nam', 'Nữ', 'Khác']).withMessage('Giới tính không hợp lệ'),
     body('dob')
         .notEmpty().withMessage('Ngày sinh không được để trống')
-        .isDate().withMessage('Ngày sinh không hợp lệ'),
+        .isDate().withMessage('Ngày sinh không hợp lệ')
+        .custom(value => {
+            if (new Date(value) > new Date()) { throw new Error('Ngày sinh không được lớn hơn ngày hiện tại'); }
+            return true;
+        }),
     body('ethnic')
         .optional()
         .matches(/^[a-zA-Z\s]+$/).withMessage('Dân tộc chỉ được chứa chữ cái'),
@@ -54,4 +58,27 @@ const studentEditValidate = [
     validate
 ];
 
-module.exports = { validate, studentEditValidate }
+const addStudentValidate = [
+    body('name')
+        .trim()
+        .notEmpty().withMessage('Họ và tên không được để trống')
+        .isLength({ min: 2, max: 30 }).withMessage('Họ và tên có chứa 2 - 30 kí tự')
+        .isAlpha('vi-VN', { ignore: ' ' }).withMessage('Họ và tên chỉ được chứa chữ cái'),
+    body('email')
+        .trim()
+        .notEmpty().withMessage('Email không được để trống')
+        .matches(SIS_EMAIL_REGEX).withMessage('Email không đúng định dạng')
+        .normalizeEmail(),
+    body('code')
+        .notEmpty().withMessage('MSSV không được để trống')
+        .matches(/^\d{8}$/).withMessage('MSSV gồm 8 chữ số'),
+    body('gender')
+        .notEmpty().withMessage('Giới tính không được để trống')
+        .isIn(['Nam', 'Nữ', 'Khác']).withMessage('Giới tính không hợp lệ'),
+    body('dob')
+        .notEmpty().withMessage('Ngày sinh không được để trống')
+        .isDate().withMessage('Ngày sinh không hợp lệ'),
+    validate
+];
+
+module.exports = { validate, editStudentValidate, addStudentValidate }

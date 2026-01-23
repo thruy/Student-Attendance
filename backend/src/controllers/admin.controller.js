@@ -54,6 +54,54 @@ const getStudentDetails = async (req, res) => {
     }
 }
 
+const bcrypt = require('bcryptjs');
+
+const createStudent = async (req, res) => {
+    try {
+        const { name, code, email, dob, gender, } = req.body;
+        // check bắt buộc
+        if (!name || !code || !email) {
+            return res.status(400).json({ message: 'Thiếu thông tin tên/code/email' });
+        }
+
+        const existed = await User.findOne({ $or: [{ code }, { email }] });
+        if (existed) {
+            return res.status(400).json({ message: 'MSSV hoặc email đã tồn tại' });
+        }
+
+        // tạo mật khẩu mặc định
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, salt);
+
+        // tính khóa học
+        let schoolYear = null;
+        const year = parseInt(code.substring(2, 4), 10);
+        if (!isNaN(year)) {
+            schoolYear = year + 45;
+        }
+
+        const student = await User.create({
+            name, code, email, password: hashedPassword, role: 'student', dob, gender, schoolYear
+        });
+
+        res.status(201).json({
+            message: 'Thêm sinh viên thành công',
+            student: {
+                _id: student._id,
+                name: student.name,
+                code: student.code,
+                email: student.email
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        if (error.code === 11000) {
+            return res.status(400).json({ message: 'MSSV hoặc email đã tồn tại' });
+        }
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+};
+
 const updateStudent = async (req, res) => {
     try {
         const { id } = req.params;
@@ -127,4 +175,4 @@ const resetPassword = async (req, res) => {
 };
 
 
-module.exports = { getAllStudents, getStudentDetails, updateStudent, resetPassword }
+module.exports = { getAllStudents, getStudentDetails, updateStudent, resetPassword, createStudent }

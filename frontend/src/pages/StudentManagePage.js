@@ -20,6 +20,7 @@ function StudentManagePage() {
     const [showDetails, setShowDetails] = useState(false);
     const [editingStudent, setEditingStudent] = useState(null);
     const [showEdit, setShowEdit] = useState(false);
+    const [showAdd, setShowAdd] = useState(false);
 
     useEffect(() => {
         const fetchAllStudent = async () => {
@@ -104,9 +105,8 @@ function StudentManagePage() {
                     </Col>
                     {/* Add button */}
                     <Col md={6} className="text-end">
-                        <Button className="add-student-btn">
-                            <PersonPlus size={18} className="me-2" />
-                            Thêm sinh viên
+                        <Button className="add-student-btn" onClick={() => setShowAdd(true)}>
+                            <PersonPlus size={18} className="me-2" />Thêm sinh viên
                         </Button>
                     </Col>
                 </Row>
