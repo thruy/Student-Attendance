@@ -60,6 +60,17 @@ function StudentManagePage() {
         }
     };
 
+    const handleCreateStudent = async (data) => {
+        try {
+            await adminService.createStudent(data);
+            setShowAdd(false);
+            const res = await adminService.getAllStudent({ page, limit, search });
+            setStudents(res.students);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Lỗi thêm sinh viên');
+        }
+    }
+
     const handleEditStudent = async (student) => {
         const data = await adminService.getStudentDetail(student._id);
         setEditingStudent(data.student);
@@ -177,6 +188,7 @@ function StudentManagePage() {
             </div>
             <StudentDetailModal show={showDetails} onHide={() => setShowDetails(false)} student={selectedStudent} />
             <EditStudentModal show={showEdit} onHide={() => setShowEdit(false)} student={editingStudent} onSave={handleUpdateStudent} />
+            <AddStudentModal show={showAdd} onHide={() => setShowAdd(false)} onSave={handleCreateStudent} />
         </div>
     );
 }
