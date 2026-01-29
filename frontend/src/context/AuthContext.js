@@ -9,7 +9,7 @@ const AuthProvider = ({ children }) => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const userData = await authService.getUserInfo();
+                const userData = await authService.verify();
                 setUser(userData.user);
             } catch {
                 setUser(null);

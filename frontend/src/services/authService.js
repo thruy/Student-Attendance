@@ -16,6 +16,11 @@ const logout = async () => {
     return response.data;
 }
 
+const verify = async () => {
+    const response = await axios.get(`${API_URL}/verify`, { withCredentials: true });
+    return response.data;
+}
+
 const getUserInfo = async () => {
     const response = await axios.get(`${API_URL}/profile`, { withCredentials: true });
     return response.data;
@@ -31,5 +36,5 @@ const changePassword = async (formData) => {
     return response.data;
 }
 
-const authService = { login, register, logout, getUserInfo, updateUserInfo, changePassword };
+const authService = { login, register, logout, getUserInfo, updateUserInfo, changePassword, verify };
 export default authService;
