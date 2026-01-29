@@ -3,12 +3,18 @@ const router = express.Router();
 const adminController = require('../controllers/admin.controller');
 const { verifyToken } = require('../middleware/auth.middleware');
 const { authorize } = require('../middleware/role.middleware');
-const { editStudentValidate, addStudentValidate } = require('../validation/adminValidate');
+const { editUserValidate, addUserValidate } = require('../validation/adminValidate');
 
-router.get('/student', verifyToken, authorize('admin'), adminController.getAllStudents);
-router.get('/student/:id', verifyToken, authorize('admin'), adminController.getStudentDetails);
-router.put('/students/:id', verifyToken, authorize('admin'), editStudentValidate, adminController.updateStudent);
+//students
+router.get('/students', verifyToken, authorize('admin'), adminController.getAllStudents);
+router.get('/students/:id', verifyToken, authorize('admin'), adminController.getStudentDetails);
+router.put('/students/:id', verifyToken, authorize('admin'), editUserValidate, adminController.updateStudent);
 router.put('/students/:id/reset-password', verifyToken, authorize('admin'), adminController.resetPassword);
-router.post('/students', verifyToken, authorize('admin'), addStudentValidate, adminController.createStudent);
-
+router.post('/students', verifyToken, authorize('admin'), addUserValidate, adminController.createStudent);
+//teacher
+router.get('/teachers', verifyToken, authorize('admin'), adminController.getAllTeachers);
+router.get('/teachers/:id', verifyToken, authorize('admin'), adminController.getTeacherDetails);
+router.put('/teachers/:id', verifyToken, authorize('admin'), editUserValidate, adminController.updateTeacher);
+router.put('/teachers/:id/reset-password', verifyToken, authorize('admin'), adminController.resetPassword);
+router.post('/teachers', verifyToken, authorize('admin'), addUserValidate, adminController.createTeacher);
 module.exports = router;

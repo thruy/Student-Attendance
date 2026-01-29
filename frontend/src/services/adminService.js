@@ -1,13 +1,14 @@
 import axios from "axios";
 const API_URL = 'http://localhost:8000/api/admin';
 
+//student
 const getAllStudent = async ({ page, limit, search }) => {
-    const res = await axios.get(`${API_URL}/student`, { params: { page, limit, search }, withCredentials: true });
+    const res = await axios.get(`${API_URL}/students`, { params: { page, limit, search }, withCredentials: true });
     return res.data;
 }
 
 const getStudentDetail = async (studentId) => {
-    const res = await axios.get(`${API_URL}/student/${studentId}`, { withCredentials: true });
+    const res = await axios.get(`${API_URL}/students/${studentId}`, { withCredentials: true });
     return res.data;
 };
 
@@ -21,11 +22,37 @@ const updateStudent = async (studentId, payload) => {
     return res.data;
 }
 
-const resetPassword = async (studentId) => {
+const resetStudentPassword = async (studentId) => {
     const res = await axios.put(`${API_URL}/students/${studentId}/reset-password`, {}, { withCredentials: true });
     return res.data;
 };
+//teacher 
+const getAllTeacher = async ({ page, limit, search }) => {
+    const res = await axios.get(`${API_URL}/teachers`, { params: { page, limit, search }, withCredentials: true });
+    return res.data;
+}
 
+const getTeacherDetail = async (studentId) => {
+    const res = await axios.get(`${API_URL}/teachers/${teacherId}`, { withCredentials: true });
+    return res.data;
+};
 
-const adminService = { getAllStudent, getStudentDetail, updateStudent, resetPassword, createStudent };
+const createTeacher = async (payload) => {
+    const res = await axios.post(`${API_URL}/teachers`, payload, { withCredentials: true });
+    return res.data;
+};
+
+const updateTeacher = async (studentId, payload) => {
+    const res = await axios.put(`${API_URL}/teachers/${teacherId}`, payload, { withCredentials: true });
+    return res.data;
+}
+
+const resetTeacherPassword = async (studentId) => {
+    const res = await axios.put(`${API_URL}/teachers/${teacherId}/reset-password`, {}, { withCredentials: true });
+    return res.data;
+};
+const adminService = {
+    getAllStudent, getStudentDetail, updateStudent, resetStudentPassword, createStudent,
+    getAllTeacher, getTeacherDetail, updateTeacher, resetTeacherPassword, createTeacher,
+};
 export default adminService;

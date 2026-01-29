@@ -16,7 +16,7 @@ const validate = (req, res, next) => {
     next();
 };
 
-const editStudentValidate = [
+const editUserValidate = [
     body('name')
         .trim()
         .notEmpty().withMessage('Họ và tên không được để trống')
@@ -58,7 +58,7 @@ const editStudentValidate = [
     validate
 ];
 
-const addStudentValidate = [
+const addUserValidate = [
     body('name')
         .trim()
         .notEmpty().withMessage('Họ và tên không được để trống')
@@ -70,8 +70,8 @@ const addStudentValidate = [
         .matches(SIS_EMAIL_REGEX).withMessage('Email không đúng định dạng')
         .normalizeEmail(),
     body('code')
-        .notEmpty().withMessage('MSSV không được để trống')
-        .matches(/^\d{8}$/).withMessage('MSSV gồm 8 chữ số'),
+        .notEmpty().withMessage('MSSV/MSGV không được để trống')
+        .matches(/^\d{8}$/).withMessage('MSSV/MSGV gồm 8 chữ số'),
     body('gender')
         .notEmpty().withMessage('Giới tính không được để trống')
         .isIn(['Nam', 'Nữ', 'Khác']).withMessage('Giới tính không hợp lệ'),
@@ -81,4 +81,4 @@ const addStudentValidate = [
     validate
 ];
 
-module.exports = { validate, editStudentValidate, addStudentValidate }
+module.exports = { validate, editUserValidate, addUserValidate }

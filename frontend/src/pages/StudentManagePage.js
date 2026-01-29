@@ -97,7 +97,7 @@ function StudentManagePage() {
         if (!confirm) return;
 
         try {
-            await adminService.resetPassword(student._id);
+            await adminService.resetStudentPassword(student._id);
             alert('Đã reset mật khẩu về 123456');
         } catch (err) {
             alert(err.response?.data?.message || 'Lỗi reset mật khẩu');
@@ -123,26 +123,6 @@ function StudentManagePage() {
                         </Button>
                     </Col>
                 </Row>
-
-                {loading && (
-                    <div>
-                        <Spinner animation="border" role="status"></Spinner>
-                        <span>Đang tải thông tin...</span>
-                    </div>
-                )}
-
-                {students.length === 0 && (
-                    <Alert variant="info">
-                        <Alert.Heading>Không có sinh viên nào!</Alert.Heading>
-                    </Alert>
-                )}
-
-                {error && (
-                    <Alert variant="danger">
-                        <Alert.Heading>Lỗi khi tải dữ liệu!</Alert.Heading>
-                        <p>{error}</p>
-                    </Alert>
-                )}
 
                 <Table bordered hover responsive className="timetable-table">
                     <thead>
@@ -174,6 +154,26 @@ function StudentManagePage() {
                         ))}
                     </tbody>
                 </Table>
+
+                {loading && (
+                    <div>
+                        <Spinner animation="border" role="status"></Spinner>
+                        <span>Đang tải thông tin...</span>
+                    </div>
+                )}
+
+                {students.length === 0 && (
+                    <Alert variant="info">
+                        <Alert.Heading>Không có sinh viên nào!</Alert.Heading>
+                    </Alert>
+                )}
+
+                {error && (
+                    <Alert variant="danger">
+                        <Alert.Heading>Lỗi khi tải dữ liệu!</Alert.Heading>
+                        <p>{error}</p>
+                    </Alert>
+                )}
                 {/* <p>Tổng số sinh viên: {total}</p> */}
 
                 <Pagination>
