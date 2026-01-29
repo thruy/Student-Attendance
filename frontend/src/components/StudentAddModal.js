@@ -11,14 +11,8 @@ function StudentAddModal({ show, onHide, onSave }) {
     });
     const [errors, setErrors] = useState({});
 
-    const handleSubmit = () => {
-        if (!validate()) return;
-        onSave(formData);
-        setFormData(initialState);
-    };
-
     return (
-        <Modal show={show} onHide={onHide} >
+        <Modal show={show} onHide={onHide} backdrop="static" keyboard={false} centered >
             <Modal.Header closeButton>
                 <Modal.Title>Thêm sinh viên mới</Modal.Title>
             </Modal.Header>
@@ -40,6 +34,7 @@ function StudentAddModal({ show, onHide, onSave }) {
                     <Form.Group className="mb-3">
                         <Form.Label>Giới tính</Form.Label>
                         <Form.Select value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })} required>
+                            <option value="">-- Chọn giới tính --</option>
                             <option value="Nam">Nam</option>
                             <option value="Nữ">Nữ</option>
                             <option value="Khác">Khác</option>
@@ -54,7 +49,7 @@ function StudentAddModal({ show, onHide, onSave }) {
 
             <Modal.Footer>
                 <Button variant="danger" onClick={onHide}> Hủy </Button>
-                <Button variant="success" onSave={handleSubmit}> Cập nhật thay đổi </Button>
+                <Button variant="success" onClick={() => onSave(formData)}> Thêm sinh viên </Button>
             </Modal.Footer>
         </Modal>
     )

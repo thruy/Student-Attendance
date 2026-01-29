@@ -5,6 +5,8 @@ import { Table, Spinner, Alert, Button, Form, Row, Col, InputGroup, Pagination }
 import { Trash3, Pen, InfoCircle, PersonPlus, Search, PersonFillLock } from 'react-bootstrap-icons'
 import './timetable.css';
 import StudentDetailModal from '../components/StudentDetailModal';
+import StudentAddModal from '../components/StudentAddModal';
+import StudentEditModal from '../components/StudentEditModal'
 
 function StudentManagePage() {
     const { user } = useAuth();
@@ -13,7 +15,7 @@ function StudentManagePage() {
     const [error, setError] = useState("");
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
-    const [limit] = useState(6);
+    const [limit] = useState(8);
     const [totalPages, setTotalPages] = useState(1);
     const [inputValue, setInputValue] = useState('');
     const [selectedStudent, setSelectedStudent] = useState('');
@@ -27,7 +29,7 @@ function StudentManagePage() {
             setLoading(true);
             try {
                 const data = await adminService.getAllStudent({ page, limit, search });
-                console.log('student', data.students);
+                console.log('student managepage', data.students);
                 setStudents(data.students);
                 setTotalPages(data.pagination.totalPages);
             } catch (err) {
@@ -187,8 +189,8 @@ function StudentManagePage() {
                 </Pagination>
             </div>
             <StudentDetailModal show={showDetails} onHide={() => setShowDetails(false)} student={selectedStudent} />
-            <EditStudentModal show={showEdit} onHide={() => setShowEdit(false)} student={editingStudent} onSave={handleUpdateStudent} />
-            <AddStudentModal show={showAdd} onHide={() => setShowAdd(false)} onSave={handleCreateStudent} />
+            <StudentEditModal show={showEdit} onHide={() => setShowEdit(false)} student={editingStudent} onSave={handleUpdateStudent} />
+            <StudentAddModal show={showAdd} onHide={() => setShowAdd(false)} onSave={handleCreateStudent} />
         </div>
     );
 }

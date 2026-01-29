@@ -6,7 +6,7 @@ const DEFAULT_PASSWORD = '123456';
 
 const getAllStudents = async (req, res) => {
     try {
-        let { page = 1, limit = 6, search = '' } = req.query;
+        let { page = 1, limit = 8, search = '' } = req.query;
         page = parseInt(page);
         limit = parseInt(limit);
 
@@ -47,14 +47,12 @@ const getStudentDetails = async (req, res) => {
         if (!student) {
             return res.status(404).json({ message: 'Không tìm thấy sinh viên' });
         }
-        res.json({ student });
+        res.status(201).json({ student });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Lỗi server' });
     }
 }
-
-const bcrypt = require('bcryptjs');
 
 const createStudent = async (req, res) => {
     try {
@@ -87,7 +85,7 @@ const createStudent = async (req, res) => {
         res.status(201).json({
             message: 'Thêm sinh viên thành công',
             student: {
-                _id: student._id,
+                id: student._id,
                 name: student.name,
                 code: student.code,
                 email: student.email

@@ -20,6 +20,7 @@ function StudentEditModal({ show, onHide, student, onSave }) {
 
     useEffect(() => {
         if (student) {
+            console.log("student", student);
             setFormData(student);
         }
     }, [student]);
@@ -93,7 +94,7 @@ function StudentEditModal({ show, onHide, student, onSave }) {
 
             <Modal.Footer>
                 <Button variant="danger" onClick={onHide}> Hủy </Button>
-                <Button variant="success" onClick={onSave(student._id, formData)}> Cập nhật thay đổi </Button>
+                <Button variant="success" onClick={() => onSave(student._id, formData)}> Cập nhật thay đổi </Button>
             </Modal.Footer>
         </Modal >
     )
