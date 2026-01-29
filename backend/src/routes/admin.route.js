@@ -7,8 +7,8 @@ const { editStudentValidate, addStudentValidate } = require('../validation/admin
 
 router.get('/student', verifyToken, authorize('admin'), adminController.getAllStudents);
 router.get('/student/:id', verifyToken, authorize('admin'), adminController.getStudentDetails);
-router.put('/students/:id', verifyToken, authorize('admin'), adminController.updateStudent);
-router.put('/students/:id/reset-password', verifyToken, authorize('admin'), editStudentValidate, adminController.resetPassword);
+router.put('/students/:id', verifyToken, authorize('admin'), editStudentValidate, adminController.updateStudent);
+router.put('/students/:id/reset-password', verifyToken, authorize('admin'), adminController.resetPassword);
 router.post('/students', verifyToken, authorize('admin'), addStudentValidate, adminController.createStudent);
 
 module.exports = router;

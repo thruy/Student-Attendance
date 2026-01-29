@@ -29,7 +29,7 @@ function StudentManagePage() {
             setLoading(true);
             try {
                 const data = await adminService.getAllStudent({ page, limit, search });
-                console.log('student managepage', data.students);
+                console.log('student manage page', data.students);
                 setStudents(data.students);
                 setTotalPages(data.pagination.totalPages);
             } catch (err) {
@@ -97,7 +97,7 @@ function StudentManagePage() {
         if (!confirm) return;
 
         try {
-            await adminService.resetStudentPassword(student._id);
+            await adminService.resetPassword(student._id);
             alert('Đã reset mật khẩu về 123456');
         } catch (err) {
             alert(err.response?.data?.message || 'Lỗi reset mật khẩu');

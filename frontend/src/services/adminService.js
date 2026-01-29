@@ -21,11 +21,11 @@ const updateStudent = async (studentId, payload) => {
     return res.data;
 }
 
-const resetStudentPassword = async (studentId) => {
+const resetPassword = async (studentId) => {
     const res = await axios.put(`${API_URL}/students/${studentId}/reset-password`, {}, { withCredentials: true });
     return res.data;
 };
 
 
-const adminService = { getAllStudent, getStudentDetail, updateStudent, resetStudentPassword, createStudent };
+const adminService = { getAllStudent, getStudentDetail, updateStudent, resetPassword, createStudent };
 export default adminService;
