@@ -6,7 +6,7 @@ import { Trash3, Pen, InfoCircle, PersonPlus, Search, PersonFillLock } from 'rea
 import './timetable.css';
 import StudentDetailModal from '../components/StudentDetailModal';
 import StudentAddModal from '../components/StudentAddModal';
-import StudentEditModal from '../components/StudentEditModal'
+import StudentEditModal from '../components/StudentEditModal';
 
 function StudentManagePage() {
     const { user } = useAuth();

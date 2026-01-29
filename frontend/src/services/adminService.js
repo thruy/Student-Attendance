@@ -32,7 +32,7 @@ const getAllTeacher = async ({ page, limit, search }) => {
     return res.data;
 }
 
-const getTeacherDetail = async (studentId) => {
+const getTeacherDetail = async (teacherId) => {
     const res = await axios.get(`${API_URL}/teachers/${teacherId}`, { withCredentials: true });
     return res.data;
 };
@@ -42,12 +42,12 @@ const createTeacher = async (payload) => {
     return res.data;
 };
 
-const updateTeacher = async (studentId, payload) => {
+const updateTeacher = async (teacherId, payload) => {
     const res = await axios.put(`${API_URL}/teachers/${teacherId}`, payload, { withCredentials: true });
     return res.data;
 }
 
-const resetTeacherPassword = async (studentId) => {
+const resetTeacherPassword = async (teacherId) => {
     const res = await axios.put(`${API_URL}/teachers/${teacherId}/reset-password`, {}, { withCredentials: true });
     return res.data;
 };

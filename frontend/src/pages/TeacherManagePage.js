@@ -2,7 +2,10 @@ import { useAuth } from '../context/AuthContext'
 import { useEffect, useState } from 'react';
 import adminService from '../services/adminService';
 import { Table, Spinner, Alert, Button, Form, Row, Col, InputGroup, Pagination } from 'react-bootstrap';
-import { Trash3, Pen, InfoCircle, PersonPlus, Search, PersonFillLock } from 'react-bootstrap-icons'
+import { Trash3, Pen, InfoCircle, PersonPlus, Search, PersonFillLock } from 'react-bootstrap-icons';
+import StudentDetailModal from '../components/StudentDetailModal';
+import StudentAddModal from '../components/StudentAddModal';
+import StudentEditModal from '../components/StudentEditModal';
 import './timetable.css';
 
 function TeacherManagePage() {
@@ -20,6 +23,86 @@ function TeacherManagePage() {
     const [editingTeacher, setEditingTeacher] = useState(null);
     const [showEdit, setShowEdit] = useState(false);
     const [showAdd, setShowAdd] = useState(false);
+
+    useEffect(() => {
+        const fetchAllTeacher = async () => {
+            setLoading(true);
+            try {
+                const data = await adminService.getAllTeacher({ page, limit, search });
+                console.log('teacher manage page', data.teachers);
+                setTeachers(data.teachers);
+                setTotalPages(data.pagination.totalPages);
+            } catch (err) {
+                setError(err.response?.data?.message || 'Lỗi khi lấy danh sách giảng viên');
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchAllTeacher();
+    }, [page, search]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setSearch(inputValue);
+            setPage(1); // khi search mới → quay về trang 1
+        }, 500); // delay 500ms
+
+        return () => {
+            clearTimeout(timer);
+        };
+    }, [inputValue]);
+
+    const handleViewDetail = async (teacherId) => {
+        try {
+            const data = await adminService.getTeacherDetail(teacherId);
+            setSelectedTeacher(data.teacher);
+            setShowDetails(true);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Lỗi khi lấy thông tin chi tiết giảng viên');
+        }
+    };
+
+    const handleCreateTeacher = async (data) => {
+        try {
+            await adminService.createTeacher(data);
+            setShowAdd(false);
+            const res = await adminService.getAllTeacher({ page, limit, search });
+            setTeachers(res.teachers);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Lỗi thêm giảng viên');
+        }
+    }
+
+    const handleEditTeacher = async (teacher) => {
+        const data = await adminService.getTeacherDetail(teacher._id);
+        setEditingTeacher(data.teacher);
+        setShowEdit(true);
+    };
+
+    const handleUpdateTeacher = async (id, data) => {
+        try {
+            await adminService.updateTeacher(id, data);
+            setShowEdit(false);
+            const res = await adminService.getAllTeacher({ page, limit, search });
+            setTeachers(res.teachers);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Lỗi khi cập nhật thông tin giảng viên');
+        }
+    }
+
+    const handleResetPassword = async (teacher) => {
+        const confirm = window.confirm(
+            `Reset mật khẩu cho giảng viên ${teacher.name} - ${teacher.code}?`
+        );
+        if (!confirm) return;
+
+        try {
+            await adminService.resetTeacherPassword(teacher._id);
+            alert('Đã reset mật khẩu về 123456');
+        } catch (err) {
+            alert(err.response?.data?.message || 'Lỗi reset mật khẩu');
+        }
+    };
 
     return (
         <div>
@@ -41,6 +124,37 @@ function TeacherManagePage() {
                     </Col>
                 </Row>
 
+                <Table bordered hover responsive className="timetable-table">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>HỌ VÀ TÊN</th>
+                            <th>MSGV</th>
+                            <th>EMAIL</th>
+                            <th>THAO TÁC</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {teachers.map((std, index) => (
+                            <tr key={std._id}>
+                                <td>{index + 1}</td>
+                                <td>{std.name}</td>
+                                <td className="text-center">{std.code}</td>
+                                <td>{std.email}</td>
+                                <td className='text-center'>
+                                    <div className="action-icons">
+                                        <Button variant='link' className="icon-btn info" onClick={() => handleViewDetail(std._id)}><InfoCircle /></Button>
+                                        <Button variant='link' className="icon-btn edit" onClick={() => handleEditTeacher(std)}><Pen /></Button>
+                                        <Button variant='link' className="icon-btn reset" onClick={() => handleResetPassword(std)}><PersonFillLock /></Button>
+                                        <Button variant='link' className="icon-btn delete"><Trash3 /></Button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </Table>
+
                 {loading && (
                     <div>
                         <Spinner animation="border" role="status"></Spinner>
@@ -48,7 +162,7 @@ function TeacherManagePage() {
                     </div>
                 )}
 
-                {students.length === 0 && (
+                {teachers.length === 0 && (
                     <Alert variant="info">
                         <Alert.Heading>Không có sinh viên nào!</Alert.Heading>
                     </Alert>
@@ -60,7 +174,22 @@ function TeacherManagePage() {
                         <p>{error}</p>
                     </Alert>
                 )}
+
+                <Pagination>
+                    <Pagination.Prev disabled={page === 1} onClick={() => setPage(page - 1)} />
+
+                    {[...Array(totalPages)].map((_, index) => (
+                        <Pagination.Item key={index + 1} active={index + 1 === page} onClick={() => setPage(index + 1)}>
+                            {index + 1}
+                        </Pagination.Item>
+                    ))}
+
+                    <Pagination.Next disabled={page === totalPages} onClick={() => setPage(page + 1)} />
+                </Pagination>
             </div>
+            <StudentDetailModal show={showDetails} onHide={() => setShowDetails(false)} student={selectedTeacher} />
+            <StudentEditModal show={showEdit} onHide={() => setShowEdit(false)} student={editingTeacher} onSave={handleUpdateTeacher} />
+            <StudentAddModal show={showAdd} onHide={() => setShowAdd(false)} onSave={handleCreateTeacher} />
         </div>
     );
 }

@@ -63,7 +63,6 @@ function App() {
           </Route>
 
           {/* admin */}
-
           <Route path='/admin' element={<RoleRoute allowedRoles={['admin']}><AdminLayout /></RoleRoute>} >
             <Route index element={<Main />} />
             <Route path='student' element={<StudentManagePage />} />
