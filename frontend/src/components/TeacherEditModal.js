@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Form, Modal, Button } from "react-bootstrap";
 
-function StudentEditModal({ show, onHide, student, onSave }) {
+function TeacherEditModal({ show, onHide, teacher, onSave }) {
     const [formData, setFormData] = useState({
         name: '',
         code: '',
@@ -19,14 +19,15 @@ function StudentEditModal({ show, onHide, student, onSave }) {
 
 
     useEffect(() => {
-        if (student) {
-            setFormData(student);
+        if (teacher) {
+            console.log("teacher", teacher);
+            setFormData(teacher);
         }
-    }, [student]);
+    }, [teacher]);
     return (
         <Modal show={show} onHide={onHide} backdrop="static" keyboard={false} centered size="lg">
             <Modal.Header closeButton>
-                <Modal.Title>Chỉnh sửa thông tin sinh viên</Modal.Title>
+                <Modal.Title>Chỉnh sửa thông tin giảng viên</Modal.Title>
             </Modal.Header>
 
             <Modal.Body>
@@ -36,7 +37,7 @@ function StudentEditModal({ show, onHide, student, onSave }) {
                         <Form.Control value={formData.name} type="text" autoFocus onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
                     </Form.Group>
                     <Form.Group className="mb-3">
-                        <Form.Label>Mã số sinh viên</Form.Label>
+                        <Form.Label>Mã số giảng viên</Form.Label>
                         <Form.Control value={formData.code} type="text" autoFocus onChange={(e) => setFormData({ ...formData, code: e.target.value })} />
                     </Form.Group>
                     <Form.Group className="mb-3">
@@ -56,19 +57,15 @@ function StudentEditModal({ show, onHide, student, onSave }) {
                         <Form.Control value={formData.ethnic} type="text" autoFocus onChange={(e) => setFormData({ ...formData, ethnic: e.target.value })} />
                     </Form.Group>
                     <Form.Group className="mb-3">
-                        <Form.Label>Khoa/Viện</Form.Label>
+                        <Form.Label>Viện/Trường</Form.Label>
                         <Form.Control value={formData.school} type="text" placeholder="Khoa/Viện/Trường" autoFocus onChange={(e) => setFormData({ ...formData, school: e.target.value })} />
                     </Form.Group>
                     <Form.Group className="mb-3">
-                        <Form.Label>Ngành học</Form.Label>
+                        <Form.Label>Khoa</Form.Label>
                         <Form.Control value={formData.branch} type="text" autoFocus onChange={(e) => setFormData({ ...formData, branch: e.target.value })} />
                     </Form.Group>
                     <Form.Group className="mb-3">
-                        <Form.Label>Lớp</Form.Label>
-                        <Form.Control value={formData.className} type="text" autoFocus onChange={(e) => setFormData({ ...formData, className: e.target.value })} />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Hệ đào tạo</Form.Label>
+                        <Form.Label>Học vị</Form.Label>
                         <Form.Select value={formData.trainingSystem} onChange={(e) => setFormData({ ...formData, trainingSystem: e.target.value })}>
                             <option value="Cử nhân">Cử nhân</option>
                             <option value="Kỹ sư">Kỹ sư</option>
@@ -93,10 +90,10 @@ function StudentEditModal({ show, onHide, student, onSave }) {
 
             <Modal.Footer>
                 <Button variant="danger" onClick={onHide}> Hủy </Button>
-                <Button variant="success" onClick={() => onSave(student._id, formData)}> Cập nhật thay đổi </Button>
+                <Button variant="success" onClick={() => onSave(teacher._id, formData)}> Cập nhật thay đổi </Button>
             </Modal.Footer>
         </Modal >
     )
 }
 
-export default StudentEditModal;
+export default TeacherEditModal;

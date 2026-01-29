@@ -1,7 +1,7 @@
 import { Modal, Button, Form } from 'react-bootstrap';
 import { useState } from 'react';
 
-function StudentAddModal({ show, onHide, onSave }) {
+function TeacherAddModal({ show, onHide, onSave }) {
     const [formData, setFormData] = useState({
         name: '',
         code: '',
@@ -13,7 +13,7 @@ function StudentAddModal({ show, onHide, onSave }) {
     return (
         <Modal show={show} onHide={onHide} backdrop="static" keyboard={false} centered >
             <Modal.Header closeButton>
-                <Modal.Title>Thêm sinh viên mới</Modal.Title>
+                <Modal.Title>Thêm giảng viên mới</Modal.Title>
             </Modal.Header>
 
             <Modal.Body>
@@ -23,7 +23,7 @@ function StudentAddModal({ show, onHide, onSave }) {
                         <Form.Control value={formData.name} type="text" autoFocus onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
                     </Form.Group>
                     <Form.Group className="mb-3">
-                        <Form.Label>Mã số sinh viên</Form.Label>
+                        <Form.Label>Mã số giảng viên</Form.Label>
                         <Form.Control value={formData.code} type="text" autoFocus onChange={(e) => setFormData({ ...formData, code: e.target.value })} required />
                     </Form.Group>
                     <Form.Group className="mb-3">
@@ -48,10 +48,10 @@ function StudentAddModal({ show, onHide, onSave }) {
 
             <Modal.Footer>
                 <Button variant="danger" onClick={onHide}> Hủy </Button>
-                <Button variant="success" onClick={() => onSave(formData)}> Thêm sinh viên </Button>
+                <Button variant="success" onClick={() => onSave(formData)}> Thêm giảng viên </Button>
             </Modal.Footer>
         </Modal>
     )
 }
 
-export default StudentAddModal;
+export default TeacherAddModal;

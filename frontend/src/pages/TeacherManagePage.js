@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 import adminService from '../services/adminService';
 import { Table, Spinner, Alert, Button, Form, Row, Col, InputGroup, Pagination } from 'react-bootstrap';
 import { Trash3, Pen, InfoCircle, PersonPlus, Search, PersonFillLock } from 'react-bootstrap-icons';
-import StudentDetailModal from '../components/StudentDetailModal';
-import StudentAddModal from '../components/StudentAddModal';
-import StudentEditModal from '../components/StudentEditModal';
+import TeacherDetailModal from '../components/TeacherDetailModal';
+import TeacherAddModal from '../components/TeacherAddModal';
+import TeacherEditModal from '../components/TeacherEditModal';
 import './timetable.css';
 
 function TeacherManagePage() {
@@ -136,17 +136,17 @@ function TeacherManagePage() {
                     </thead>
 
                     <tbody>
-                        {teachers.map((std, index) => (
-                            <tr key={std._id}>
+                        {teachers.map((tea, index) => (
+                            <tr key={tea._id}>
                                 <td>{index + 1}</td>
-                                <td>{std.name}</td>
-                                <td className="text-center">{std.code}</td>
-                                <td>{std.email}</td>
+                                <td>{tea.name}</td>
+                                <td className="text-center">{tea.code}</td>
+                                <td>{tea.email}</td>
                                 <td className='text-center'>
                                     <div className="action-icons">
-                                        <Button variant='link' className="icon-btn info" onClick={() => handleViewDetail(std._id)}><InfoCircle /></Button>
-                                        <Button variant='link' className="icon-btn edit" onClick={() => handleEditTeacher(std)}><Pen /></Button>
-                                        <Button variant='link' className="icon-btn reset" onClick={() => handleResetPassword(std)}><PersonFillLock /></Button>
+                                        <Button variant='link' className="icon-btn info" onClick={() => handleViewDetail(tea._id)}><InfoCircle /></Button>
+                                        <Button variant='link' className="icon-btn edit" onClick={() => handleEditTeacher(tea)}><Pen /></Button>
+                                        <Button variant='link' className="icon-btn reset" onClick={() => handleResetPassword(tea)}><PersonFillLock /></Button>
                                         <Button variant='link' className="icon-btn delete"><Trash3 /></Button>
                                     </div>
                                 </td>
@@ -187,9 +187,9 @@ function TeacherManagePage() {
                     <Pagination.Next disabled={page === totalPages} onClick={() => setPage(page + 1)} />
                 </Pagination>
             </div>
-            <StudentDetailModal show={showDetails} onHide={() => setShowDetails(false)} student={selectedTeacher} />
-            <StudentEditModal show={showEdit} onHide={() => setShowEdit(false)} student={editingTeacher} onSave={handleUpdateTeacher} />
-            <StudentAddModal show={showAdd} onHide={() => setShowAdd(false)} onSave={handleCreateTeacher} />
+            <TeacherDetailModal show={showDetails} onHide={() => setShowDetails(false)} teacher={selectedTeacher} />
+            <TeacherEditModal show={showEdit} onHide={() => setShowEdit(false)} student={editingTeacher} onSave={handleUpdateTeacher} />
+            <TeacherAddModal show={showAdd} onHide={() => setShowAdd(false)} onSave={handleCreateTeacher} />
         </div>
     );
 }

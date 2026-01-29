@@ -272,7 +272,7 @@ const createTeacher = async (req, res) => {
 const updateTeacher = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, code, email, dob, gender, ethnic, school, branch, className, trainingSystem, hometown, identificationNumber, phone } = req.body;
+        const { name, code, email, dob, gender, ethnic, school, branch, trainingSystem, hometown, identificationNumber, phone } = req.body;
         const teacher = await User.findOne({ _id: id, role: 'teacher' });
         if (!teacher) {
             return res.status(404).json({ message: 'Không tìm thấy giảng viên' });
@@ -285,7 +285,6 @@ const updateTeacher = async (req, res) => {
         if (ethnic !== undefined) teacher.ethnic = ethnic;
         if (school !== undefined) teacher.school = school;
         if (branch !== undefined) teacher.branch = branch;
-        if (className !== undefined) teacher.className = className;
         if (trainingSystem !== undefined) teacher.trainingSystem = trainingSystem;
         if (hometown !== undefined) teacher.hometown = hometown;
         if (identificationNumber !== undefined) teacher.identificationNumber = identificationNumber;
