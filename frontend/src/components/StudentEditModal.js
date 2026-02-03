@@ -6,6 +6,7 @@ function StudentEditModal({ show, onHide, student, onSave }) {
         name: '',
         code: '',
         email: '',
+        dob: '',
         gender: '',
         ethnic: '',
         school: '',
@@ -17,12 +18,15 @@ function StudentEditModal({ show, onHide, student, onSave }) {
         phone: ''
     });
 
-
     useEffect(() => {
         if (student) {
-            setFormData(student);
+            setFormData({
+                ...student,
+                dob: student.dob ? new Date(student.dob).toISOString().split('T')[0] : ''
+            });
         }
     }, [student]);
+
     return (
         <Modal show={show} onHide={onHide} backdrop="static" keyboard={false} centered size="lg">
             <Modal.Header closeButton>
@@ -42,6 +46,10 @@ function StudentEditModal({ show, onHide, student, onSave }) {
                     <Form.Group className="mb-3">
                         <Form.Label>Email</Form.Label>
                         <Form.Control value={formData.email} type="text" autoFocus onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+                    </Form.Group>
+                    <Form.Group>
+                        <Form.Label>Ngày sinh</Form.Label>
+                        <Form.Control value={formData.dob} type="date" autoFocus onChange={(e) => setFormData({ ...formData, dob: e.target.value })} />
                     </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Label>Giới tính</Form.Label>
