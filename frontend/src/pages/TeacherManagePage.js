@@ -188,7 +188,7 @@ function TeacherManagePage() {
                 </Pagination>
             </div>
             <TeacherDetailModal show={showDetails} onHide={() => setShowDetails(false)} teacher={selectedTeacher} />
-            <TeacherEditModal show={showEdit} onHide={() => setShowEdit(false)} student={editingTeacher} onSave={handleUpdateTeacher} />
+            <TeacherEditModal show={showEdit} onHide={() => setShowEdit(false)} teacher={editingTeacher} onSave={handleUpdateTeacher} />
             <TeacherAddModal show={showAdd} onHide={() => setShowAdd(false)} onSave={handleCreateTeacher} />
         </div>
     );

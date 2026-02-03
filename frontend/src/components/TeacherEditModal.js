@@ -6,6 +6,7 @@ function TeacherEditModal({ show, onHide, teacher, onSave }) {
         name: '',
         code: '',
         email: '',
+        dob: '',
         gender: '',
         ethnic: '',
         school: '',
@@ -17,13 +18,15 @@ function TeacherEditModal({ show, onHide, teacher, onSave }) {
         phone: ''
     });
 
-
     useEffect(() => {
         if (teacher) {
-            console.log("teacher", teacher);
-            setFormData(teacher);
+            setFormData({
+                ...teacher,
+                dob: teacher.dob ? new Date(teacher.dob).toISOString().split('T')[0] : ''
+            });
         }
     }, [teacher]);
+
     return (
         <Modal show={show} onHide={onHide} backdrop="static" keyboard={false} centered size="lg">
             <Modal.Header closeButton>
@@ -43,6 +46,10 @@ function TeacherEditModal({ show, onHide, teacher, onSave }) {
                     <Form.Group className="mb-3">
                         <Form.Label>Email</Form.Label>
                         <Form.Control value={formData.email} type="text" autoFocus onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+                    </Form.Group>
+                    <Form.Group>
+                        <Form.Label>Ngày sinh</Form.Label>
+                        <Form.Control value={formData.dob} type="date" autoFocus onChange={(e) => setFormData({ ...formData, dob: e.target.value })} />
                     </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Label>Giới tính</Form.Label>
