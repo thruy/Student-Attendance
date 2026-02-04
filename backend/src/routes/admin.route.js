@@ -32,6 +32,8 @@ router.put('/classes/:classId', verifyToken, authorize('admin'), updateClassVali
 router.delete('/classes/:id', verifyToken, authorize('admin'), adminController.deleteClass);
 
 //project
+router.get('/projects', verifyToken, authorize('admin'), adminController.getAllProjects);
+router.get('/projects/:projectId', verifyToken, authorize('admin'), adminController.getProjectDetail);
 router.post('/projects', verifyToken, authorize('admin'), adminController.createProject);
 router.post('/:projectId/students', verifyToken, authorize('admin'), adminController.addStudentToProject);
 router.delete('/:projectId/students/:studentId', verifyToken, authorize('admin'), adminController.removeStudentFromProject);

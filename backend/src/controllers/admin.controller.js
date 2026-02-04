@@ -327,7 +327,7 @@ const deleteTeacher = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const teacher = await Users.findOne({ _id: id, role: 'teacher' });
+        const teacher = await User.findOne({ _id: id, role: 'teacher' });
         if (!teacher) {
             return res.status(404).json({ message: 'Không tìm thấy giảng viên' });
         }
@@ -750,12 +750,178 @@ const removeStudentFromProject = async (req, res) => {
     }
 };
 
+const getAllProjects = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const search = req.query.search || '';
+        const semester = req.query.semester;
+        const filter = {};
+        if (semester) {
+            filter.semester = semester;
+        }
+
+        if (search) {
+            filter.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { projectCode: { $regex: search, $options: 'i' } },
+                { subjectCode: { $regex: search, $options: 'i' } },
+            ];
+        }
+        const total = await Projects.countDocuments(filter);
+        const projects = await Projects.find(filter)
+            .select('name subjectCode classCode teacherId members')
+            .populate({
+                path: 'teacherId',
+                select: 'name email'
+            })
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const formattedProjects = projects.map(p => ({
+            _id: p._id,
+            name: p.name,
+            subjectCode: p.subjectCode,
+            projectCode: p.projectCode,
+            teacherId: p.teacherId,
+            studentCount: p.members?.length || 0
+        }));
+
+        res.status(200).json({
+            projects: formattedProjects,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+const getProjectDetail = async (req, res) => {
+    try {
+        const { projectId } = req.params;
+
+        const project = await Projects.findById(projectId)
+            .populate('teacherId', 'name email code')
+            .populate('members.studentId', 'name email code');
+
+        if (!project) {
+            return res.status(404).json({ message: 'Không tìm thấy project' });
+        }
+        res.json({ project });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+const updateProjectInfo = async (req, res) => {
+    try {
+        const { projectId } = req.params;
+        const updateData = req.body;
+
+        const project = await Projects.findByIdAndUpdate(projectId, updateData, { new: true });
+        if (!project) {
+            return res.status(404).json({ message: 'Không tìm thấy project' });
+        }
+
+        res.json({ message: 'Cập nhật project thành công', project });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+const uploadReport = async (req, res) => {
+    try {
+        const { projectId } = req.params;
+        const studentId = req.user.userId;
+        const fileUrl = req.file.path;
+
+        const project = await Projects.findOneAndUpdate(
+            { _id: projectId, 'members.studentId': studentId },
+            { $set: { 'members.$.fileUrl': fileUrl } },
+            { new: true }
+        );
+        if (!project) {
+            return res.status(404).json({ message: 'Không tìm thấy project hoặc sinh viên' });
+        }
+        res.json({ message: 'Upload thành công', fileUrl });
+    } catch {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+const gradeStudent = async (req, res) => {
+    try {
+        const { projectId, studentId } = req.params;
+        const { score, comment } = req.body;
+
+        const project = await Projects.findOneAndUpdate(
+            { _id: projectId, 'members.studentId': studentId },
+            {
+                $set: {
+                    'members.$.score': score,
+                    'members.$.comment': comment
+                }
+            },
+            { new: true }
+        );
+
+        if (!project) {
+            return res.status(404).json({ message: 'Không tìm thấy sinh viên trong project' });
+        }
+
+        res.json({ message: 'Chấm điểm thành công' });
+    } catch {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+const updateTitleForStudent = async (req, res) => {
+    try {
+        const { projectId, studentId } = req.params;
+        const { title } = req.body;
+        const project = await Projects.findOneAndUpdate(
+            { _id: projectId, 'members.studentId': studentId },
+            {
+                $set: { 'members.$.title': title }
+            },
+            { new: true }
+        );
+        if (!project) {
+            return res.status(404).json({ message: 'Không tìm thấy lớp đồ án' });
+        }
+    } catch {
+        res.status(500).json({ message: err.message });
+    }
+}
+
+const deleteProject = async (req, res) => {
+    try {
+        const { projectId } = req.params;
+
+        const project = await Projects.findById(projectId);
+        if (!project) {
+            return res.status(404).json({ message: 'Không tìm thấy lớp project' });
+        }
+        await project.deleteOne();
+        res.status(200).json({ message: 'Xóa lớp project thành công' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
 
 module.exports = {
     resetPassword,
     getAllStudents, getStudentDetails, createStudent, updateStudent,
     getAllTeachers, getTeacherDetails, createTeacher, updateTeacher, deleteTeacher,
-    getAllClasses, getClassDetail, saveAttendance, deleteAttendance, createClass, updateClass, deleteClass,
-    addStudentsToClass, removeStudentFromClass,
-    createProject, addStudentToProject, removeStudentFromProject,
+    getAllClasses, getClassDetail, createClass, updateClass, deleteClass,
+    addStudentsToClass, removeStudentFromClass, saveAttendance, deleteAttendance,
+    getAllProjects, getProjectDetail, createProject, updateProjectInfo, deleteProject,
+    addStudentToProject, removeStudentFromProject, uploadReport, gradeStudent, updateTitleForStudent
 }
