@@ -1,6 +1,7 @@
 const User = require('../models/Users');
 const Classes = require('../models/Classes');
 const Attendances = require('../models/Attendances');
+const Projects = require('../models/Project');
 const bcrypt = require('bcryptjs');
 const DEFAULT_PASSWORD = '123456';
 // students
@@ -655,6 +656,100 @@ const deleteClass = async (req, res) => {
     }
 };
 
+const createProject = async (req, res) => {
+    try {
+        const { subjectCode, name, projectCode, semester, teacherId } = req.body;
+        if (!subjectCode || !name || !projectCode || !semester || !teacherId) {
+            return res.status(400).json({ message: 'Thiếu thông tin bắt buộc' });
+        }
+
+        const existed = await Projects.findOne({ projectCode });
+        if (existed) {
+            return res.status(400).json({ message: 'Mã đồ án đã tồn tại' });
+        }
+
+        const project = await Projects.create({
+            subjectCode,
+            name,
+            projectCode,
+            semester,
+            teacherId,
+            members: []
+        });
+        res.status(201).json({
+            message: 'Tạo lớp đồ án thành công',
+            project
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+const addStudentToProject = async (req, res) => {
+    try {
+        const { projectId } = req.params;
+        const { studentId } = req.body;
+        if (!studentId) {
+            return res.status(400).json({ message: 'Thiếu sinh viên' });
+        }
+
+        const project = await Projects.findById(projectId);
+        if (!project) {
+            return res.status(404).json({ message: 'Không tìm thấy lớp đồ án' });
+        }
+
+        const student = await User.findById(studentId);
+        if (!student) {
+            return res.status(404).json({ message: 'Không tìm thấy sinh viên' });
+        }
+
+        const existed = project.members.some(m => m.studentId.toString() === studentId);
+        if (existed) {
+            return res.status(400).json({ message: 'Sinh viên đã tồn tại trong lớp đồ án' });
+        }
+
+        project.members.push({
+            studentId,
+            title: null,
+            fileUrl: null,
+            score: null,
+            comment: null
+        });
+
+        await project.save();
+        res.json({
+            message: 'Thêm sinh viên vào project thành công',
+            members: project.members
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+const removeStudentFromProject = async (req, res) => {
+    try {
+        const { projectId, studentId } = req.params;
+
+        const project = await Projects.findById(projectId);
+        if (!project) {
+            return res.status(404).json({ message: 'Không tìm thấy project' });
+        }
+
+        const before = project.members.length;
+        project.members = project.members.filter(m => m.studentId.toString() !== studentId);
+        if (project.members.length === before) {
+            return res.status(404).json({ message: 'Sinh viên không tồn tại trong lớp đồ án' });
+        }
+
+        await project.save();
+        res.json({
+            message: 'Xóa sinh viên khỏi project thành công'
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
 
 module.exports = {
     resetPassword,
@@ -662,4 +757,5 @@ module.exports = {
     getAllTeachers, getTeacherDetails, createTeacher, updateTeacher, deleteTeacher,
     getAllClasses, getClassDetail, saveAttendance, deleteAttendance, createClass, updateClass, deleteClass,
     addStudentsToClass, removeStudentFromClass,
+    createProject, addStudentToProject, removeStudentFromProject,
 }
