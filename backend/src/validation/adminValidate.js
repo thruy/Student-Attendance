@@ -1,6 +1,8 @@
 const { body, param, validationResult } = require('express-validator');
 const SIS_EMAIL_REGEX = /^[a-zA-Z]+\.[a-zA-Z]+\d{6}@sis\.hust\.edu\.vn$/;
 
+const DAYS = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
+
 const validate = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -81,4 +83,89 @@ const addUserValidate = [
     validate
 ];
 
-module.exports = { validate, editUserValidate, addUserValidate }
+const createClassValidate = [
+    body('subjectCode')
+        .trim()
+        .notEmpty().withMessage('Mã học phần không được để trống')
+        .matches(/^[A-Za-z]{2}\d{4}/).withMessage('Mã học phần không đúng định dạng'),
+    body('classCode')
+        .trim()
+        .matches(/^\d{6}$/).withMessage('Mã lớp không đúng định dạng'),
+    body('name')
+        .trim()
+        .isLength({ min: 3 }).withMessage('Tên lớp phải có ít nhất 3 ký tự'),
+    body('type')
+        .notEmpty().withMessage('Loại lớp không được để trống')
+        .isIn(['Lý thuyết', 'Bài tập', 'Thực hành']).withMessage('Loại lớp không hợp lệ'),
+    body('semester')
+        .matches(/^\d{5}$/).withMessage('Học kỳ không hợp lệ'),
+    body('teacherId')
+        .custom(value => mongoose.Types.ObjectId.isValid(value)).withMessage('Giảng viên không hợp lệ'),
+    body('date')
+        .isArray({ min: 1 }).withMessage('Danh sách ngày học phải là mảng'),
+    body('date.*')
+        .isISO8601().withMessage('Ngày học không hợp lệ'),
+
+    body('schedule')
+        .isArray({ min: 1 }).withMessage('Lịch học phải là mảng'),
+    body('schedule.*.dayOfWeek')
+        .isIn(DAYS).withMessage('Thứ trong tuần không hợp lệ'),
+    body('schedule.*.startTime')
+        .matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage('Giờ bắt đầu không hợp lệ'),
+    body('schedule.*.endTime')
+        .matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage('Giờ kết thúc không hợp lệ'),
+    body('schedule.*.room')
+        .trim()
+        .notEmpty().withMessage('Phòng học không được để trống'),
+    validate
+];
+
+const updateClassValidate = [
+    body('subjectCode')
+        .optional()
+        .matches(/^[A-Za-z]{2}\d{4}.*/).withMessage('Mã môn không hợp lệ'),
+    body('classCode')
+        .optional()
+        .matches(/^\d{6}$/).withMessage('Mã lớp gồm 6 chữ số'),
+    body('name')
+        .optional()
+        .isLength({ min: 3 }).withMessage('Tên lớp tối thiểu 3 ký tự'),
+    body('type')
+        .optional()
+        .isIn(['Lý thuyết', 'Bài tập', 'Thực hành']).withMessage('Loại lớp không hợp lệ'),
+    body('semester')
+        .optional()
+        .matches(/^\d{5}$/).withMessage('Học kỳ không hợp lệ'),
+    body('teacherId')
+        .optional()
+        .isMongoId().withMessage('teacherId không hợp lệ'),
+    body('date')
+        .optional()
+        .isArray({ min: 1 }).withMessage('date phải là mảng'),
+    body('date.*')
+        .optional()
+        .isISO8601().withMessage('Ngày học không hợp lệ'),
+
+    body('schedule')
+        .optional()
+        .isArray({ min: 1 }).withMessage('schedule phải là mảng'),
+    body('schedule.*.dayOfWeek')
+        .optional()
+        .isIn(DAYS).withMessage('Ngày học không hợp lệ'),
+    body('schedule.*.startTime')
+        .optional()
+        .matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage('Giờ bắt đầu không hợp lệ'),
+    body('schedule.*.endTime')
+        .optional()
+        .matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage('Giờ kết thúc không hợp lệ'),
+    body('schedule.*.room')
+        .optional()
+        .notEmpty().withMessage('Phòng học không được trống'),
+    validate
+];
+
+module.exports = {
+    validate,
+    editUserValidate, addUserValidate,
+    createClassValidate, updateClassValidate
+}

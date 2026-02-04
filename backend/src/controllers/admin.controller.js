@@ -1,6 +1,6 @@
 const User = require('../models/Users');
-const Class = require('../models/Classes');
-const Attendance = require('../models/Attendances');
+const Classes = require('../models/Classes');
+const Attendances = require('../models/Attendances');
 const bcrypt = require('bcryptjs');
 const DEFAULT_PASSWORD = '123456';
 // students
@@ -322,8 +322,344 @@ const updateTeacher = async (req, res) => {
     }
 }
 
+const deleteTeacher = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const teacher = await Users.findOne({ _id: id, role: 'teacher' });
+        if (!teacher) {
+            return res.status(404).json({ message: 'Không tìm thấy giảng viên' });
+        }
+
+        const classes = await Classes.find({ teacherId: id });
+        const classIds = classes.map(cls => cls._id);
+        if (classIds.length > 0) {
+            await Attendances.deleteMany({ classId: { $in: classIds } });
+        }
+        await Classes.deleteMany({ teacherId: id });
+        await teacher.deleteOne();
+
+        res.status(200).json({ message: 'Đã xóa giảng viên và toàn bộ lớp học, điểm danh liên quan' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+};
+
+const getAllClasses = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const search = req.query.search || '';
+        const semester = req.query.semester;
+        const filter = {};
+        if (semester) {
+            filter.semester = semester;
+        }
+
+        if (search) {
+            filter.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { classCode: { $regex: search, $options: 'i' } },
+                { subjectCode: { $regex: search, $options: 'i' } },
+            ];
+        }
+
+        const total = await Classes.countDocuments(filter);
+
+        const classes = await Classes.find(filter)
+            .select('name subjectCode classCode type schedule teacherId')
+            .populate({
+                path: 'teacherId',
+                select: 'name email'
+            })
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        res.status(200).json({
+            classes,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        });
+    } catch {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+}
+
+const getClassDetail = async (req, res) => {
+    try {
+        const { classId } = req.params;
+        const cls = await Classes.findById(classId)
+            .populate('teacherId', 'name email code')
+            .populate('students', 'name email code')
+        if (!cls) { return res.status(404).json({ message: 'Không tìm thấy lớp học' }); }
+
+        const attendances = await Attendances.find({ classId });
+        res.status(200).json({
+            class: {
+                classId: cls._id,
+                subjectCode: cls.subjectCode,
+                name: cls.name,
+                classCode: cls.classCode,
+                type: cls.type,
+                semester: cls.semester,
+                teacher: {
+                    name: cls.teacherId?.name,
+                    email: cls.teacherId?.email,
+                    code: cls.teacherId?.code
+                },
+                schedule: cls.schedule.map(s => ({
+                    dayOfWeek: s.dayOfWeek,
+                    startTime: s.startTime,
+                    endTime: s.endTime,
+                    room: s.room
+                })),
+                date: cls.date.map(d => d.toISOString().split('T')[0]),
+                students: cls.students.map(student => ({
+                    id: student._id,
+                    name: student.name,
+                    email: student.email,
+                    code: student.code
+                }))
+            },
+            attendances,
+        });
+    } catch (err) {
+        res.status(500).json({ message: 'Lỗi khi lấy thông tin lớp học', error: err.message });
+    }
+}
+
+const createClass = async (req, res) => {
+    try {
+        const { subjectCode, name, classCode, type, semester, teacherId, date, schedule, students = [] } = req.body;
+        if (!subjectCode || !name || !classCode || !type || !semester || !teacherId || !date || !schedule) {
+            return res.status(400).json({ message: 'Thiếu thông tin lớp học' });
+        }
+
+        const existed = await Classes.findOne({ classCode });
+        if (existed) {
+            return res.status(400).json({ message: 'Mã lớp đã tồn tại' });
+        }
+
+        const teacher = await User.findOne({ _id: teacherId, role: 'teacher' });
+        if (!teacher) {
+            return res.status(400).json({ message: 'Giảng viên không hợp lệ' });
+        }
+        const parsedDates = date.map(d => new Date(d));
+
+        // 5. Tạo lớp
+        const newClass = await Classes.create({ subjectCode, name, classCode, type, semester, teacherId, students, date: parsedDates, schedule });
+        res.status(201).json({
+            message: 'Tạo lớp học thành công',
+            class: {
+                id: newClass._id,
+                classCode: newClass.classCode,
+                name: newClass.name,
+                semester: newClass.semester
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+};
+
+const saveAttendance = async (req, res) => {
+    try {
+        const { classId, date, type, records } = req.body;
+        const teacherId = req.user.userId;
+        if (!classId || !date || !records) { return res.status(400).json({ message: 'Thiếu dữ liệu điểm danh' }); }
+        const cls = await Classes.findById(classId);
+        if (!cls) { return res.status(404).json({ message: 'Không tìm thấy lớp học' }); }
+
+        const validDate = cls.date.some(
+            d => new Date(d).toISOString().split('T')[0] === date
+        );
+        if (!validDate) { return res.status(400).json({ message: 'Ngày không thuộc lịch học' }); }
+
+        let attendance = await Attendances.findOne({ classId, date });
+        if (!attendance) {
+            attendance = await Attendances.create({
+                classId,
+                teacherId,
+                date,
+                type,
+                records
+            });
+        } else {
+            attendance.records = records;
+            attendance.teacherId = teacherId;
+            await attendance.save();
+        }
+
+        res.json({
+            message: 'Lưu điểm danh thành công',
+            attendance
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+const deleteAttendance = async (req, res) => {
+    try {
+        const { classId, date } = req.params;
+        const teacherId = req.user.userId;
+
+        const cls = await Classes.findById(classId);
+        if (!cls) {
+            return res.status(404).json({ message: 'Không tìm thấy lớp học' });
+        }
+
+        const validDate = cls.date.some(d => new Date(d).toISOString().split('T')[0] === date);
+        if (!validDate) {
+            return res.status(400).json({ message: 'Ngày không thuộc lịch học' });
+        }
+
+        const attendance = await Attendances.findOne({ classId, date });
+        if (!attendance) {
+            return res.status(404).json({ message: 'Không tìm thấy phiên điểm danh' });
+        }
+
+        if (attendance.teacherId.toString() !== teacherId) {
+            return res.status(403).json({ message: 'Không có quyền xóa phiên điểm danh này' });
+        }
+        await attendance.deleteOne();
+        res.status(200).json({
+            message: 'Đã xóa phiên điểm danh thành công'
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+};
+
+const addStudentsToClass = async (req, res) => {
+    try {
+        const { classId } = req.params;
+        const { studentIds } = req.body;
+
+        if (!Array.isArray(studentIds) || studentIds.length === 0) {
+            return res.status(400).json({ message: 'Danh sách sinh viên không hợp lệ/không có sinh viên nào' });
+        }
+
+        const cls = await Classes.findById(classId);
+        if (!cls) {
+            return res.status(404).json({ message: 'Không tìm thấy lớp học' });
+        }
+
+        const students = await User.find({ _id: { $in: studentIds }, role: 'student' }).select('_id');
+        if (students.length === 0) {
+            return res.status(400).json({ message: 'Không có sinh viên hợp lệ' });
+        }
+
+        const newStudentIds = students
+            .map(s => s._id.toString())
+            .filter(id => !cls.students.map(x => x.toString()).includes(id));
+
+        cls.students.push(...newStudentIds);
+        await cls.save();
+
+        res.status(200).json({
+            message: 'Thêm sinh viên vào lớp thành công',
+            addedCount: newStudentIds.length
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+};
+
+const removeStudentFromClass = async (req, res) => {
+    try {
+        const { classId, studentId } = req.params;
+
+        const cls = await Classes.findById(classId);
+        if (!cls) {
+            return res.status(404).json({ message: 'Không tìm thấy lớp học' });
+        }
+
+        const before = cls.students.length;
+        cls.students = cls.students.filter(id => id.toString() !== studentId);
+        if (cls.students.length === before) {
+            return res.status(400).json({ message: 'Sinh viên không thuộc lớp này' });
+        }
+
+        await cls.save();
+        res.status(200).json({ message: 'Đã xóa sinh viên khỏi lớp' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+};
+
+const updateClass = async (req, res) => {
+    try {
+        const { classId } = req.params;
+        const updates = req.body;
+
+        const cls = await Classes.findById(classId);
+        if (!cls) {
+            return res.status(404).json({ message: 'Không tìm thấy lớp học' });
+        }
+
+        if (updates.teacherId) {
+            const teacher = await User.findOne({ _id: updates.teacherId, role: 'teacher' });
+            if (!teacher) {
+                return res.status(400).json({ message: 'Giảng viên không hợp lệ' });
+            }
+        }
+        Object.keys(updates).forEach(key => {
+            cls[key] = updates[key];
+        });
+
+        await cls.save();
+        res.status(200).json({
+            message: 'Cập nhật lớp học thành công',
+            class: cls
+        });
+    } catch (err) {
+        console.error(err);
+
+        if (err.code === 11000) {
+            return res.status(400).json({ message: 'Mã lớp đã tồn tại' });
+        }
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+};
+
+const deleteClass = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const cls = await Classes.findById(id);
+        if (!cls) {
+            return res.status(404).json({ message: 'Không tìm thấy lớp học' });
+        }
+
+        await Attendances.deleteMany({ classId: id });
+        await cls.deleteOne();
+
+        res.status(200).json({
+            message: 'Đã xóa lớp học và toàn bộ phiên điểm danh liên quan'
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+};
+
+
 module.exports = {
     resetPassword,
     getAllStudents, getStudentDetails, createStudent, updateStudent,
-    getAllTeachers, getTeacherDetails, createTeacher, updateTeacher,
+    getAllTeachers, getTeacherDetails, createTeacher, updateTeacher, deleteTeacher,
+    getAllClasses, getClassDetail, saveAttendance, deleteAttendance, createClass, updateClass, deleteClass,
+    addStudentsToClass, removeStudentFromClass,
 }
