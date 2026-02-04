@@ -1,5 +1,47 @@
 const mongoose = require('mongoose');
 
+const projectMemberSchema = new mongoose.Schema({
+    studentId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Users',
+        required: true
+    },
+
+    title: {
+        type: String,
+        trim: true,
+        default: null
+    },
+
+    fileUrl: {
+        type: String,
+        default: null
+    },
+
+    originalFileName: {
+        type: String,
+        default: null
+    },
+
+    score: {
+        type: Number,
+        min: 0,
+        max: 10,
+        default: null
+    },
+
+    comment: {
+        type: String,
+        trim: true,
+        default: null
+    },
+
+    submittedAt: {
+        type: Date,
+        default: null
+    }
+}, { _id: false });
+
 const ProjectSchema = new mongoose.Schema({
     subjectCode: {
         type: String,
@@ -17,11 +59,6 @@ const ProjectSchema = new mongoose.Schema({
         unique: true
     },
 
-    title: {
-        type: String,
-        required: true,
-    },
-
     semester: {
         type: String,
         match: [/^\d+$/],
@@ -35,10 +72,7 @@ const ProjectSchema = new mongoose.Schema({
         required: true
     },
 
-    students: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Users'
-    }],
+    members: [projectMemberSchema],
 }, {
     timestamps: true
 });
