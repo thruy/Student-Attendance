@@ -582,9 +582,6 @@ const deleteAttendance = async (req, res) => {
             return res.status(404).json({ message: 'Không tìm thấy phiên điểm danh' });
         }
 
-        if (attendance.teacherId.toString() !== teacherId) {
-            return res.status(403).json({ message: 'Không có quyền xóa phiên điểm danh này' });
-        }
         await attendance.deleteOne();
         res.status(200).json({
             message: 'Đã xóa phiên điểm danh thành công'

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import adminService from '../services/adminService';
 import { Table, Spinner, Alert, Button, Form, Row, Col, InputGroup, Pagination, FormLabel } from 'react-bootstrap';
 import { Trash3, Pen, InfoCircle, PersonPlus, Search, PersonFillLock } from 'react-bootstrap-icons'
+import { useNavigate } from 'react-router-dom';
 import './timetable.css';
 
 function ClassManagePage() {
@@ -21,7 +22,7 @@ function ClassManagePage() {
     const [showEdit, setShowEdit] = useState(false);
     const [showAdd, setShowAdd] = useState(false);
     const [selectedSemester, setSelectedSemester] = useState("20251");
-
+    const navigate = useNavigate();
     const semesters = ['20251', '20243', '20242', '20241', '20233', '20232', '20231'];
 
     useEffect(() => {
@@ -145,7 +146,7 @@ function ClassManagePage() {
                                 <td>{formatSchedule(cls.schedule)}</td>
                                 <td className='text-center'>
                                     <div className="action-icons">
-                                        <Button variant='link' className="icon-btn info" ><InfoCircle /></Button>
+                                        <Button variant='link' className="icon-btn info" onClick={() => navigate(`/admin/class/${cls._id}`)}><InfoCircle /></Button>
                                         <Button variant='link' className="icon-btn edit" ><Pen /></Button>
                                         <Button variant='link' className="icon-btn delete"><Trash3 /></Button>
                                     </div>

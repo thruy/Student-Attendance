@@ -25,6 +25,7 @@ import TeacherManagePage from './pages/TeacherManagePage';
 import ClassManagePage from './pages/ClassManagePage';
 import ScholarshipManagePage from './pages/ScholarshipManagePage';
 import ProjectManagePage from './pages/ProjectManagePage';
+import AdminAttendancePage from './pages/AdminAttendancePage';
 
 function App() {
   return (
@@ -68,6 +69,7 @@ function App() {
             <Route path='student' element={<StudentManagePage />} />
             <Route path='teacher' element={<TeacherManagePage />} />
             <Route path='class' element={<ClassManagePage />} />
+            <Route path="class/:classId" element={<AdminAttendancePage />} />
             <Route path='project' element={<ProjectManagePage />} />
             <Route path='scholarship' element={<ScholarshipManagePage />} />
             <Route path='profile' element={<UserProfilePage />} />

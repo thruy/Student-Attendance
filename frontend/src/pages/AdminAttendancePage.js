@@ -1,6 +1,6 @@
 import { Button, Card, Container, Form, Table, Row, Col, Spinner, Alert } from "react-bootstrap";
 import { useParams } from "react-router-dom";
-import teacherService from "../services/teacherService";
+import adminService from "../services/adminService";
 import { CheckCircle, XCircleFill } from 'react-bootstrap-icons';
 import AttendanceModal from "../components/AttendanceModal";
 import { useEffect, useState } from "react";
@@ -20,7 +20,8 @@ function AttendancePage() {
     const [error, setError] = useState('');
 
     const [selectedDate, setSelectedDate] = useState(null);
-    const [editMode, setEditMode] = useState(false);
+    const [chooseAttendanceDate, setChooseAttendanceDate] = useState(false);
+    const [deleteAttendanceDate, setDeleteAttendanceDate] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [newAttendanceRecord, setNewAttendanceRecord] = useState([]);
     const [type, setType] = useState("");
@@ -29,7 +30,8 @@ function AttendancePage() {
     useEffect(() => {
         const fetchAttendanceData = async () => {
             try {
-                const data = await teacherService.getAttendancePageData(classId);
+                const data = await adminService.getClassDetail(classId);
+                console.log("data: useEffect in AdminAttendancePage", data);
                 setClassInfo(data.class);
                 setTeacher(data.class.teacher);
                 setStudents(data.class.students);
@@ -87,8 +89,8 @@ function AttendancePage() {
 
     const handleSaveAttendance = async (records) => {
         try {
-            await teacherService.saveAttendance({ classId, date: selectedDate, type: type, records })
-            const data = await teacherService.getAttendancePageData(classId);
+            await adminService.saveAttendance({ classId, date: selectedDate, type: type, records });
+            const data = await adminService.getClassDetail(classId);
             setAttendances(data.attendances);
             // build map
             const map = {};
@@ -107,10 +109,46 @@ function AttendancePage() {
             setAttendanceDates(dates);
             setAttendanceMap(map);
             setShowModal(false);
+            setSelectedDate(null);
         } catch (err) {
             setError("Lỗi lưu điểm danh");
         }
     };
+
+    const deleteAttendance = async (date) => {
+        if (!classId || !date) return;
+        const confirmDelete = window.confirm(`Bạn có chắc chắn muốn xóa phiên điểm danh ngày ${date} không?`);
+        if (!confirmDelete) return;
+
+        try {
+            setLoading(true);
+            await adminService.deleteAttendance(classId, date);
+            const data = await adminService.getClassDetail(classId);
+            setAttendances(data.attendances);
+            // build map
+            const map = {};
+            const dates = [];
+            data.attendances.forEach(a => {
+                const dateKey = new Date(a.date).toISOString().split("T")[0];
+                dates.push(dateKey);
+
+                const recordMap = {};
+                a.records.forEach(r => {
+                    recordMap[r.studentId] = r.status;
+                });
+                map[dateKey] = { recordMap };
+            });
+            dates.sort((a, b) => new Date(a) - new Date(b));
+            setAttendanceDates(dates);
+            setAttendanceMap(map);
+            setSelectedDate(null);
+        } catch (err) {
+            setError(`Xóa phiên điểm danh thất bại: ${err.response?.data?.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     const InfoRow = ({ label, value }) => (
         <Row className="mb-3 align-items-center">
@@ -141,9 +179,10 @@ function AttendancePage() {
                     </Container>
 
                     <Container className="mt-4">
-                        <Button variant="dark" onClick={() => { setEditMode(true); setType("manual") }}>Điểm danh thủ công</Button>
+                        <Button variant="dark" onClick={() => { setChooseAttendanceDate(true); setDeleteAttendanceDate(false); setType("manual") }}>Điểm danh thủ công</Button>
                         <Button variant="dark" className="ms-2" disabled>Điểm danh tự động</Button>
-                        {editMode && (
+                        <Button variant="dark" className="ms-2" onClick={() => { setChooseAttendanceDate(false); setDeleteAttendanceDate(true) }}>Xóa phiên điểm danh</Button>
+                        {chooseAttendanceDate && (
                             <div className="d-flex align-items-center gap-3 mt-3">
                                 <Form.Select
                                     value={selectedDate || ''}
@@ -156,6 +195,21 @@ function AttendancePage() {
                                     ))}
                                 </Form.Select>
                                 <Button className="mt-3" onClick={() => handleOpenAttendanceModal(selectedDate)} disabled={!selectedDate}>Bắt đầu</Button>
+                            </div>
+                        )}
+                        {deleteAttendanceDate && (
+                            <div className="d-flex align-items-center gap-3 mt-3">
+                                <Form.Select
+                                    value={selectedDate || ''}
+                                    onChange={(e) => setSelectedDate(e.target.value)}
+                                    className="mt-3" style={{ width: '300px' }}
+                                >
+                                    <option value="">Xóa phiên ngày</option>
+                                    {attendanceDates.map(d => (
+                                        <option key={d} value={d}>{d}</option>
+                                    ))}
+                                </Form.Select>
+                                <Button className="mt-3" onClick={() => deleteAttendance(selectedDate)} disabled={!selectedDate}>Xóa</Button>
                             </div>
                         )}
                     </Container>

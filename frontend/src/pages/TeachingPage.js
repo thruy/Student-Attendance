@@ -51,30 +51,6 @@ function TeachingPage() {
         fetchTimetable();
     }, []);
 
-    if (loading) {
-        return (
-            <div>
-                <Spinner animation="border" role="status"></Spinner>
-                <span>Đang tải thông tin...</span>
-            </div>
-        )
-    }
-
-    if (timetable.length === 0) {
-        return <Alert variant="info">
-            <Alert.Heading>Bạn chưa có lịch giảng dạy!</Alert.Heading>
-        </Alert>;
-    }
-
-    if (error) {
-        return (
-            <Alert variant="secondary">
-                <Alert.Heading>Lỗi khi tải dữ liệu</Alert.Heading>
-                <p>{error}</p>
-            </Alert>
-        )
-    }
-
     return (
         <div>
             <h2 className="timetable-title">Thời khóa biểu của giảng viên {user.name}</h2>
@@ -88,7 +64,7 @@ function TeachingPage() {
                         <th>LOẠI LỚP</th>
                         <th>SỐ SINH VIÊN</th>
                         <th>LỊCH HỌC</th>
-                        <th>GHI CHÚ</th>
+                        <th>THAO TÁC</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -109,6 +85,25 @@ function TeachingPage() {
                 </tbody>
             </Table>
 
+            {loading && (
+                <div>
+                    <Spinner animation="border" role="status"></Spinner>
+                    <span>Đang tải thông tin...</span>
+                </div>
+            )}
+
+            {timetable.length === 0 && (
+                <Alert variant="info">
+                    <Alert.Heading>Không có lớp học nào!</Alert.Heading>
+                </Alert>
+            )}
+
+            {error && (
+                <Alert variant="danger">
+                    <Alert.Heading>Lỗi khi tải dữ liệu!</Alert.Heading>
+                    <p>{error}</p>
+                </Alert>
+            )}
         </div>
     );
 }
