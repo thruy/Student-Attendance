@@ -11,6 +11,7 @@ router.get('/students/:id', verifyToken, authorize('admin'), adminController.get
 router.put('/students/:id', verifyToken, authorize('admin'), editUserValidate, adminController.updateStudent);
 router.put('/students/:id/reset-password', verifyToken, authorize('admin'), adminController.resetPassword);
 router.post('/students', verifyToken, authorize('admin'), addUserValidate, adminController.createStudent);
+router.delete('/students/:id', verifyToken, authorize('admin'), adminController.deleteStudent)
 
 //teacher
 router.get('/teachers', verifyToken, authorize('admin'), adminController.getAllTeachers);
@@ -23,19 +24,24 @@ router.delete('/teachers/:id', verifyToken, authorize('admin'), adminController.
 //class
 router.get('/classes', verifyToken, authorize('admin'), adminController.getAllClasses);
 router.get('/classes/:id', verifyToken, authorize('admin'), adminController.getClassDetail);
-router.post('/classes/:id/attendance', verifyToken, authorize('admin'), adminController.saveAttendance);
-router.delete('/classes/:classId/attendance/:date', verifyToken, authorize('admin'), adminController.deleteAttendance);
 router.post('/classes', verifyToken, authorize('admin'), createClassValidate, adminController.createClass);
-router.post('/classes/:classId/students', verifyToken, authorize('admin'), adminController.addStudentsToClass);
-router.delete('/classes/:classId/students/:studentId', verifyToken, authorize('admin'), adminController.removeStudentFromClass);
 router.put('/classes/:classId', verifyToken, authorize('admin'), updateClassValidate, adminController.updateClass);
 router.delete('/classes/:id', verifyToken, authorize('admin'), adminController.deleteClass);
+router.post('/classes/:classId/students', verifyToken, authorize('admin'), adminController.addStudentsToClass);
+router.delete('/classes/:classId/students/:studentId', verifyToken, authorize('admin'), adminController.removeStudentFromClass);
+router.post('/classes/:id/attendance', verifyToken, authorize('admin'), adminController.saveAttendance);
+router.delete('/classes/:classId/attendance/:date', verifyToken, authorize('admin'), adminController.deleteAttendance);
 
 //project
 router.get('/projects', verifyToken, authorize('admin'), adminController.getAllProjects);
 router.get('/projects/:projectId', verifyToken, authorize('admin'), adminController.getProjectDetail);
 router.post('/projects', verifyToken, authorize('admin'), adminController.createProject);
-router.post('/:projectId/students', verifyToken, authorize('admin'), adminController.addStudentToProject);
-router.delete('/:projectId/students/:studentId', verifyToken, authorize('admin'), adminController.removeStudentFromProject);
+router.put('/projects/:projectId', verifyToken, authorize('admin'), adminController.updateProjectInfo);
+router.delete('/projects/:projectId', verifyToken, authorize('admin'), adminController.deleteProject);
+router.post('/projects/:projectId/students', verifyToken, authorize('admin'), adminController.addStudentToProject);
+router.delete('/projects/:projectId/students/:studentId', verifyToken, authorize('admin'), adminController.removeStudentFromProject);
+router.put('/projects/:projectId/students/:studentId/report', verifyToken, authorize('admin'), adminController.uploadReport);
+router.put('/projects/:projectId/students/:studentId/grade', verifyToken, authorize('admin'), adminController.gradeStudent);
+router.put('/projects/:projectId/students/:studentId/title', verifyToken, authorize('admin'), adminController.updateTitleForStudent);
 
 module.exports = router;

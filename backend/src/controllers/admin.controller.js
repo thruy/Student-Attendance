@@ -173,6 +173,43 @@ const resetPassword = async (req, res) => {
     }
 };
 
+const deleteStudent = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const { id } = req.params;
+
+        const student = await User.findOne({ _id: id, role: 'student' }, null, { session });
+        if (!student) {
+            await session.abortTransaction();
+            return res.status(404).json({ message: 'Không tìm thấy sinh viên' });
+        }
+
+        const classResult = await Classes.updateMany({ students: id }, { $pull: { students: id } }, { session });
+        const attendanceResult = await Attendances.updateMany(
+            { 'records.studentId': id },
+            { $pull: { records: { studentId: id } } },
+            { session }
+        );
+
+        const projectResult = await Projects.updateMany(
+            { 'members.studentId': id },
+            { $pull: { members: { studentId: id } } },
+            { session }
+        );
+
+        await student.deleteOne({ session });
+        await session.commitTransaction();
+        session.endSession();
+        res.status(200).json({ message: 'Đã xóa sinh viên và gỡ khỏi lớp học, đồ án, điểm danh' });
+    } catch (err) {
+        await session.abortTransaction();
+        session.endSession();
+        console.error(err);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+};
+
 //teacher
 const getAllTeachers = async (req, res) => {
     try {
@@ -324,29 +361,46 @@ const updateTeacher = async (req, res) => {
 }
 
 const deleteTeacher = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
         const { id } = req.params;
 
-        const teacher = await User.findOne({ _id: id, role: 'teacher' });
+        const teacher = await User.findOne({ _id: id, role: 'teacher' }, null, { session });
         if (!teacher) {
+            await session.abortTransaction();
             return res.status(404).json({ message: 'Không tìm thấy giảng viên' });
         }
 
-        const classes = await Classes.find({ teacherId: id });
-        const classIds = classes.map(cls => cls._id);
-        if (classIds.length > 0) {
-            await Attendances.deleteMany({ classId: { $in: classIds } });
-        }
-        await Classes.deleteMany({ teacherId: id });
-        await teacher.deleteOne();
+        const projectResult = await Projects.deleteMany({ teacherId: id }, { session });
 
-        res.status(200).json({ message: 'Đã xóa giảng viên và toàn bộ lớp học, điểm danh liên quan' });
+        const classes = await Classes.find({ teacherId: id }, '_id', { session });
+        const classIds = classes.map(c => c._id);
+        if (classIds.length > 0) {
+            await Attendances.deleteMany({ classId: { $in: classIds } }, { session });
+        }
+
+        const classResult = await Classes.deleteMany({ teacherId: id }, { session });
+        await teacher.deleteOne({ session });
+        await session.commitTransaction();
+        session.endSession();
+
+        res.status(200).json({
+            message: 'Đã xóa giảng viên và dữ liệu liên quan',
+            deleted: {
+                projects: projectResult.deletedCount,
+                classes: classResult.deletedCount
+            }
+        });
     } catch (err) {
+        await session.abortTransaction();
+        session.endSession();
         console.error(err);
         res.status(500).json({ message: 'Lỗi server' });
     }
 };
 
+//class
 const getAllClasses = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -656,6 +710,7 @@ const deleteClass = async (req, res) => {
     }
 };
 
+//project
 const createProject = async (req, res) => {
     try {
         const { subjectCode, name, projectCode, semester, teacherId } = req.body;
@@ -918,10 +973,12 @@ const deleteProject = async (req, res) => {
 
 module.exports = {
     resetPassword,
-    getAllStudents, getStudentDetails, createStudent, updateStudent,
+    getAllStudents, getStudentDetails, createStudent, updateStudent, deleteStudent,
     getAllTeachers, getTeacherDetails, createTeacher, updateTeacher, deleteTeacher,
+
     getAllClasses, getClassDetail, createClass, updateClass, deleteClass,
     addStudentsToClass, removeStudentFromClass, saveAttendance, deleteAttendance,
+
     getAllProjects, getProjectDetail, createProject, updateProjectInfo, deleteProject,
     addStudentToProject, removeStudentFromProject, uploadReport, gradeStudent, updateTitleForStudent
 }

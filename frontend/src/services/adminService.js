@@ -104,6 +104,8 @@ const deleteClass = async (classId) => {
     return res.data;
 };
 
+//projects
+
 
 const adminService = {
     getAllStudent, getStudentDetail, updateStudent, resetStudentPassword, createStudent,
