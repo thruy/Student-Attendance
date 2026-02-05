@@ -31,7 +31,6 @@ function AttendancePage() {
         const fetchAttendanceData = async () => {
             try {
                 const data = await adminService.getClassDetail(classId);
-                console.log("data: useEffect in AdminAttendancePage", data);
                 setClassInfo(data.class);
                 setTeacher(data.class.teacher);
                 setStudents(data.class.students);
@@ -81,9 +80,6 @@ function AttendancePage() {
             }));
         }
         setNewAttendanceRecord(records);
-        console.log("students: handleOpenAttendance ", students);
-        console.log("newAttendanceRecord: handleOpenAttendance", newAttendanceRecord);
-        console.log("records: handleOpenAttendance", records)
         setShowModal(true);
     }
 

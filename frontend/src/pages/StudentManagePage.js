@@ -29,7 +29,6 @@ function StudentManagePage() {
             setLoading(true);
             try {
                 const data = await adminService.getAllStudent({ page, limit, search });
-                console.log('student manage page', data.students);
                 setStudents(data.students);
                 setTotalPages(data.pagination.totalPages);
             } catch (err) {

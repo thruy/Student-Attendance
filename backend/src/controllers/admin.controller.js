@@ -465,6 +465,7 @@ const getClassDetail = async (req, res) => {
                 type: cls.type,
                 semester: cls.semester,
                 teacher: {
+                    id: cls.teacherId?._id,
                     name: cls.teacherId?.name,
                     email: cls.teacherId?.email,
                     code: cls.teacherId?.code

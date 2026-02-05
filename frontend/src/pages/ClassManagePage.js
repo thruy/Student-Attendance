@@ -2,8 +2,9 @@ import { useAuth } from '../context/AuthContext';
 import { useEffect, useState } from 'react';
 import adminService from '../services/adminService';
 import { Table, Spinner, Alert, Button, Form, Row, Col, InputGroup, Pagination, FormLabel } from 'react-bootstrap';
-import { Trash3, Pen, InfoCircle, PersonPlus, Search, PersonFillLock } from 'react-bootstrap-icons'
+import { Trash3, Pen, InfoCircle, PersonPlus, Search } from 'react-bootstrap-icons'
 import { useNavigate } from 'react-router-dom';
+import ClassEditModal from '../components/ClassEditModal';
 import './timetable.css';
 
 function ClassManagePage() {
@@ -22,8 +23,9 @@ function ClassManagePage() {
     const [showEdit, setShowEdit] = useState(false);
     const [showAdd, setShowAdd] = useState(false);
     const [selectedSemester, setSelectedSemester] = useState("20251");
+    const [teachers, setTeachers] = useState([]);
     const navigate = useNavigate();
-    const semesters = ['20251', '20243', '20242', '20241', '20233', '20232', '20231'];
+    const semesters = ['20252', '20251', '20243', '20242', '20241', '20233', '20232', '20231'];
 
     useEffect(() => {
         const fetchClasses = async () => {
@@ -57,6 +59,15 @@ function ClassManagePage() {
         };
     }, [inputValue]);
 
+    const fetchAllTeacher = async () => {
+        const data = await adminService.getAllTeacher({ page, limit, search });
+        setTeachers(data.teachers);
+    }
+
+    useEffect(() => {
+        fetchAllTeacher();
+    }, []);
+
     const dayOrder = {
         'Thứ Hai': 1,
         'Thứ Ba': 2,
@@ -81,7 +92,22 @@ function ClassManagePage() {
         return sorted.map(s => `${s.dayOfWeek}, ${s.startTime}–${s.endTime}, phòng ${s.room}`).join(' | ');
     };
 
+    const handleEditClass = async (cls) => {
+        const data = await adminService.getClassDetail(cls._id);
+        setEditingClass(data.class);
+        setShowEdit(true);
+    }
 
+    const handleUpdateClass = async (id, data) => {
+        try {
+            await adminService.updateClass(id, data);
+            setShowEdit(false);
+            const res = await adminService.getAllClasses({ page, limit, search });
+            setClasses(res.classes);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Lỗi khi cập nhật thông tin sinh viên')
+        }
+    }
 
     return (
         <div>
@@ -147,7 +173,7 @@ function ClassManagePage() {
                                 <td className='text-center'>
                                     <div className="action-icons">
                                         <Button variant='link' className="icon-btn info" onClick={() => navigate(`/admin/class/${cls._id}`)}><InfoCircle /></Button>
-                                        <Button variant='link' className="icon-btn edit" ><Pen /></Button>
+                                        <Button variant='link' className="icon-btn edit" onClick={() => handleEditClass(cls)}><Pen /></Button>
                                         <Button variant='link' className="icon-btn delete"><Trash3 /></Button>
                                     </div>
                                 </td>
@@ -188,6 +214,8 @@ function ClassManagePage() {
                     <Pagination.Next disabled={page === totalPages} onClick={() => setPage(page + 1)} />
                 </Pagination>
             </div>
+
+            <ClassEditModal show={showEdit} onHide={() => setShowEdit(false)} classInfo={editingClass} onSave={handleUpdateClass} teachers={teachers} />
         </div>
     );
 }
