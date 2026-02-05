@@ -47,5 +47,8 @@ const updateTitleForStudent = async (projectId, studentId, title) => {
     return response.data;
 };
 
-const teacherService = { getTeacherTimetable, getAttendancePageData, saveAttendance };
+const teacherService = {
+    getTeacherTimetable, getAttendancePageData, saveAttendance,
+    getAllProjects, getProjectDetail, uploadReport, gradeStudent, updateTitleForStudent
+};
 export default teacherService;
