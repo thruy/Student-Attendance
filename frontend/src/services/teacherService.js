@@ -16,5 +16,36 @@ const saveAttendance = async ({ classId, date, type, records }) => {
     return response.data;
 }
 
+const getAllProjects = async ({ page, limit, search, semester }) => {
+    const res = await axios.get(`${API_URL}/projects`, { params: { page, limit, search, semester }, withCredentials: true });
+    return res.data;
+};
+
+const getProjectDetail = async (projectId) => {
+    const res = await axios.get(`${API_URL}/projects/${projectId}`, { withCredentials: true });
+    return res.data;
+};
+
+const uploadReport = async (projectId, studentId, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await axios.put(
+        `${API_URL}/projects/${projectId}/students/${studentId}/report`,
+        formData,
+        { withCredentials: true, headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+    return response.data;
+};
+
+const gradeStudent = async (projectId, studentId, data) => {
+    const response = await axios.put(`${API_URL}/projects/${projectId}/students/${studentId}/grade`, data, { withCredentials: true });
+    return response.data;
+};
+
+const updateTitleForStudent = async (projectId, studentId, title) => {
+    const response = await axios.put(`${API_URL}/projects/${projectId}/students/${studentId}/title`, { title }, { withCredentials: true });
+    return response.data;
+};
+
 const teacherService = { getTeacherTimetable, getAttendancePageData, saveAttendance };
 export default teacherService;

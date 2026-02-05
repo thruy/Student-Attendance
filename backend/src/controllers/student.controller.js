@@ -1,6 +1,6 @@
 const Classes = require('../models/Classes');
 const Users = require('../models/Users');
-const AttendanceRecords = require('../models/AttendanceRecords');
+const Projects = require('../models/Project');
 const mongoose = require('mongoose');
 
 const getStudentTimetable = async (req, res) => {
@@ -70,4 +70,85 @@ const getInfoOfClasses = async (req, res) => {
     }
 }
 
-module.exports = { getStudentTimetable, getInfoOfClasses };
+const getStudentProjects = async (req, res) => {
+    try {
+        const studentId = req.user.userId;
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const search = req.query.search || '';
+        const semester = req.query.semester;
+        if (semester) {
+            filter.semester = semester;
+        }
+        const filter = { 'members.studentId': studentId };
+
+        if (search) {
+            filter.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { projectCode: { $regex: search, $options: 'i' } },
+                { subjectCode: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        const total = await Projects.countDocuments(filter);
+        const projects = await Projects.find(filter)
+            .select('subjectCode name projectCode teacherId members')
+            .populate('teacherId', 'name')
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        // format data
+        const formatted = projects.map(p => {
+            const myMember = p.members.find(
+                m => m.studentId.toString() === studentId
+            );
+
+            return {
+                _id: p._id,
+                subjectCode: p.subjectCode,
+                name: p.name,
+                projectCode: p.projectCode,
+                teacher: p.teacherId,
+                title: myMember?.title || null,
+                score: myMember?.score ?? null,
+                comment: myMember?.comment ?? null
+            };
+        });
+
+        res.status(200).json({
+            projects: formatted,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+const uploadReport = async (req, res) => {
+    try {
+        const { projectId } = req.params;
+        const studentId = req.user.userId;
+        const fileUrl = req.file.path;
+
+        const project = await Projects.findOneAndUpdate(
+            { _id: projectId, 'members.studentId': studentId },
+            { $set: { 'members.$.fileUrl': fileUrl } },
+            { new: true }
+        );
+        if (!project) {
+            return res.status(404).json({ message: 'Không tìm thấy project hoặc sinh viên' });
+        }
+        res.json({ message: 'Upload thành công', fileUrl });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+module.exports = { getStudentTimetable, getInfoOfClasses, getStudentProjects, uploadReport };

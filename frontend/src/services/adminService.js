@@ -131,7 +131,7 @@ const getAllProjects = async ({ page, limit, search, semester }) => {
 };
 
 const getProjectDetail = async (projectId) => {
-    const res = await axios.get(`${API_URL}/projetcs/${projectId}`, { withCredentials: true });
+    const res = await axios.get(`${API_URL}/projects/${projectId}`, { withCredentials: true });
     return res.data;
 };
 

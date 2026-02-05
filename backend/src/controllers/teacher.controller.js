@@ -1,6 +1,7 @@
 const Classes = require('../models/Classes');
 const Users = require('../models/Users');
 const Attendances = require('../models/Attendances');
+const Projects = require('../models/Project');
 const mongoose = require('mongoose');
 const { text } = require('express');
 
@@ -110,4 +111,134 @@ const saveAttendance = async (req, res) => {
     }
 };
 
-module.exports = { getTeacherTimetable, getAttendancePageData, saveAttendance };
+const getAllProjects = async (req, res) => {
+    try {
+        const teacherId = req.user.userId;
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const search = req.query.search || '';
+        const filter = { teacherId };
+
+        if (search) {
+            filter.$or = [
+                { subjectCode: { $regex: search, $options: 'i' } },
+                { name: { $regex: search, $options: 'i' } },
+                { projectCode: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        const total = await Projects.countDocuments(filter);
+        const projects = await Projects.find(filter)
+            .select('subjectCode name projectCode members')
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const formatted = projects.map(p => ({
+            _id: p._id,
+            subjectCode: p.subjectCode,
+            name: p.name,
+            projectCode: p.projectCode,
+            studentCount: p.members.length
+        }));
+
+        res.status(200).json({
+            projects: formatted,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+};
+
+const getProjectDetail = async (req, res) => {
+    try {
+        const { projectId } = req.params;
+
+        const project = await Projects.findById(projectId)
+            .populate('teacherId', 'name email code')
+            .populate('members.studentId', 'name email code');
+
+        if (!project) {
+            return res.status(404).json({ message: 'Không tìm thấy project' });
+        }
+        res.json({ project });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+const uploadReport = async (req, res) => {
+    try {
+        const { projectId } = req.params;
+        const studentId = req.user.userId;
+        const fileUrl = req.file.path;
+
+        const project = await Projects.findOneAndUpdate(
+            { _id: projectId, 'members.studentId': studentId },
+            { $set: { 'members.$.fileUrl': fileUrl } },
+            { new: true }
+        );
+        if (!project) {
+            return res.status(404).json({ message: 'Không tìm thấy project hoặc sinh viên' });
+        }
+        res.json({ message: 'Upload thành công', fileUrl });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+const gradeStudent = async (req, res) => {
+    try {
+        const { projectId, studentId } = req.params;
+        const { score, comment } = req.body;
+
+        const project = await Projects.findOneAndUpdate(
+            { _id: projectId, 'members.studentId': studentId },
+            {
+                $set: {
+                    'members.$.score': score,
+                    'members.$.comment': comment
+                }
+            },
+            { new: true }
+        );
+
+        if (!project) {
+            return res.status(404).json({ message: 'Không tìm thấy sinh viên trong project' });
+        }
+
+        res.json({ message: 'Chấm điểm thành công' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+const updateTitleForStudent = async (req, res) => {
+    try {
+        const { projectId, studentId } = req.params;
+        const { title } = req.body;
+        const project = await Projects.findOneAndUpdate(
+            { _id: projectId, 'members.studentId': studentId },
+            { $set: { 'members.$.title': title } },
+            { new: true }
+        );
+        if (!project) {
+            return res.status(404).json({ message: 'Không tìm thấy lớp đồ án' });
+        }
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+}
+
+module.exports = {
+    getTeacherTimetable, getAttendancePageData, saveAttendance,
+    getAllProjects, getProjectDetail, uploadReport, gradeStudent, updateTitleForStudent
+};

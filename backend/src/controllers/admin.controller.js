@@ -942,9 +942,7 @@ const updateTitleForStudent = async (req, res) => {
         const { title } = req.body;
         const project = await Projects.findOneAndUpdate(
             { _id: projectId, 'members.studentId': studentId },
-            {
-                $set: { 'members.$.title': title }
-            },
+            { $set: { 'members.$.title': title } },
             { new: true }
         );
         if (!project) {
