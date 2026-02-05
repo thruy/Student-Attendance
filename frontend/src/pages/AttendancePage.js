@@ -11,6 +11,7 @@ function AttendancePage() {
     const [students, setStudents] = useState([]);
     const [attendances, setAttendances] = useState([]);
     const [scheduleDates, setScheduleDates] = useState(null);
+    const [teacher, setTeacher] = useState({});
 
     const [attendanceDates, setAttendanceDates] = useState([]);
     const [attendanceMap, setAttendanceMap] = useState({});
@@ -31,6 +32,7 @@ function AttendancePage() {
                 const data = await teacherService.getAttendancePageData(classId);
                 console.log("data: useEffect in AttendancePage", data);
                 setClassInfo(data.class);
+                setTeacher(data.class.teacher);
                 setStudents(data.class.students);
                 setAttendances(data.attendances);
                 setScheduleDates(data.class.date);
@@ -122,24 +124,6 @@ function AttendancePage() {
         </Row>
     );
 
-    if (loading) {
-        return (
-            <div>
-                <Spinner animation="border" role="status"></Spinner>
-                <span>Đang tải thông tin...</span>
-            </div>
-        )
-    }
-
-    if (error) {
-        return (
-            <Alert variant="danger">
-                <Alert.Heading>Lỗi khi tải dữ liệu</Alert.Heading>
-                <p>{error}</p>
-            </Alert>
-        )
-    }
-
     return (
         <>
             <Card className="container mt-5" variant='dark' style={{ width: "100vw", marginBottom: "3rem" }}>
@@ -151,6 +135,9 @@ function AttendancePage() {
                         <InfoRow label="Loại lớp" value={classInfo?.type} />
                         <InfoRow label="Học kỳ" value={classInfo?.semester} />
                         <InfoRow label="Lịch học" value={formatSchedule(classInfo?.schedule)} />
+                        <InfoRow label="Giảng viên" value={teacher?.name} />
+                        <InfoRow label="Email giảng viên" value={teacher?.email} />
+                        <InfoRow label="Mã giảng viên" value={teacher?.code} />
                         <InfoRow label="Số lượng sinh viên" value={students?.length} />
                     </Container>
 
@@ -202,6 +189,20 @@ function AttendancePage() {
                             ))}
                         </tbody>
                     </Table>
+
+                    {loading && (
+                        <div>
+                            <Spinner animation="border" role="status"></Spinner>
+                            <span>Đang tải thông tin...</span>
+                        </div>
+                    )}
+
+                    {error && (
+                        <Alert variant="danger">
+                            <Alert.Heading>Lỗi khi tải dữ liệu!</Alert.Heading>
+                            <p>{error}</p>
+                        </Alert>
+                    )}
                 </Card.Body>
             </Card>
 

@@ -40,7 +40,7 @@ router.put('/projects/:projectId', verifyToken, authorize('admin'), adminControl
 router.delete('/projects/:projectId', verifyToken, authorize('admin'), adminController.deleteProject);
 router.post('/projects/:projectId/students', verifyToken, authorize('admin'), adminController.addStudentToProject);
 router.delete('/projects/:projectId/students/:studentId', verifyToken, authorize('admin'), adminController.removeStudentFromProject);
-router.put('/projects/:projectId/students/:studentId/report', verifyToken, authorize('admin'), upload.single('file'), adminController.uploadReport);
+router.put('/projects/:projectId/students/:studentId/report', verifyToken, authorize('admin'), adminController.uploadReport);
 router.put('/projects/:projectId/students/:studentId/grade', verifyToken, authorize('admin'), adminController.gradeStudent);
 router.put('/projects/:projectId/students/:studentId/title', verifyToken, authorize('admin'), adminController.updateTitleForStudent);
 
