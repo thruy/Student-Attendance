@@ -905,7 +905,7 @@ const uploadReport = async (req, res) => {
             return res.status(404).json({ message: 'Không tìm thấy project hoặc sinh viên' });
         }
         res.json({ message: 'Upload thành công', fileUrl });
-    } catch {
+    } catch (err) {
         res.status(500).json({ message: err.message });
     }
 };
@@ -931,7 +931,7 @@ const gradeStudent = async (req, res) => {
         }
 
         res.json({ message: 'Chấm điểm thành công' });
-    } catch {
+    } catch (err) {
         res.status(500).json({ message: err.message });
     }
 };
@@ -950,7 +950,7 @@ const updateTitleForStudent = async (req, res) => {
         if (!project) {
             return res.status(404).json({ message: 'Không tìm thấy lớp đồ án' });
         }
-    } catch {
+    } catch (err) {
         res.status(500).json({ message: err.message });
     }
 }
@@ -969,7 +969,6 @@ const deleteProject = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
-
 
 module.exports = {
     resetPassword,

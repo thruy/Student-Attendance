@@ -27,6 +27,11 @@ const resetStudentPassword = async (studentId) => {
     return res.data;
 };
 
+const deleteStudent = async (studentId) => {
+    const res = await axios.delete(`${API_URL}/students/${studentId}`, { withCredentials: true });
+    return res.data;
+};
+
 //teacher 
 const getAllTeacher = async ({ page, limit, search }) => {
     const res = await axios.get(`${API_URL}/teachers`, { params: { page, limit, search }, withCredentials: true });
@@ -105,12 +110,70 @@ const deleteClass = async (classId) => {
 };
 
 //projects
+const createProject = async (data) => {
+    const response = await axios.post(`${API_URL}/projects`, data, { withCredentials: true });
+    return response.data;
+};
 
+const addStudentToProject = async (projectId, studentId) => {
+    const response = await axios.post(`${API_URL}/projects/${projectId}/students`, { studentId }, { withCredentials: true });
+    return response.data;
+};
+
+const removeStudentFromProject = async (projectId, studentId) => {
+    const response = await axios.delete(`${API_URL}/projects/${projectId}/students/${studentId}`, { withCredentials: true });
+    return response.data;
+};
+
+const getAllProjects = async ({ page, limit, search, semester }) => {
+    const res = await axios.get(`${API_URL}/projects`, { params: { page, limit, search, semester }, withCredentials: true });
+    return res.data;
+};
+
+const getProjectDetail = async (projectId) => {
+    const res = await axios.get(`${API_URL}/projetcs/${projectId}`, { withCredentials: true });
+    return res.data;
+};
+
+const updateProjectInfo = async (projectId, payload) => {
+    const res = await axios.put(`${API_URL}/projects/${projectId}`, payload, { withCredentials: true });
+    return res.data;
+};
+
+const uploadReport = async (projectId, studentId, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await axios.put(
+        `${API_URL}/projects/${projectId}/students/${studentId}/report`,
+        formData,
+        { withCredentials: true, headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+    return response.data;
+};
+
+const gradeStudent = async (projectId, studentId, data) => {
+    const response = await axios.put(`${API_URL}/projects/${projectId}/students/${studentId}/grade`, data, { withCredentials: true });
+    return response.data;
+};
+
+const updateTitleForStudent = async (projectId, studentId, title) => {
+    const response = await axios.put(`${API_URL}/projects/${projectId}/students/${studentId}/title`, { title }, { withCredentials: true });
+    return response.data;
+};
+
+const deleteProject = async (projectId) => {
+    const response = await axios.delete(`${API_URL}/projects/${projectId}`, { withCredentials: true });
+    return response.data;
+};
 
 const adminService = {
-    getAllStudent, getStudentDetail, updateStudent, resetStudentPassword, createStudent,
+    getAllStudent, getStudentDetail, updateStudent, resetStudentPassword, createStudent, deleteStudent,
     getAllTeacher, getTeacherDetail, updateTeacher, resetTeacherPassword, createTeacher, deleteTeacher,
-    getAllClasses, getClassDetail, updateClass, createClass, deleteClass,
+
+    getAllClasses, getClassDetail, createClass, updateClass, deleteClass,
     addStudentsToClass, removeStudentFromClass, saveAttendance, deleteAttendance,
+
+    getAllProjects, getProjectDetail, createProject, updateProjectInfo, deleteProject,
+    addStudentToProject, removeStudentFromProject, uploadReport, gradeStudent, updateTitleForStudent
 };
 export default adminService;
