@@ -1,6 +1,6 @@
 const { body, param, validationResult } = require('express-validator');
+const mongoose = require('mongoose');
 const SIS_EMAIL_REGEX = /^[a-zA-Z]+\.[a-zA-Z]+\d{6}@sis\.hust\.edu\.vn$/;
-
 const DAYS = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
 
 const validate = (req, res, next) => {

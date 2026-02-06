@@ -2,9 +2,10 @@ import { useAuth } from '../context/AuthContext';
 import { useEffect, useState } from 'react';
 import adminService from '../services/adminService';
 import { Table, Spinner, Alert, Button, Form, Row, Col, InputGroup, Pagination, FormLabel } from 'react-bootstrap';
-import { Trash3, Pen, InfoCircle, PersonPlus, Search } from 'react-bootstrap-icons'
+import { Trash3, Pen, InfoCircle, JournalPlus, Search, PersonFillGear } from 'react-bootstrap-icons'
 import { useNavigate } from 'react-router-dom';
 import ClassEditModal from '../components/ClassEditModal';
+import ClassAddModal from '../components/ClassAddModal';
 import './timetable.css';
 
 function ClassManagePage() {
@@ -92,6 +93,17 @@ function ClassManagePage() {
         return sorted.map(s => `${s.dayOfWeek}, ${s.startTime}–${s.endTime}, phòng ${s.room}`).join(' | ');
     };
 
+    const handleCreateClass = async (form) => {
+        try {
+            const response = await adminService.createClass(form);
+            setShowAdd(false);
+            const res = await adminService.getAllClasses({ page, limit, search });
+            setClasses(res.classes);
+        } catch (err) {
+            alert(err.response?.data?.message || "Lỗi tạo lớp");
+        }
+    };
+
     const handleEditClass = async (cls) => {
         const data = await adminService.getClassDetail(cls._id);
         setEditingClass(data.class);
@@ -138,8 +150,8 @@ function ClassManagePage() {
                         </Col>
                         {/* Add button */}
                         <Col md={4} className="text-end">
-                            <Button className="add-student-btn" >
-                                <PersonPlus size={18} className="me-2" />Thêm lớp học
+                            <Button className="add-student-btn" onClick={() => setShowAdd(true)}>
+                                <JournalPlus size={18} className="me-2" />Thêm lớp học
                             </Button>
                         </Col>
                     </Row>
@@ -174,6 +186,7 @@ function ClassManagePage() {
                                     <div className="action-icons">
                                         <Button variant='link' className="icon-btn info" onClick={() => navigate(`/admin/class/${cls._id}`)}><InfoCircle /></Button>
                                         <Button variant='link' className="icon-btn edit" onClick={() => handleEditClass(cls)}><Pen /></Button>
+                                        <Button variant='link' className='icon-btn manage'><PersonFillGear /></Button>
                                         <Button variant='link' className="icon-btn delete"><Trash3 /></Button>
                                     </div>
                                 </td>
@@ -216,6 +229,7 @@ function ClassManagePage() {
             </div>
 
             <ClassEditModal show={showEdit} onHide={() => setShowEdit(false)} classInfo={editingClass} onSave={handleUpdateClass} teachers={teachers} />
+            <ClassAddModal show={showAdd} onHide={() => setShowAdd(false)} onSave={handleCreateClass} teachers={teachers} />
         </div>
     );
 }
