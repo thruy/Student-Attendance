@@ -27,6 +27,7 @@ router.get('/classes/:classId', verifyToken, authorize('admin'), adminController
 router.post('/classes', verifyToken, authorize('admin'), createClassValidate, adminController.createClass);
 router.put('/classes/:classId', verifyToken, authorize('admin'), updateClassValidate, adminController.updateClass);
 router.delete('/classes/:classId', verifyToken, authorize('admin'), adminController.deleteClass);
+router.get('/classes/students/all', verifyToken, authorize('admin'), adminController.getStudentsForClassModal);
 router.post('/classes/:classId/students', verifyToken, authorize('admin'), adminController.addStudentsToClass);
 router.delete('/classes/:classId/students/:studentId', verifyToken, authorize('admin'), adminController.removeStudentFromClass);
 router.post('/classes/:classId/attendance', verifyToken, authorize('admin'), adminController.saveAttendance);

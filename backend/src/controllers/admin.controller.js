@@ -593,6 +593,30 @@ const deleteAttendance = async (req, res) => {
     }
 };
 
+const getStudentsForClassModal = async (req, res) => {
+    console.log('QUERY:', req.query);
+    try {
+        const { search = '' } = req.query;
+
+        const query = { role: 'student' };
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { code: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        const students = await User.find(query)
+            .select('_id name code email')
+            .sort({ code: 1 });
+
+        res.status(201).json({ students });
+    } catch (err) {
+        console.error('getStudentsForClassModal ERROR:', err);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+};
+
 const addStudentsToClass = async (req, res) => {
     try {
         const { classId } = req.params;
@@ -972,7 +996,7 @@ module.exports = {
     getAllTeachers, getTeacherDetails, createTeacher, updateTeacher, deleteTeacher,
 
     getAllClasses, getClassDetail, createClass, updateClass, deleteClass,
-    addStudentsToClass, removeStudentFromClass, saveAttendance, deleteAttendance,
+    getStudentsForClassModal, addStudentsToClass, removeStudentFromClass, saveAttendance, deleteAttendance,
 
     getAllProjects, getProjectDetail, createProject, updateProjectInfo, deleteProject,
     addStudentToProject, removeStudentFromProject, uploadReport, gradeStudent, updateTitleForStudent

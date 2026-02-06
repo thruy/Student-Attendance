@@ -6,25 +6,25 @@ import { Trash3, Pen, InfoCircle, JournalPlus, Search, PersonFillGear } from 're
 import { useNavigate } from 'react-router-dom';
 import ClassEditModal from '../components/ClassEditModal';
 import ClassAddModal from '../components/ClassAddModal';
+import ClassStudentModal from '../components/ClassStudentModal';
 import './timetable.css';
 
 function ClassManagePage() {
-    const { user } = useAuth();
     const [classes, setClasses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [limit] = useState(8);
+    const [limit1] = useState(1000);
     const [totalPages, setTotalPages] = useState(1);
     const [inputValue, setInputValue] = useState('');
-    const [selectedClass, setSelectedClass] = useState('');
-    const [showDetails, setShowDetails] = useState(false);
-    const [editingClass, setEditingClass] = useState(null);
+    const [chosenClass, setChosenClass] = useState(null);
     const [showEdit, setShowEdit] = useState(false);
     const [showAdd, setShowAdd] = useState(false);
     const [selectedSemester, setSelectedSemester] = useState("20251");
     const [teachers, setTeachers] = useState([]);
+    const [showAddStudents, setShowAddStudents] = useState(false);
     const navigate = useNavigate();
     const semesters = ['20252', '20251', '20243', '20242', '20241', '20233', '20232', '20231'];
 
@@ -61,7 +61,7 @@ function ClassManagePage() {
     }, [inputValue]);
 
     const fetchAllTeacher = async () => {
-        const data = await adminService.getAllTeacher({ page, limit, search });
+        const data = await adminService.getAllTeacher({ page, limit1, search });
         setTeachers(data.teachers);
     }
 
@@ -106,8 +106,14 @@ function ClassManagePage() {
 
     const handleEditClass = async (cls) => {
         const data = await adminService.getClassDetail(cls._id);
-        setEditingClass(data.class);
+        setChosenClass(data.class);
         setShowEdit(true);
+    }
+
+    const handleAddStudentToClass = async (cls) => {
+        const data = await adminService.getClassDetail(cls._id);
+        setChosenClass(data.class);
+        setShowAddStudents(true);
     }
 
     const handleUpdateClass = async (id, data) => {
@@ -186,7 +192,7 @@ function ClassManagePage() {
                                     <div className="action-icons">
                                         <Button variant='link' className="icon-btn info" onClick={() => navigate(`/admin/class/${cls._id}`)}><InfoCircle /></Button>
                                         <Button variant='link' className="icon-btn edit" onClick={() => handleEditClass(cls)}><Pen /></Button>
-                                        <Button variant='link' className='icon-btn manage'><PersonFillGear /></Button>
+                                        <Button variant='link' className='icon-btn manage' onClick={() => handleAddStudentToClass(cls)}><PersonFillGear /></Button>
                                         <Button variant='link' className="icon-btn delete"><Trash3 /></Button>
                                     </div>
                                 </td>
@@ -228,8 +234,9 @@ function ClassManagePage() {
                 </Pagination>
             </div>
 
-            <ClassEditModal show={showEdit} onHide={() => setShowEdit(false)} classInfo={editingClass} onSave={handleUpdateClass} teachers={teachers} />
+            <ClassEditModal show={showEdit} onHide={() => setShowEdit(false)} classInfo={chosenClass} onSave={handleUpdateClass} teachers={teachers} />
             <ClassAddModal show={showAdd} onHide={() => setShowAdd(false)} onSave={handleCreateClass} teachers={teachers} />
+            <ClassStudentModal show={showAddStudents} onHide={() => setShowAddStudents(false)} classInfo={chosenClass} />
         </div>
     );
 }

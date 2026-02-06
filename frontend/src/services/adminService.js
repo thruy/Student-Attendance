@@ -89,6 +89,11 @@ const deleteAttendance = async (classId, date) => {
     return res.data;
 };
 
+const getStudentsForClassModal = async (search = '') => {
+    const res = await axios.get(`${API_URL}/classes/students/all`, { params: { search }, withCredentials: true });
+    return res.data;
+};
+
 const addStudentsToClass = async (classId, studentIds) => {
     const res = await axios.post(`${API_URL}/classes/${classId}/students`, { studentIds }, { withCredentials: true });
     return res.data;
@@ -171,7 +176,7 @@ const adminService = {
     getAllTeacher, getTeacherDetail, updateTeacher, resetTeacherPassword, createTeacher, deleteTeacher,
 
     getAllClasses, getClassDetail, createClass, updateClass, deleteClass,
-    addStudentsToClass, removeStudentFromClass, saveAttendance, deleteAttendance,
+    getStudentsForClassModal, addStudentsToClass, removeStudentFromClass, saveAttendance, deleteAttendance,
 
     getAllProjects, getProjectDetail, createProject, updateProjectInfo, deleteProject,
     addStudentToProject, removeStudentFromProject, uploadReport, gradeStudent, updateTitleForStudent
