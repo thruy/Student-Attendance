@@ -79,9 +79,6 @@ function AttendancePage() {
             }));
         }
         setNewAttendanceRecord(records);
-        console.log("students: handleOpenAttendance ", students);
-        console.log("newAttendanceRecord: handleOpenAttendance", newAttendanceRecord);
-        console.log("records: handleOpenAttendance", records)
         setShowModal(true);
     }
 

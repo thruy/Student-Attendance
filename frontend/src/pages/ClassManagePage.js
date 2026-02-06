@@ -127,6 +127,23 @@ function ClassManagePage() {
         }
     }
 
+    const handleDeleteClass = async (classId) => {
+        const confirmDelete = window.confirm('Bạn có chắc chắn muốn xóa lớp học này không?');
+        if (!confirmDelete) return;
+        try {
+            setLoading(true);
+            await adminService.deleteClass(classId);
+            const res = await adminService.getAllClasses({ page, limit, search });
+            setClasses(res.classes);
+            alert('Xóa lớp học thành công');
+        } catch (err) {
+            console.error(err);
+            alert(err.response?.data?.message || 'Xóa lớp học thất bại');
+        } finally {
+            setLoading(false);
+        }
+    }
+
     return (
         <div>
             <h1 className="timetable-title">Quản lý lớp học</h1>
@@ -193,7 +210,7 @@ function ClassManagePage() {
                                         <Button variant='link' className="icon-btn info" onClick={() => navigate(`/admin/class/${cls._id}`)}><InfoCircle /></Button>
                                         <Button variant='link' className="icon-btn edit" onClick={() => handleEditClass(cls)}><Pen /></Button>
                                         <Button variant='link' className='icon-btn manage' onClick={() => handleAddStudentToClass(cls)}><PersonFillGear /></Button>
-                                        <Button variant='link' className="icon-btn delete"><Trash3 /></Button>
+                                        <Button variant='link' className="icon-btn delete" onClick={() => handleDeleteClass(cls._id)}><Trash3 /></Button>
                                     </div>
                                 </td>
                             </tr>

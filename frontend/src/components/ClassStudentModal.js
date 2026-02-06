@@ -13,7 +13,6 @@ function ClassStudentModal({ show, onHide, classInfo }) {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        console.log("classInfo: ", classInfo);
         if (show && classInfo) {
             setClassStudents(classInfo.students || []);
         }

@@ -5,13 +5,11 @@ import { CheckCircle, XCircleFill } from "react-bootstrap-icons";
 function AttendanceModal({ show, onClose, students, date, initialRecords, onSave }) {
     const [records, setRecords] = useState({});
     useEffect(() => {
-        console.log("initialRecord: useEffect in AttendanceModal", initialRecords);
         const init = {};
         initialRecords?.forEach(r => {
             init[r.studentId] = r.status;
         });
         setRecords(init);
-        console.log("records: state in AttendanceModal(useEffect)", records);
     }, [students, initialRecords])
 
     const toggleStatus = (studentId) => {
