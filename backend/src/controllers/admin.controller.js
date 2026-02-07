@@ -173,6 +173,28 @@ const resetPassword = async (req, res) => {
     }
 };
 
+const getStudentsForModal = async (req, res) => {
+    try {
+        const { search = '' } = req.query;
+
+        const query = { role: 'student' };
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { code: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        const students = await User.find(query)
+            .select('_id name code email')
+            .sort({ code: 1 });
+
+        res.status(201).json({ students });
+    } catch (err) {
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+};
+
 const deleteStudent = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -359,6 +381,28 @@ const updateTeacher = async (req, res) => {
         res.status(500).json({ message: 'Lỗi server' });
     }
 }
+
+const getTeachersForModal = async (req, res) => {
+    try {
+        const { search = '' } = req.query;
+
+        const query = { role: 'teacher' };
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { code: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        const teachers = await User.find(query)
+            .select('_id name code email')
+            .sort({ code: 1 });
+
+        res.status(201).json({ teachers });
+    } catch (err) {
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+};
 
 const deleteTeacher = async (req, res) => {
     const session = await mongoose.startSession();
@@ -589,30 +633,6 @@ const deleteAttendance = async (req, res) => {
         });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: 'Lỗi server' });
-    }
-};
-
-const getStudentsForClassModal = async (req, res) => {
-    console.log('QUERY:', req.query);
-    try {
-        const { search = '' } = req.query;
-
-        const query = { role: 'student' };
-        if (search) {
-            query.$or = [
-                { name: { $regex: search, $options: 'i' } },
-                { code: { $regex: search, $options: 'i' } }
-            ];
-        }
-
-        const students = await User.find(query)
-            .select('_id name code email')
-            .sort({ code: 1 });
-
-        res.status(201).json({ students });
-    } catch (err) {
-        console.error('getStudentsForClassModal ERROR:', err);
         res.status(500).json({ message: 'Lỗi server' });
     }
 };
@@ -884,8 +904,8 @@ const getProjectDetail = async (req, res) => {
         const { projectId } = req.params;
 
         const project = await Projects.findById(projectId)
-            .populate('teacherId', 'name email code')
-            .populate('members.studentId', 'name email code');
+            .populate('teacherId', ' _id name email code')
+            .populate('members.studentId', ' _id name email code');
 
         if (!project) {
             return res.status(404).json({ message: 'Không tìm thấy project' });
@@ -992,11 +1012,11 @@ const deleteProject = async (req, res) => {
 
 module.exports = {
     resetPassword,
-    getAllStudents, getStudentDetails, createStudent, updateStudent, deleteStudent,
-    getAllTeachers, getTeacherDetails, createTeacher, updateTeacher, deleteTeacher,
+    getAllStudents, getStudentDetails, createStudent, updateStudent, getStudentsForModal, deleteStudent,
+    getAllTeachers, getTeacherDetails, createTeacher, updateTeacher, getTeachersForModal, deleteTeacher,
 
     getAllClasses, getClassDetail, createClass, updateClass, deleteClass,
-    getStudentsForClassModal, addStudentsToClass, removeStudentFromClass, saveAttendance, deleteAttendance,
+    addStudentsToClass, removeStudentFromClass, saveAttendance, deleteAttendance,
 
     getAllProjects, getProjectDetail, createProject, updateProjectInfo, deleteProject,
     addStudentToProject, removeStudentFromProject, uploadReport, gradeStudent, updateTitleForStudent

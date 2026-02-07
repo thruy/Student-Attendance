@@ -53,7 +53,7 @@ const ProjectSchema = new mongoose.Schema({
         required: true
     },
 
-    classCode: {
+    projectCode: {
         type: String,
         required: true,
         unique: true

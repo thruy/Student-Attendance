@@ -55,9 +55,7 @@ function ClassManagePage() {
             setPage(1); // khi search mới → quay về trang 1
         }, 500); // delay 500ms
 
-        return () => {
-            clearTimeout(timer);
-        };
+        return () => { clearTimeout(timer); };
     }, [inputValue]);
 
     const fetchAllTeacher = async () => {

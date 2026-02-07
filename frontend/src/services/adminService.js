@@ -120,6 +120,16 @@ const createProject = async (data) => {
     return response.data;
 };
 
+const getStudentsForProjectModal = async (search = '') => {
+    const res = await axios.get(`${API_URL}/projects/students/all`, { params: { search }, withCredentials: true });
+    return res.data;
+};
+
+const getTeachersForProjectModal = async (search = '') => {
+    const res = await axios.get(`${API_URL}/projects/teachers/all`, { params: { search }, withCredentials: true });
+    return res.data;
+};
+
 const addStudentToProject = async (projectId, studentId) => {
     const response = await axios.post(`${API_URL}/projects/${projectId}/students`, { studentId }, { withCredentials: true });
     return response.data;
@@ -179,6 +189,7 @@ const adminService = {
     getStudentsForClassModal, addStudentsToClass, removeStudentFromClass, saveAttendance, deleteAttendance,
 
     getAllProjects, getProjectDetail, createProject, updateProjectInfo, deleteProject,
-    addStudentToProject, removeStudentFromProject, uploadReport, gradeStudent, updateTitleForStudent
+    getStudentsForProjectModal, getTeachersForProjectModal, addStudentToProject, removeStudentFromProject,
+    uploadReport, gradeStudent, updateTitleForStudent
 };
 export default adminService;

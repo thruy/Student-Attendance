@@ -39,7 +39,7 @@ const TeacherNavBar = (props) => {
                         <Nav>
                             <NavDropdown className='fw-semibold' color='black' title={`Xin chào, ${user?.name || ""} `}>
                                 <NavDropdown.Item as={Link} to="/teacher/profile">Thông tin cá nhân</NavDropdown.Item>
-                                <NavDropdown.Item as={Link} to="/teacher/setting">Cài đặt</NavDropdown.Item>
+                                {/* <NavDropdown.Item as={Link} to="/teacher/setting">Cài đặt</NavDropdown.Item> */}
                                 <NavDropdown.Item onClick={() => setShowChangePassword(true)}>Đổi mật khẩu</NavDropdown.Item>
                                 <NavDropdown.Divider />
                                 <NavDropdown.Item as={Link} onClick={handleLogout}>Đăng xuất</NavDropdown.Item>
