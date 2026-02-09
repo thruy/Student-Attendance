@@ -76,21 +76,21 @@ function UserProfilePage() {
                         </Alert>
                     )}
                     <Container>
-                        <InfoRow label="Họ và tên:" value={formatName(user.name)} />
-                        <InfoRow label="Email:" value={user.email} />
-                        <InfoRow label="Mã số sinh viên:" value={user.code} />
-                        <InfoRow label="Ngày sinh:" value={formatDate(user.dob)} />
-                        <InfoRow label="Giới tính:" value={user.gender} />
-                        <InfoRow label="Dân tộc:" value={user.ethnic} />
-                        <InfoRow label="Đại học:" value={user.university} />
-                        <InfoRow label="Khoa/Viện:" value={user.school} />
-                        <InfoRow label="Ngành:" value={user.branch} />
-                        <InfoRow label="Lớp:" value={user.className} />
-                        <InfoRow label="Khóa:" value={user.schoolYear} />
-                        <InfoRow label="Hệ đào tạo:" value={user.trainingSystem} />
-                        <InfoRow label="Quê quán:" value={user.hometown} />
-                        <InfoRow label="Số căn cước công dân:" value={user.identificationNumber} />
-                        <InfoRow label="Số điện thoại:" value={user.phone} />
+                        <InfoRow label="Họ và tên:" value={formatName(user?.name)} />
+                        <InfoRow label="Email:" value={user?.email} />
+                        <InfoRow label="Mã số sinh viên:" value={user?.code} />
+                        <InfoRow label="Ngày sinh:" value={formatDate(user?.dob)} />
+                        <InfoRow label="Giới tính:" value={user?.gender} />
+                        <InfoRow label="Dân tộc:" value={user?.ethnic} />
+                        <InfoRow label="Đại học:" value={user?.university} />
+                        <InfoRow label="Khoa/Viện:" value={user?.school} />
+                        <InfoRow label="Ngành:" value={user?.branch} />
+                        <InfoRow label="Lớp:" value={user?.className} />
+                        <InfoRow label="Khóa:" value={user?.schoolYear} />
+                        <InfoRow label="Hệ đào tạo:" value={user?.trainingSystem} />
+                        <InfoRow label="Quê quán:" value={user?.hometown} />
+                        <InfoRow label="Số căn cước công dân:" value={user?.identificationNumber} />
+                        <InfoRow label="Số điện thoại:" value={user?.phone} />
                     </Container>
                 </CardBody>
 
@@ -108,15 +108,15 @@ function UserProfilePage() {
                     <Form>
                         <Form.Group className="mb-3">
                             <Form.Label>Họ và tên</Form.Label>
-                            <Form.Control value={formatName(user.name)} type="text" autoFocus disabled />
+                            <Form.Control value={formatName(user?.name)} type="text" autoFocus disabled />
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Mã số sinh viên</Form.Label>
-                            <Form.Control value={user.code} type="text" autoFocus disabled />
+                            <Form.Control value={user?.code} type="text" autoFocus disabled />
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Giới tính</Form.Label>
-                            <Form.Select value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })}>
+                            <Form.Select value={formData?.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })}>
                                 <option value="Nam">Nam</option>
                                 <option value="Nữ">Nữ</option>
                                 <option value="Khác">Khác</option>
@@ -124,23 +124,23 @@ function UserProfilePage() {
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Dân tộc</Form.Label>
-                            <Form.Control value={formData.ethnic} type="text" autoFocus onChange={(e) => setFormData({ ...formData, ethnic: e.target.value })} />
+                            <Form.Control value={formData?.ethnic} type="text" autoFocus onChange={(e) => setFormData({ ...formData, ethnic: e.target.value })} />
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Khoa/Viện</Form.Label>
-                            <Form.Control value={formData.school} type="text" placeholder="Khoa/Viện/Trường" autoFocus onChange={(e) => setFormData({ ...formData, school: e.target.value })} />
+                            <Form.Control value={formData?.school} type="text" placeholder="Khoa/Viện/Trường" autoFocus onChange={(e) => setFormData({ ...formData, school: e.target.value })} />
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Ngành học</Form.Label>
-                            <Form.Control value={formData.branch} type="text" autoFocus onChange={(e) => setFormData({ ...formData, branch: e.target.value })} />
+                            <Form.Control value={formData?.branch} type="text" autoFocus onChange={(e) => setFormData({ ...formData, branch: e.target.value })} />
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Lớp</Form.Label>
-                            <Form.Control value={formData.className} type="text" autoFocus onChange={(e) => setFormData({ ...formData, className: e.target.value })} />
+                            <Form.Control value={formData?.className} type="text" autoFocus onChange={(e) => setFormData({ ...formData, className: e.target.value })} />
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Hệ đào tạo</Form.Label>
-                            <Form.Select value={formData.trainingSystem} onChange={(e) => setFormData({ ...formData, trainingSystem: e.target.value })}>
+                            <Form.Select value={formData?.trainingSystem} onChange={(e) => setFormData({ ...formData, trainingSystem: e.target.value })}>
                                 <option value="Cử nhân">Cử nhân</option>
                                 <option value="Kỹ sư">Kỹ sư</option>
                                 <option value="Thạc sĩ">Thạc sĩ</option>
@@ -149,15 +149,15 @@ function UserProfilePage() {
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Quê quán</Form.Label>
-                            <Form.Control value={formData.hometown} as="textarea" rows={3} onChange={(e) => setFormData({ ...formData, hometown: e.target.value })} />
+                            <Form.Control value={formData?.hometown} as="textarea" rows={3} onChange={(e) => setFormData({ ...formData, hometown: e.target.value })} />
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Số căn cước công dân</Form.Label>
-                            <Form.Control value={formData.identificationNumber} type="text" placeholder="040204020402" autoFocus onChange={(e) => setFormData({ ...formData, identificationNumber: e.target.value })} />
+                            <Form.Control value={formData?.identificationNumber} type="text" placeholder="040204020402" autoFocus onChange={(e) => setFormData({ ...formData, identificationNumber: e.target.value })} />
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Số điện thoại</Form.Label>
-                            <Form.Control value={formData.phone} type="text" placeholder="0987654321" autoFocus onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+                            <Form.Control value={formData?.phone} type="text" placeholder="0987654321" autoFocus onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
                         </Form.Group>
                     </Form>
                 </Modal.Body>

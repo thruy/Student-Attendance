@@ -1,6 +1,7 @@
 import { useAuth } from '../context/AuthContext'
 import { useEffect, useState } from 'react';
-import { Table, Spinner, Alert, Button } from 'react-bootstrap';
+import { Table, Spinner, Alert, Button, Row, Col, Form, FormLabel, InputGroup } from 'react-bootstrap';
+import { Search } from 'react-bootstrap-icons';
 import teacherService from '../services/teacherService';
 import { useNavigate } from 'react-router-dom';
 import './timetable.css'
@@ -12,6 +13,9 @@ function TeachingPage() {
     const [error, setError] = useState(null);
     const [selectedClass, setSelectedClass] = useState(null);
     const navigate = useNavigate();
+    const [selectedSemester, setSelectedSemester] = useState('20251');
+    const [inputValue, setInputValue] = useState('');
+    const semesters = ['20252', '20251', '20243', '20242', '20241', '20233', '20232', '20231'];
 
     const dayOrder = {
         'Thứ Hai': 1,
@@ -54,6 +58,31 @@ function TeachingPage() {
     return (
         <div>
             <h2 className="timetable-title">Thời khóa biểu của giảng viên {user.name}</h2>
+            <div>
+                <Row className='align-items-center'>
+                    <Col md={2}>
+                        <FormLabel className='fw-bold ms-1'>Học kỳ</FormLabel>
+                    </Col>
+                    <Col md={10}></Col>
+                </Row>
+
+                <Row className="align-items-center mb-4">
+                    <Col md={4}>
+                        <Form.Select value={selectedSemester} onChange={(e) => setSelectedSemester(e.target.value)} className="semester-select" >
+                            {semesters.map((item) => (
+                                <option key={item} value={item}>{item}</option>
+                            ))}
+                        </Form.Select>
+                    </Col>
+                    {/* Search */}
+                    <Col md={8}>
+                        <InputGroup className="student-search">
+                            <InputGroup.Text><Search /></InputGroup.Text>
+                            <Form.Control type="text" placeholder="Tìm kiếm" value={inputValue} onChange={(e) => { setInputValue(e.target.value) }} />
+                        </InputGroup>
+                    </Col>
+                </Row>
+            </div>
             <Table bordered hover responsive className="timetable-table">
                 <thead>
                     <tr>

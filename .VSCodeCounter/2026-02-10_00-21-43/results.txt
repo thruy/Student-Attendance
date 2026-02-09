@@ -1,0 +1,60 @@
+Date : 2026-02-10 00:21:43
+Directory : c:\Users\Admin\Student Attendance\backend
+Total : 25 files,  3499 codes, 18 comments, 300 blanks, all 3817 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| JavaScript |         23 |      2,217 |         18 |        298 |      2,533 |
+| JSON       |          2 |      1,282 |          0 |          2 |      1,284 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++---------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                            | files      | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                               |         25 |      3,499 |         18 |        300 |      3,817 |
+| . (Files)                                                                       |          2 |      1,282 |          0 |          2 |      1,284 |
+| seed                                                                            |          4 |        186 |          0 |         26 |        212 |
+| src                                                                             |         19 |      2,031 |         18 |        272 |      2,321 |
+| src (Files)                                                                     |          1 |         22 |          0 |          4 |         26 |
+| src\config                                                                      |          1 |         12 |          0 |          2 |         14 |
+| src\controllers                                                                 |          4 |      1,355 |         14 |        173 |      1,542 |
+| src\middleware                                                                  |          2 |         24 |          0 |          3 |         27 |
+| src\models                                                                      |          5 |        292 |          0 |         64 |        356 |
+| src\routes                                                                      |          4 |         78 |          4 |         12 |         94 |
+| src\validation                                                                  |          2 |        248 |          0 |         14 |        262 |
++---------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++---------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                                        | language   | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| c:\Users\Admin\Student Attendance\backend\package-lock.json                     | JSON       |      1,260 |          0 |          1 |      1,261 |
+| c:\Users\Admin\Student Attendance\backend\package.json                          | JSON       |         22 |          0 |          1 |         23 |
+| c:\Users\Admin\Student Attendance\backend\seed\admin.js                         | JavaScript |         31 |          0 |          3 |         34 |
+| c:\Users\Admin\Student Attendance\backend\seed\attendance.js                    | JavaScript |         36 |          0 |         10 |         46 |
+| c:\Users\Admin\Student Attendance\backend\seed\class.js                         | JavaScript |         82 |          0 |          8 |         90 |
+| c:\Users\Admin\Student Attendance\backend\seed\teacher.js                       | JavaScript |         37 |          0 |          5 |         42 |
+| c:\Users\Admin\Student Attendance\backend\src\app.js                            | JavaScript |         22 |          0 |          4 |         26 |
+| c:\Users\Admin\Student Attendance\backend\src\config\db.js                      | JavaScript |         12 |          0 |          2 |         14 |
+| c:\Users\Admin\Student Attendance\backend\src\controllers\admin.controller.js   | JavaScript |        889 |         13 |        121 |      1,023 |
+| c:\Users\Admin\Student Attendance\backend\src\controllers\auth.controller.js    | JavaScript |        110 |          0 |         11 |        121 |
+| c:\Users\Admin\Student Attendance\backend\src\controllers\student.controller.js | JavaScript |        137 |          1 |         16 |        154 |
+| c:\Users\Admin\Student Attendance\backend\src\controllers\teacher.controller.js | JavaScript |        219 |          0 |         25 |        244 |
+| c:\Users\Admin\Student Attendance\backend\src\middleware\auth.middleware.js     | JavaScript |         15 |          0 |          2 |         17 |
+| c:\Users\Admin\Student Attendance\backend\src\middleware\role.middleware.js     | JavaScript |          9 |          0 |          1 |         10 |
+| c:\Users\Admin\Student Attendance\backend\src\models\AttendanceRecords.js       | JavaScript |         27 |          0 |          8 |         35 |
+| c:\Users\Admin\Student Attendance\backend\src\models\Attendances.js             | JavaScript |         47 |          0 |         10 |         57 |
+| c:\Users\Admin\Student Attendance\backend\src\models\Classes.js                 | JavaScript |         65 |          0 |         11 |         76 |
+| c:\Users\Admin\Student Attendance\backend\src\models\Project.js                 | JavaScript |         66 |          0 |         14 |         80 |
+| c:\Users\Admin\Student Attendance\backend\src\models\Users.js                   | JavaScript |         87 |          0 |         21 |        108 |
+| c:\Users\Admin\Student Attendance\backend\src\routes\admin.route.js             | JavaScript |         42 |          4 |          5 |         51 |
+| c:\Users\Admin\Student Attendance\backend\src\routes\auth.route.js              | JavaScript |         13 |          0 |          2 |         15 |
+| c:\Users\Admin\Student Attendance\backend\src\routes\student.route.js           | JavaScript |          9 |          0 |          2 |         11 |
+| c:\Users\Admin\Student Attendance\backend\src\routes\teacher.route.js           | JavaScript |         14 |          0 |          3 |         17 |
+| c:\Users\Admin\Student Attendance\backend\src\validation\adminValidate.js       | JavaScript |        163 |          0 |          8 |        171 |
+| c:\Users\Admin\Student Attendance\backend\src\validation\validate.js            | JavaScript |         85 |          0 |          6 |         91 |
+| Total                                                                           |            |      3,499 |         18 |        300 |      3,817 |
++---------------------------------------------------------------------------------+------------+------------+------------+------------+------------+

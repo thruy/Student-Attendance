@@ -755,7 +755,7 @@ const deleteClass = async (req, res) => {
 //project
 const createProject = async (req, res) => {
     try {
-        const { subjectCode, name, projectCode, semester, teacherId } = req.body;
+        const { subjectCode, name, projectCode, semester, teacherId, members = [] } = req.body;
         if (!subjectCode || !name || !projectCode || !semester || !teacherId) {
             return res.status(400).json({ message: 'Thiếu thông tin bắt buộc' });
         }

@@ -35,7 +35,7 @@ function ProjectManagePage() {
                 search,
                 semester: selectedSemester
             });
-            setProjects(res.classes);
+            setProjects(res.projects);
             setTotalPages(res.pagination.totalPages);
         } catch (err) {
             setError('Lỗi lấy danh sách lớp học');
@@ -64,10 +64,10 @@ function ProjectManagePage() {
 
     const handleCreateProject = async (form) => {
         try {
-            const response = await adminService.createClass(form);
+            const response = await adminService.createProject(form);
             setShowAdd(false);
-            const res = await adminService.getAllClasses({ page, limit, search });
-            setClasses(res.classes);
+            const res = await adminService.getAllProjects({ page, limit, search, semester: selectedSemester });
+            setProjects(res.projects);
         } catch (err) {
             setError(err.response?.data?.message || "Lỗi tạo lớp");
         }
@@ -151,7 +151,7 @@ function ProjectManagePage() {
                     </div>
                 )}
 
-                {classes.length === 0 && (
+                {projects.length === 0 && (
                     <Alert variant="info">
                         <Alert.Heading>Không có lớp học nào!</Alert.Heading>
                     </Alert>

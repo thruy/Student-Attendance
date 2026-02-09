@@ -33,7 +33,6 @@ function ClassStudentModal({ show, onHide, classInfo }) {
         fetchStudents();
     }, [show, search]);
 
-
     useEffect(() => {
         const timer = setTimeout(() => {
             setSearch(inputValue);
