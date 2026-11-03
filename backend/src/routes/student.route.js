@@ -1,14 +1,19 @@
 const express = require('express');
 const route = express.Router();
-const studentController = require('../controllers/student.controller');
+const classController = require('../controllers/class.controller');
+const attendanceController = require('../controllers/attendance.controller');
+const projectController = require('../controllers/project.controller');
 const { verifyToken } = require('../middleware/auth.middleware');
 const { authorize } = require('../middleware/role.middleware');
 
-route.get('/timetable', verifyToken, studentController.getStudentTimetable);
-route.get('/classes/:id/students', verifyToken, studentController.getInfoOfClasses);
-route.get('/projects', verifyToken, studentController.getStudentProjects);
-route.put('/projects/:projectId/students/:studentId/report', verifyToken, studentController.uploadReport);
-route.get('/attendance/qr', verifyToken, authorize('student'), studentController.getQrSessionInfo);
-route.post('/attendance/qr', verifyToken, authorize('student'), studentController.checkInByQr);
+// mọi route sinh viên đều cần đăng nhập với role student
+route.use(verifyToken, authorize('student'));
+
+route.get('/timetable', classController.getMyTimetable);
+route.get('/classes/:id/students', classController.getClassInfo);
+route.get('/projects', projectController.getMyProjects);
+route.put('/projects/:projectId/students/:studentId/report', projectController.uploadReport);
+route.get('/attendance/qr', attendanceController.getQrSessionInfo);
+route.post('/attendance/qr', attendanceController.checkInByQr);
 
 module.exports = route;

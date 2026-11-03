@@ -1,19 +1,24 @@
 const express = require('express');
 const route = express.Router();
-const teacherController = require('../controllers/teacher.controller');
+const classController = require('../controllers/class.controller');
+const attendanceController = require('../controllers/attendance.controller');
+const projectController = require('../controllers/project.controller');
 const { verifyToken } = require('../middleware/auth.middleware');
 const { authorize } = require('../middleware/role.middleware');
 
-route.get('/timetable', verifyToken, authorize('teacher'), teacherController.getTeacherTimetable);
-route.get('/timetable/:classId/attendance', verifyToken, authorize('teacher'), teacherController.getAttendancePageData);
-route.post('/timetable/attendance/save', verifyToken, authorize('teacher'), teacherController.saveAttendance);
-route.post('/timetable/:classId/qr-session', verifyToken, authorize('teacher'), teacherController.startQrSession);
-route.post('/timetable/:classId/qr-session/end', verifyToken, authorize('teacher'), teacherController.endQrSession);
+// mọi route giảng viên đều cần đăng nhập với role teacher
+route.use(verifyToken, authorize('teacher'));
 
-route.get('/projects', verifyToken, authorize('teacher'), teacherController.getAllProjects);
-route.get('/projects/:projectId', verifyToken, authorize('teacher'), teacherController.getProjectDetail);
-route.put('/projects/:projectId/students/:studentId/report', verifyToken, authorize('teacher'), teacherController.uploadReport);
-route.put('/projects/:projectId/students/:studentId/grade', verifyToken, authorize('teacher'), teacherController.gradeStudent);
-route.put('/projects/:projectId/students/:studentId/title', verifyToken, authorize('teacher'), teacherController.updateTitleForStudent);
+route.get('/timetable', classController.getMyTimetable);
+route.get('/timetable/:classId/attendance', attendanceController.getClassAttendance);
+route.post('/timetable/attendance/save', attendanceController.saveAttendance);
+route.post('/timetable/:classId/qr-session', attendanceController.startQrSession);
+route.post('/timetable/:classId/qr-session/end', attendanceController.endQrSession);
+
+route.get('/projects', projectController.getAllProjects);
+route.get('/projects/:projectId', projectController.getProjectDetail);
+route.put('/projects/:projectId/students/:studentId/report', projectController.uploadReport);
+route.put('/projects/:projectId/students/:studentId/grade', projectController.gradeStudent);
+route.put('/projects/:projectId/students/:studentId/title', projectController.updateTitleForStudent);
 
 module.exports = route;
