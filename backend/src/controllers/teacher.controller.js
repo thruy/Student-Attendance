@@ -3,7 +3,11 @@ const Users = require('../models/Users');
 const Attendances = require('../models/Attendances');
 const Projects = require('../models/Project');
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 const { text } = require('express');
+const {
+    getQrConfig, todayInVN, parseLocation, activeQrFilter, isQrActive, formatQrSession, mergeManualRecords
+} = require('../utils/attendance');
 
 const getTeacherTimetable = async (req, res) => {
     try {
@@ -40,6 +44,7 @@ const getAttendancePageData = async (req, res) => {
         if (!cls) { return res.status(404).json({ message: 'Không tìm thấy lớp học' }); }
 
         const attendances = await Attendances.find({ classId });
+        const activeQr = attendances.find(a => isQrActive(a));
         res.status(200).json({
             class: {
                 classId: cls._id,
@@ -68,6 +73,7 @@ const getAttendancePageData = async (req, res) => {
                 }))
             },
             attendances,
+            qrSession: activeQr ? formatQrSession(activeQr, cls.students.length) : null
         });
     } catch (err) {
         res.status(500).json({ message: 'Lỗi khi lấy thông tin lớp học', error: err.message });
@@ -79,13 +85,9 @@ const saveAttendance = async (req, res) => {
         const { classId, date, type, records } = req.body;
         const teacherId = req.user.userId;
         if (!classId || !date || !records) { return res.status(400).json({ message: 'Thiếu dữ liệu điểm danh' }); }
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || isNaN(new Date(date))) { return res.status(400).json({ message: 'Ngày điểm danh không hợp lệ' }); }
         const cls = await Classes.findById(classId);
         if (!cls) { return res.status(404).json({ message: 'Không tìm thấy lớp học' }); }
-
-        const validDate = cls.date.some(
-            d => new Date(d).toISOString().split('T')[0] === date
-        );
-        if (!validDate) { return res.status(400).json({ message: 'Ngày không thuộc lịch học' }); }
 
         let attendance = await Attendances.findOne({ classId, date });
         if (!attendance) {
@@ -94,10 +96,10 @@ const saveAttendance = async (req, res) => {
                 teacherId,
                 date,
                 type,
-                records
+                records: mergeManualRecords([], records)
             });
         } else {
-            attendance.records = records;
+            attendance.records = mergeManualRecords(attendance.records, records);
             attendance.teacherId = teacherId;
             await attendance.save();
         }
@@ -108,6 +110,82 @@ const saveAttendance = async (req, res) => {
         });
     } catch (err) {
         res.status(500).json({ message: err.message });
+    }
+};
+
+const findTeacherClass = async (classId, teacherId) => {
+    if (!mongoose.isValidObjectId(classId)) return { status: 404, message: 'Không tìm thấy lớp học' };
+    const cls = await Classes.findById(classId);
+    if (!cls) return { status: 404, message: 'Không tìm thấy lớp học' };
+    if (String(cls.teacherId) !== String(teacherId)) return { status: 403, message: 'Bạn không phụ trách lớp học này' };
+    return { cls };
+};
+
+const startQrSession = async (req, res) => {
+    try {
+        const { classId } = req.params;
+        const { date, lat, lng, accuracy, duration } = req.body;
+        const teacherId = req.user.userId;
+
+        const { cls, status, message } = await findTeacherClass(classId, teacherId);
+        if (!cls) { return res.status(status).json({ message }); }
+
+        const today = todayInVN();
+        if (date && date !== today) { return res.status(400).json({ message: 'Chỉ được điểm danh QR cho ngày hôm nay' }); }
+
+        const location = parseLocation(lat, lng, accuracy);
+        if ((lat != null || lng != null) && !location) { return res.status(400).json({ message: 'Tọa độ không hợp lệ' }); }
+
+        const config = getQrConfig();
+        const minutes = duration === undefined ? config.minutes : Number(duration);
+        if (!Number.isInteger(minutes) || minutes < 1 || minutes > 180) {
+            return res.status(400).json({ message: 'Thời gian hiệu lực phải từ 1 đến 180 phút' });
+        }
+
+        const now = new Date();
+        let attendance = await Attendances.findOne({ classId, date: today });
+        if (attendance && isQrActive(attendance, now)) {
+            return res.status(200).json({ message: 'Phiên điểm danh QR đang diễn ra', session: formatQrSession(attendance, cls.students.length) });
+        }
+        if (!attendance) {
+            attendance = new Attendances({ classId, teacherId, date: today, records: [] });
+        }
+
+        // thêm sinh viên chưa có trong danh sách, giữ nguyên kết quả đã điểm danh trước đó
+        const existingIds = new Set(attendance.records.map(r => String(r.studentId)));
+        cls.students.forEach(studentId => {
+            if (!existingIds.has(String(studentId))) attendance.records.push({ studentId, status: null });
+        });
+
+        attendance.type = 'qr';
+        attendance.teacherId = teacherId;
+        attendance.qrToken = crypto.randomBytes(24).toString('base64url');
+        attendance.expiresAt = new Date(now.getTime() + minutes * 60 * 1000);
+        attendance.endedAt = null;
+        attendance.location = location || undefined;
+        attendance.radius = location ? config.radius : undefined;
+        await attendance.save();
+
+        res.status(201).json({ message: 'Đã tạo phiên điểm danh QR', session: formatQrSession(attendance, cls.students.length) });
+    } catch (err) {
+        res.status(500).json({ message: 'Lỗi khi tạo phiên điểm danh', error: err.message });
+    }
+};
+
+const endQrSession = async (req, res) => {
+    try {
+        const { classId } = req.params;
+        const { cls, status, message } = await findTeacherClass(classId, req.user.userId);
+        if (!cls) { return res.status(status).json({ message }); }
+
+        const active = await Attendances.findOne({ classId, ...activeQrFilter() });
+        if (!active) { return res.status(404).json({ message: 'Không có phiên điểm danh QR nào đang diễn ra' }); }
+
+        active.endedAt = new Date();
+        await active.save();
+        res.status(200).json({ message: 'Đã kết thúc phiên điểm danh QR' });
+    } catch (err) {
+        res.status(500).json({ message: 'Lỗi khi kết thúc phiên điểm danh', error: err.message });
     }
 };
 
@@ -239,6 +317,6 @@ const updateTitleForStudent = async (req, res) => {
 }
 
 module.exports = {
-    getTeacherTimetable, getAttendancePageData, saveAttendance,
+    getTeacherTimetable, getAttendancePageData, saveAttendance, startQrSession, endQrSession,
     getAllProjects, getProjectDetail, uploadReport, gradeStudent, updateTitleForStudent
 };

@@ -3,6 +3,7 @@ const Classes = require('../models/Classes');
 const Attendances = require('../models/Attendances');
 const Projects = require('../models/Project');
 const bcrypt = require('bcryptjs');
+const { mergeManualRecords } = require('../utils/attendance');
 const DEFAULT_PASSWORD = '123456';
 // students
 const getAllStudents = async (req, res) => {
@@ -575,13 +576,9 @@ const saveAttendance = async (req, res) => {
         const { classId, date, type, records } = req.body;
         const teacherId = req.user.userId;
         if (!classId || !date || !records) { return res.status(400).json({ message: 'Thiếu dữ liệu điểm danh' }); }
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || isNaN(new Date(date))) { return res.status(400).json({ message: 'Ngày điểm danh không hợp lệ' }); }
         const cls = await Classes.findById(classId);
         if (!cls) { return res.status(404).json({ message: 'Không tìm thấy lớp học' }); }
-
-        const validDate = cls.date.some(
-            d => new Date(d).toISOString().split('T')[0] === date
-        );
-        if (!validDate) { return res.status(400).json({ message: 'Ngày không thuộc lịch học' }); }
 
         let attendance = await Attendances.findOne({ classId, date });
         if (!attendance) {
@@ -590,10 +587,10 @@ const saveAttendance = async (req, res) => {
                 teacherId,
                 date,
                 type,
-                records
+                records: mergeManualRecords([], records)
             });
         } else {
-            attendance.records = records;
+            attendance.records = mergeManualRecords(attendance.records, records);
             attendance.teacherId = teacherId;
             await attendance.save();
         }
@@ -615,11 +612,6 @@ const deleteAttendance = async (req, res) => {
         const cls = await Classes.findById(classId);
         if (!cls) {
             return res.status(404).json({ message: 'Không tìm thấy lớp học' });
-        }
-
-        const validDate = cls.date.some(d => new Date(d).toISOString().split('T')[0] === date);
-        if (!validDate) {
-            return res.status(400).json({ message: 'Ngày không thuộc lịch học' });
         }
 
         const attendance = await Attendances.findOne({ classId, date });

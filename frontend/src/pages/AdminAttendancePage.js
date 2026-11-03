@@ -10,7 +10,6 @@ function AttendancePage() {
     const [classInfo, setClassInfo] = useState(null);
     const [students, setStudents] = useState([]);
     const [attendances, setAttendances] = useState([]);
-    const [scheduleDates, setScheduleDates] = useState(null);
     const [teacher, setTeacher] = useState({});
 
     const [attendanceDates, setAttendanceDates] = useState([]);
@@ -35,7 +34,6 @@ function AttendancePage() {
                 setTeacher(data.class.teacher);
                 setStudents(data.class.students);
                 setAttendances(data.attendances);
-                setScheduleDates(data.class.date);
                 // build map
                 const map = {};
                 const dates = [];
@@ -180,16 +178,12 @@ function AttendancePage() {
                         <Button variant="dark" className="ms-2" onClick={() => { setChooseAttendanceDate(false); setDeleteAttendanceDate(true) }}>Xóa phiên điểm danh</Button>
                         {chooseAttendanceDate && (
                             <div className="d-flex align-items-center gap-3 mt-3">
-                                <Form.Select
+                                <Form.Control
+                                    type="date"
                                     value={selectedDate || ''}
                                     onChange={(e) => setSelectedDate(e.target.value)}
                                     className="mt-3" style={{ width: '300px' }}
-                                >
-                                    <option value="">Chọn ngày điểm danh</option>
-                                    {scheduleDates.map(d => (
-                                        <option key={d} value={d}>{d}</option>
-                                    ))}
-                                </Form.Select>
+                                />
                                 <Button className="mt-3" onClick={() => handleOpenAttendanceModal(selectedDate)} disabled={!selectedDate}>Bắt đầu</Button>
                             </div>
                         )}

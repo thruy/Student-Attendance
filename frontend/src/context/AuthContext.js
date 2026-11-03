@@ -18,7 +18,7 @@ const AuthProvider = ({ children }) => {
             }
         }
         fetchUser();
-    });
+    }, []);
 
     const logout = async () => {
         try {

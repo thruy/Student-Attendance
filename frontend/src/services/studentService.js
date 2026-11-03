@@ -27,5 +27,15 @@ const uploadReport = async (projectId, studentId, file) => {
     return response.data;
 };
 
-const studentService = { getStudentTimetable, getInfoOfClass, getStudentProjects, uploadReport };
+const getQrSessionInfo = async (token) => {
+    const response = await axios.get(`${API_URL}/attendance/qr`, { params: { token }, withCredentials: true });
+    return response.data;
+}
+
+const checkInByQr = async ({ token, lat, lng, accuracy }) => {
+    const response = await axios.post(`${API_URL}/attendance/qr`, { token, lat, lng, accuracy }, { withCredentials: true });
+    return response.data;
+}
+
+const studentService = { getStudentTimetable, getInfoOfClass, getStudentProjects, uploadReport, getQrSessionInfo, checkInByQr };
 export default studentService;

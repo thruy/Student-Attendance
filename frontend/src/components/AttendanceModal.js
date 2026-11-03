@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Modal, Table, Button } from "react-bootstrap";
-import { CheckCircle, XCircleFill } from "react-bootstrap-icons";
+import { CheckCircle, XCircleFill, Circle } from "react-bootstrap-icons";
 
 function AttendanceModal({ show, onClose, students, date, initialRecords, onSave }) {
     const [records, setRecords] = useState({});
@@ -8,6 +8,10 @@ function AttendanceModal({ show, onClose, students, date, initialRecords, onSave
         const init = {};
         initialRecords?.forEach(r => {
             init[r.studentId] = r.status;
+        });
+        // sinh viên chưa có trong danh sách điểm danh: để trống cho giảng viên xử lý
+        students?.forEach(s => {
+            if (!(s.id in init)) init[s.id] = null;
         });
         setRecords(init);
     }, [students, initialRecords])
@@ -49,10 +53,14 @@ function AttendanceModal({ show, onClose, students, date, initialRecords, onSave
                                 <td>{s.code}</td>
                                 <td>{s.name}</td>
                                 <td className="text-center" style={{ cursor: "pointer" }}>
-                                    {records[s.id] === "yes" ? (
+                                    {records[s.id] === "yes" && (
                                         <CheckCircle size={20} color="royalblue" onClick={() => toggleStatus(s.id)} />
-                                    ) : (
+                                    )}
+                                    {records[s.id] === "no" && (
                                         <XCircleFill size={20} color="red" onClick={() => toggleStatus(s.id)} />
+                                    )}
+                                    {!records[s.id] && (
+                                        <Circle size={20} color="gray" onClick={() => toggleStatus(s.id)} title="Chưa điểm danh" />
                                     )}
                                 </td>
                             </tr>

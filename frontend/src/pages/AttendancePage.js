@@ -3,14 +3,34 @@ import { useParams } from "react-router-dom";
 import teacherService from "../services/teacherService";
 import { CheckCircle, XCircleFill } from 'react-bootstrap-icons';
 import AttendanceModal from "../components/AttendanceModal";
-import { useEffect, useState } from "react";
+import QrSessionStartModal from "../components/QrSessionStartModal";
+import QrSessionPanel from "../components/QrSessionPanel";
+import { useCallback, useEffect, useState } from "react";
 import './timetable.css';
+
+const QR_POLLING_INTERVAL = 4000;
+
+const buildAttendanceMap = (attendances) => {
+    const map = {};
+    const dates = [];
+    attendances.forEach(a => {
+        const dateKey = new Date(a.date).toISOString().split("T")[0];
+        dates.push(dateKey);
+
+        const recordMap = {};
+        a.records.forEach(r => {
+            recordMap[r.studentId] = r.status;
+        });
+        map[dateKey] = { recordMap };
+    });
+    dates.sort((a, b) => new Date(a) - new Date(b));
+    return { dates, map };
+};
 
 function AttendancePage() {
     const [classInfo, setClassInfo] = useState(null);
     const [students, setStudents] = useState([]);
     const [attendances, setAttendances] = useState([]);
-    const [scheduleDates, setScheduleDates] = useState(null);
     const [teacher, setTeacher] = useState({});
 
     const [attendanceDates, setAttendanceDates] = useState([]);
@@ -24,42 +44,38 @@ function AttendancePage() {
     const [showModal, setShowModal] = useState(false);
     const [newAttendanceRecord, setNewAttendanceRecord] = useState([]);
     const [type, setType] = useState("");
+
+    const [qrSession, setQrSession] = useState(null);
+    const [showQrModal, setShowQrModal] = useState(false);
     const { classId } = useParams();
 
-    useEffect(() => {
-        const fetchAttendanceData = async () => {
-            try {
-                const data = await teacherService.getAttendancePageData(classId);
-                setClassInfo(data.class);
-                setTeacher(data.class.teacher);
-                setStudents(data.class.students);
-                setAttendances(data.attendances);
-                setScheduleDates(data.class.date);
-                // build map
-                const map = {};
-                const dates = [];
-                data.attendances.forEach(a => {
-                    const dateKey = new Date(a.date).toISOString().split("T")[0];
-                    dates.push(dateKey);
-
-                    const recordMap = {};
-                    a.records.forEach(r => {
-                        recordMap[r.studentId] = r.status;
-                    });
-                    map[dateKey] = { recordMap };
-                });
-                dates.sort((a, b) => new Date(a) - new Date(b));
-                setAttendanceDates(dates);
-                setAttendanceMap(map);
-            } catch (err) {
-                console.error('Lỗi khi tải dữ liệu điểm danh:', err);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchAttendanceData();
+    const loadData = useCallback(async () => {
+        const data = await teacherService.getAttendancePageData(classId);
+        setClassInfo(data.class);
+        setTeacher(data.class.teacher);
+        setStudents(data.class.students);
+        setAttendances(data.attendances);
+        setQrSession(data.qrSession);
+        const { dates, map } = buildAttendanceMap(data.attendances);
+        setAttendanceDates(dates);
+        setAttendanceMap(map);
     }, [classId]);
 
+    useEffect(() => {
+        loadData()
+            .catch(err => console.error('Lỗi khi tải dữ liệu điểm danh:', err))
+            .finally(() => setLoading(false));
+    }, [loadData]);
+
+    // khi có phiên QR đang diễn ra, định kỳ tải lại để cập nhật sinh viên đã điểm danh
+    const qrActive = !!qrSession;
+    useEffect(() => {
+        if (!qrActive) return;
+        const timer = setInterval(() => {
+            loadData().catch(err => console.error('Lỗi khi cập nhật điểm danh QR:', err));
+        }, QR_POLLING_INTERVAL);
+        return () => clearInterval(timer);
+    }, [qrActive, loadData]);
 
     const formatSchedule = (schedules) => {
         if (!Array.isArray(schedules)) return "Chưa cập nhật";
@@ -85,29 +101,34 @@ function AttendancePage() {
     const handleSaveAttendance = async (records) => {
         try {
             await teacherService.saveAttendance({ classId, date: selectedDate, type: type, records })
-            const data = await teacherService.getAttendancePageData(classId);
-            setAttendances(data.attendances);
-            // build map
-            const map = {};
-            const dates = [];
-            data.attendances.forEach(a => {
-                const dateKey = new Date(a.date).toISOString().split("T")[0];
-                dates.push(dateKey);
-
-                const recordMap = {};
-                a.records.forEach(r => {
-                    recordMap[r.studentId] = r.status;
-                });
-                map[dateKey] = { recordMap };
-            });
-            dates.sort((a, b) => new Date(a) - new Date(b));
-            setAttendanceDates(dates);
-            setAttendanceMap(map);
+            await loadData();
             setShowModal(false);
         } catch (err) {
-            setError("Lỗi lưu điểm danh");
+            setError(err.response?.data?.message || "Lỗi lưu điểm danh");
         }
     };
+
+    const handleStartQrSession = async (payload) => {
+        const data = await teacherService.startQrSession(classId, payload);
+        setQrSession(data.session);
+        setShowQrModal(false);
+        setEditMode(false);
+        await loadData();
+    };
+
+    const handleEndQrSession = async () => {
+        if (!window.confirm('Bạn có chắc chắn muốn kết thúc phiên điểm danh QR không?')) return;
+        try {
+            await teacherService.endQrSession(classId);
+        } catch (err) {
+            setError(err.response?.data?.message || "Lỗi kết thúc phiên điểm danh");
+        }
+        await loadData().catch(err => console.error('Lỗi khi tải dữ liệu điểm danh:', err));
+    };
+
+    const handleQrExpire = useCallback(() => {
+        loadData().catch(err => console.error('Lỗi khi tải dữ liệu điểm danh:', err));
+    }, [loadData]);
 
     const InfoRow = ({ label, value }) => (
         <Row className="mb-3 align-items-center">
@@ -138,24 +159,24 @@ function AttendancePage() {
                     </Container>
 
                     <Container className="mt-4">
-                        <Button variant="dark" onClick={() => { setEditMode(true); setType("manual") }}>Điểm danh thủ công</Button>
-                        <Button variant="dark" className="ms-2" disabled>Điểm danh tự động</Button>
-                        {editMode && (
+                        <Button variant="dark" onClick={() => { setEditMode(true); setType("manual") }} disabled={qrActive}>Điểm danh thủ công</Button>
+                        <Button variant="dark" className="ms-2" onClick={() => setShowQrModal(true)} disabled={qrActive}>Điểm danh tự động</Button>
+                        {editMode && !qrActive && (
                             <div className="d-flex align-items-center gap-3 mt-3">
-                                <Form.Select
+                                <Form.Control
+                                    type="date"
                                     value={selectedDate || ''}
                                     onChange={(e) => setSelectedDate(e.target.value)}
                                     className="mt-3" style={{ width: '300px' }}
-                                >
-                                    <option value="">Chọn ngày điểm danh</option>
-                                    {scheduleDates.map(d => (
-                                        <option key={d} value={d}>{d}</option>
-                                    ))}
-                                </Form.Select>
+                                />
                                 <Button className="mt-3" onClick={() => handleOpenAttendanceModal(selectedDate)} disabled={!selectedDate}>Bắt đầu</Button>
                             </div>
                         )}
                     </Container>
+
+                    {qrSession && (
+                        <QrSessionPanel session={qrSession} onEnd={handleEndQrSession} onExpire={handleQrExpire} />
+                    )}
 
                     <Table bordered hover responsive className="timetable-table">
                         <thead>
@@ -171,7 +192,7 @@ function AttendancePage() {
 
                         <tbody>
                             {students.map((student, index) => (
-                                <tr key={student._id}>
+                                <tr key={student.id}>
                                     <td>{index + 1}</td>
                                     <td>{student.name}</td>
                                     <td className="text-center">{student.code}</td>
@@ -194,7 +215,7 @@ function AttendancePage() {
                     )}
 
                     {error && (
-                        <Alert variant="danger">
+                        <Alert variant="danger" dismissible onClose={() => setError('')}>
                             <Alert.Heading>Lỗi khi tải dữ liệu!</Alert.Heading>
                             <p>{error}</p>
                         </Alert>
@@ -203,6 +224,7 @@ function AttendancePage() {
             </Card>
 
             <AttendanceModal show={showModal} onClose={() => setShowModal(false)} students={students} date={selectedDate} initialRecords={newAttendanceRecord} onSave={handleSaveAttendance} />
+            <QrSessionStartModal show={showQrModal} onClose={() => setShowQrModal(false)} onStart={handleStartQrSession} />
         </>
     )
 }

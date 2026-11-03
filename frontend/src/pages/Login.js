@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function Login() {
@@ -7,12 +7,19 @@ function Login() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const location = useLocation();
     const { login } = useAuth();
 
     const handleLogin = async (event) => {
         event.preventDefault();
         try {
             const loginUser = await login(email, password);
+            // quay lại trang trước khi bị chuyển đến đăng nhập (vd: link điểm danh QR) nếu đúng vai trò
+            const from = location.state?.from;
+            if (from && (from.pathname.startsWith(`/${loginUser.role}`) || from.pathname.startsWith('/attendance'))) {
+                navigate(`${from.pathname}${from.search}`, { replace: true });
+                return;
+            }
             if (loginUser.role === 'student') {
                 navigate("/student");
                 return;

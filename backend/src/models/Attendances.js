@@ -25,7 +25,8 @@ const attendancesSchema = new mongoose.Schema({
     },
 
     qrToken: {
-        type: String
+        type: String,
+        index: true
     },
 
     createAt: {
@@ -35,6 +36,23 @@ const attendancesSchema = new mongoose.Schema({
 
     expiresAt: {
         type: Date
+    },
+
+    // phiên QR đang hoạt động khi: có qrToken, endedAt = null và expiresAt > hiện tại
+    endedAt: {
+        type: Date,
+        default: null
+    },
+
+    // vị trí giảng viên lúc mở phiên QR, không có thì bỏ qua kiểm tra vị trí
+    location: {
+        lat: { type: Number },
+        lng: { type: Number },
+        accuracy: { type: Number }
+    },
+
+    radius: {
+        type: Number
     },
 
     records: [{
@@ -47,6 +65,21 @@ const attendancesSchema = new mongoose.Schema({
             type: String,
             enum: ['yes', 'no', null],
             default: null
+        },
+        method: {
+            type: String,
+            enum: ['manual', 'qr', 'face']
+        },
+        checkInTime: {
+            type: Date
+        },
+        location: {
+            lat: { type: Number },
+            lng: { type: Number },
+            accuracy: { type: Number }
+        },
+        distance: {
+            type: Number
         }
     }]
 }, {

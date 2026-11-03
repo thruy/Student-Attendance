@@ -16,6 +16,16 @@ const saveAttendance = async ({ classId, date, type, records }) => {
     return response.data;
 }
 
+const startQrSession = async (classId, { date, duration, lat, lng, accuracy }) => {
+    const response = await axios.post(`${API_URL}/timetable/${classId}/qr-session`, { date, duration, lat, lng, accuracy }, { withCredentials: true });
+    return response.data;
+}
+
+const endQrSession = async (classId) => {
+    const response = await axios.post(`${API_URL}/timetable/${classId}/qr-session/end`, {}, { withCredentials: true });
+    return response.data;
+}
+
 const getAllProjects = async ({ page, limit, search, semester }) => {
     const res = await axios.get(`${API_URL}/projects`, { params: { page, limit, search, semester }, withCredentials: true });
     return res.data;
@@ -48,7 +58,7 @@ const updateTitleForStudent = async (projectId, studentId, title) => {
 };
 
 const teacherService = {
-    getTeacherTimetable, getAttendancePageData, saveAttendance,
+    getTeacherTimetable, getAttendancePageData, saveAttendance, startQrSession, endQrSession,
     getAllProjects, getProjectDetail, uploadReport, gradeStudent, updateTitleForStudent
 };
 export default teacherService;

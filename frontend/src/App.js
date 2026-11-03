@@ -26,6 +26,7 @@ import ClassManagePage from './pages/ClassManagePage';
 import ScholarshipManagePage from './pages/ScholarshipManagePage';
 import ProjectManagePage from './pages/ProjectManagePage';
 import AdminAttendancePage from './pages/AdminAttendancePage';
+import AttendanceVerifyPage from './pages/AttendanceVerifyPage';
 
 function App() {
   return (
@@ -39,6 +40,8 @@ function App() {
           <Route path="/" element={<Intro />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          {/* link trong mã QR điểm danh, trang tự xử lý trường hợp không phải sinh viên */}
+          <Route path="/attendance/verify" element={<RoleRoute allowedRoles={['student', 'teacher', 'admin']}><AttendanceVerifyPage /></RoleRoute>} />
           {/* student */}
           <Route path='/student' element={<RoleRoute allowedRoles={['student']}><StudentLayout /></RoleRoute>}>
             <Route index element={<Main />} />
