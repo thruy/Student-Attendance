@@ -8,6 +8,7 @@ import ClassEditModal from '../components/ClassEditModal';
 import ClassAddModal from '../components/ClassAddModal';
 import ClassStudentModal from '../components/ClassStudentModal';
 import './timetable.css';
+import { formatSchedule } from '../utils/schedule';
 
 function ClassManagePage() {
     const [classes, setClasses] = useState([]);
@@ -66,30 +67,6 @@ function ClassManagePage() {
     useEffect(() => {
         fetchAllTeacher();
     }, []);
-
-    const dayOrder = {
-        'Thứ Hai': 1,
-        'Thứ Ba': 2,
-        'Thứ Tư': 3,
-        'Thứ Năm': 4,
-        'Thứ Sáu': 5,
-        'Thứ Bảy': 6,
-        'Chủ Nhật': 7
-    };
-
-    const sortSchedulesByDay = (schedules) => {
-        return [...schedules].sort(
-            (a, b) => dayOrder[a.dayOfWeek] - dayOrder[b.dayOfWeek]
-        );
-    };
-
-    const formatSchedule = (schedules) => {
-        if (!schedules || schedules.length === 0) {
-            return 'Bạn chưa có lịch học nào.';
-        }
-        const sorted = sortSchedulesByDay(schedules);
-        return sorted.map(s => `${s.dayOfWeek}, ${s.startTime}–${s.endTime}, phòng ${s.room}`).join(' | ');
-    };
 
     const handleCreateClass = async (form) => {
         try {
@@ -177,7 +154,6 @@ function ClassManagePage() {
                         </Col>
                     </Row>
                 </div>
-
 
                 <Table bordered hover responsive className="timetable-table">
                     <thead>

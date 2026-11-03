@@ -7,10 +7,34 @@ import ChangePasswordModal from './ChangePassword';
 import { Calendar2Check } from 'react-bootstrap-icons';
 import './navbar.css';
 
-const TeacherNavBar = (props) => {
-    const { logout, user } = useAuth();
+// đường dẫn tương đối so với /<role>
+const NAV_LINKS = {
+    admin: [
+        { to: 'student', label: 'Sinh viên' },
+        { to: 'teacher', label: 'Giảng viên' },
+        { to: 'class', label: 'Lớp học' },
+        { to: 'project', label: 'Đồ án' },
+        { to: 'scholarship', label: 'Học bổng' }
+    ],
+    teacher: [
+        { to: 'teaching', label: 'Giảng dạy' },
+        { to: 'project', label: 'Đồ án' },
+        { to: 'contact', label: 'Liên hệ' },
+        { to: 'support', label: 'Hỗ trợ' }
+    ],
+    student: [
+        { to: 'study', label: 'Học tập' },
+        { to: 'project', label: 'Đồ án' },
+        { to: 'scholarship', label: 'Học bổng' },
+        { to: 'contact', label: 'Hỗ trợ' }
+    ]
+};
+
+const NavBar = () => {
+    const { logout, user, role } = useAuth();
     const navigate = useNavigate();
     const [showChangePassword, setShowChangePassword] = useState(false);
+    const basePath = `/${role}`;
 
     const handleLogout = async () => {
         await logout();
@@ -22,7 +46,7 @@ const TeacherNavBar = (props) => {
             <Navbar bg="white" expand="lg" className="main-navbar">
                 <Container>
                     {/* Logo */}
-                    <Navbar.Brand as={Link} to="/teacher" className="navbar-logo d-flex align-items-center gap-2">
+                    <Navbar.Brand as={Link} to={basePath} className="navbar-logo d-flex align-items-center gap-2">
                         <div className="logo-icon"> <Calendar2Check size={20} /></div>
                         <span className="brand-text">S-a-S</span>
                     </Navbar.Brand>
@@ -30,16 +54,13 @@ const TeacherNavBar = (props) => {
                     <Navbar.Toggle />
                     <Navbar.Collapse className="justify-content-end">
                         <Nav className="nav-links">
-                            <Nav.Link as={NavLink} to="/teacher/teaching">Giảng dạy</Nav.Link>
-                            <Nav.Link as={NavLink} to="/teacher/project">Đồ án</Nav.Link>
-                            <Nav.Link as={NavLink} to="/teacher/contact">Liên hệ</Nav.Link>
-                            <Nav.Link as={NavLink} to="/teacher/support">Hỗ trợ</Nav.Link>
-
+                            {(NAV_LINKS[role] || []).map(link => (
+                                <Nav.Link key={link.to} as={NavLink} to={`${basePath}/${link.to}`}>{link.label}</Nav.Link>
+                            ))}
                         </Nav>
                         <Nav>
                             <NavDropdown className='fw-semibold' color='black' title={`Xin chào, ${user?.name || ""} `}>
-                                <NavDropdown.Item as={Link} to="/teacher/profile">Thông tin cá nhân</NavDropdown.Item>
-                                {/* <NavDropdown.Item as={Link} to="/teacher/setting">Cài đặt</NavDropdown.Item> */}
+                                <NavDropdown.Item as={Link} to={`${basePath}/profile`}>Thông tin cá nhân</NavDropdown.Item>
                                 <NavDropdown.Item onClick={() => setShowChangePassword(true)}>Đổi mật khẩu</NavDropdown.Item>
                                 <NavDropdown.Divider />
                                 <NavDropdown.Item as={Link} onClick={handleLogout}>Đăng xuất</NavDropdown.Item>
@@ -54,4 +75,4 @@ const TeacherNavBar = (props) => {
     )
 }
 
-export default TeacherNavBar;
+export default NavBar;

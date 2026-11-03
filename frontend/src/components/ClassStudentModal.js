@@ -1,8 +1,10 @@
-import { Modal, Button, Table, Form, Spinner, Container, Row, Col } from 'react-bootstrap';
+import { Modal, Button, Table, Form, Spinner, Container } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import adminService from '../services/adminService';
 import { Trash3, PersonAdd } from 'react-bootstrap-icons';
 import '../pages/timetable.css';
+import InfoRow from './InfoRow';
+import ClassInfoRows from './ClassInfoRows';
 
 function ClassStudentModal({ show, onHide, classInfo }) {
     const [allStudents, setAllStudents] = useState([]);
@@ -41,24 +43,6 @@ function ClassStudentModal({ show, onHide, classInfo }) {
         return () => { clearTimeout(timer); };
     }, [inputValue]);
 
-    const formatSchedule = (schedules) => {
-        if (!Array.isArray(schedules)) return "Chưa cập nhật";
-        return schedules.map(s => `${s.dayOfWeek}, ${s.startTime} – ${s.endTime}, phòng ${s.room}`).join(' | ');
-    };
-
-    const InfoRow = ({ label, value }) => (
-        <Row className="mb-3 align-items-center">
-            <Col md={4} className="fw-bold">
-                {label}
-            </Col>
-            <Col md={8}>
-                <div className="info-value">
-                    {value || <span className="text-muted">Chưa cập nhật</span>}
-                </div>
-            </Col>
-        </Row>
-    );
-
     const classStudentIds = classStudents.map(s => s.id);
     const availableStudents = allStudents.filter(
         s => !classStudentIds.includes(s._id)
@@ -75,7 +59,6 @@ function ClassStudentModal({ show, onHide, classInfo }) {
         setSelectedIds([]);
     };
 
-
     const handleRemove = async (studentId) => {
         await adminService.removeStudentFromClass(classInfo.classId, studentId);
         setClassStudents(prev => prev.filter(s => s.id !== studentId));
@@ -91,14 +74,7 @@ function ClassStudentModal({ show, onHide, classInfo }) {
                 <Container>
                     <InfoRow label="Mã học phần:" value={classInfo?.subjectCode} />
                     <InfoRow label="Học phần:" value={classInfo?.name} />
-                    <InfoRow label="Mã lớp học:" value={classInfo?.classCode} />
-                    <InfoRow label="Loại lớp:" value={classInfo?.type} />
-                    <InfoRow label="Học kỳ" value={classInfo?.semester} />
-                    <InfoRow label="Lịch học" value={formatSchedule(classInfo?.schedule)} />
-                    <InfoRow label="Giảng viên" value={classInfo?.teacher?.name} />
-                    <InfoRow label="Email giảng viên" value={classInfo?.teacher?.email} />
-                    <InfoRow label="Mã giảng viên" value={classInfo?.teacher?.code} />
-                    <InfoRow label="Số lượng sinh viên" value={classInfo?.students?.length} />
+                    <ClassInfoRows classInfo={classInfo} />
                 </Container>
 
                 <Container>

@@ -2,12 +2,44 @@ import { useAuth } from '../context/AuthContext'
 import { useEffect, useState } from 'react';
 import { Table, Spinner, Alert, Button, Col, Row, Form, FormLabel, InputGroup } from 'react-bootstrap';
 import { Search } from 'react-bootstrap-icons';
+import { useNavigate } from 'react-router-dom';
 import studentService from '../services/studentService';
+import teacherService from '../services/teacherService';
 import ClassInfoModal from '../components/ClassInfoModal';
+import { formatSchedule } from '../utils/schedule';
 import './timetable.css';
 
-function StudyPage() {
+const SEMESTERS = ['20252', '20251', '20243', '20242', '20241', '20233', '20232', '20231'];
+
+// khác biệt giữa thời khóa biểu của sinh viên và giảng viên
+const CONFIG = {
+    student: {
+        fetchTimetable: studentService.getStudentTimetable,
+        title: (name) => `Thời khóa biểu của ${name}`,
+        emptySchedule: 'Bạn chưa có lịch học nào.',
+        emptyTimetable: 'Bạn chưa có lịch!',
+        infoHeader: 'GIẢNG VIÊN',
+        infoValue: (item) => item.teacher?.name,
+        actionHeader: 'GHI CHÚ',
+        actionLabel: 'Chi tiết'
+    },
+    teacher: {
+        fetchTimetable: teacherService.getTeacherTimetable,
+        title: (name) => `Thời khóa biểu của giảng viên ${name}`,
+        emptySchedule: 'Bạn chưa có lịch giảng dạy nào.',
+        emptyTimetable: 'Không có lớp học nào!',
+        infoHeader: 'SỐ SINH VIÊN',
+        infoValue: (item) => item.numberOfStudents,
+        actionHeader: 'THAO TÁC',
+        actionLabel: 'Điểm danh'
+    }
+};
+
+// role: 'student' | 'teacher'
+function TimetablePage({ role }) {
+    const config = CONFIG[role];
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [timetable, setTimetable] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -15,56 +47,35 @@ function StudyPage() {
     const [selectedClass, setSelectedClass] = useState(null);
     const [selectedSemester, setSelectedSemester] = useState('20251');
     const [inputValue, setInputValue] = useState('');
-    const semesters = ['20252', '20251', '20243', '20242', '20241', '20233', '20232', '20231'];
-
-    const dayOrder = {
-        'Thứ Hai': 1,
-        'Thứ Ba': 2,
-        'Thứ Tư': 3,
-        'Thứ Năm': 4,
-        'Thứ Sáu': 5,
-        'Thứ Bảy': 6,
-        'Chủ Nhật': 7
-    };
-
-    const sortSchedulesByDay = (schedules) => {
-        return [...schedules].sort(
-            (a, b) => dayOrder[a.dayOfWeek] - dayOrder[b.dayOfWeek]
-        );
-    };
-
-    const formatSchedule = (schedules) => {
-        if (!schedules || schedules.length === 0) {
-            return 'Bạn chưa có lịch học nào.';
-        }
-        const sorted = sortSchedulesByDay(schedules);
-        return sorted.map(s => `${s.dayOfWeek}, ${s.startTime}–${s.endTime}, phòng ${s.room}`).join(' | ');
-    };
 
     useEffect(() => {
         const fetchTimetable = async () => {
             try {
-                const data = await studentService.getStudentTimetable();
+                const data = await config.fetchTimetable();
                 setTimetable(data.timetable);
             } catch (err) {
-                setError('Lỗi khi tải thời khóa biểu.', err);
+                setError('Lỗi khi tải thời khóa biểu.');
             } finally {
                 setLoading(false);
             }
         };
         fetchTimetable();
-    }, []);
+    }, [config]);
 
-    const getInfoOfClass = async (id) => {
-        try {
-            const data = await studentService.getInfoOfClass(id);
-            setShowModal(true);
-            setSelectedClass(data.classInfo);
-            return data;
-        } catch (err) {
-            setError('Lỗi khi tải danh sách sinh viên.', err);
+    // sinh viên: xem chi tiết lớp; giảng viên: chuyển sang trang điểm danh
+    const handleAction = async (classId) => {
+        if (role === 'teacher') {
+            navigate(`/teacher/teaching/attendance/${classId}`);
+            return;
         }
-    }
+        try {
+            const data = await studentService.getInfoOfClass(classId);
+            setSelectedClass(data.classInfo);
+            setShowModal(true);
+        } catch (err) {
+            setError('Lỗi khi tải danh sách sinh viên.');
+        }
+    };
 
     if (loading) {
         return (
@@ -75,24 +86,26 @@ function StudyPage() {
         )
     }
 
-    if (timetable.length === 0) {
-        return <Alert variant="info">
-            <Alert.Heading>Bạn chưa có lịch!</Alert.Heading>
-        </Alert>;
-    }
-
     if (error) {
         return (
             <Alert variant="danger">
-                <Alert.Heading>Lỗi khi tải dữ liệu</Alert.Heading>
+                <Alert.Heading>Lỗi khi tải dữ liệu!</Alert.Heading>
                 <p>{error}</p>
             </Alert>
         )
     }
 
+    if (timetable.length === 0) {
+        return (
+            <Alert variant="info">
+                <Alert.Heading>{config.emptyTimetable}</Alert.Heading>
+            </Alert>
+        );
+    }
+
     return (
         <div>
-            <h2 className="timetable-title">Thời khóa biểu của {user.name}</h2>
+            <h2 className="timetable-title">{config.title(user.name)}</h2>
             <div>
                 <Row className='align-items-center'>
                     <Col md={2}>
@@ -104,7 +117,7 @@ function StudyPage() {
                 <Row className="align-items-center mb-4">
                     <Col md={4}>
                         <Form.Select value={selectedSemester} onChange={(e) => setSelectedSemester(e.target.value)} className="semester-select" >
-                            {semesters.map((item) => (
+                            {SEMESTERS.map((item) => (
                                 <option key={item} value={item}>{item}</option>
                             ))}
                         </Form.Select>
@@ -126,32 +139,33 @@ function StudyPage() {
                         <th>MÃ HỌC PHẦN</th>
                         <th>MÃ LỚP HỌC</th>
                         <th>LOẠI LỚP</th>
-                        <th>GIẢNG VIÊN</th>
+                        <th>{config.infoHeader}</th>
                         <th>LỊCH HỌC</th>
-                        <th>GHI CHÚ</th>
+                        <th>{config.actionHeader}</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     {timetable.map((item, index) => (
-                        <tr key={index}>
+                        <tr key={item.classId}>
                             <td className="text-center fw-bold">{index + 1}</td>
-                            <td className="subject-name"> {item.name}</td>
+                            <td className="subject-name">{item.name}</td>
                             <td>{item.subjectCode}</td>
                             <td>{item.classCode}</td>
-                            <td>{item.type} </td>
-                            <td>{item.teacher.name}</td>
-                            <td className="schedule-cell">{formatSchedule(item.schedule)}</td>
+                            <td>{item.type}</td>
+                            <td>{config.infoValue(item)}</td>
+                            <td className="schedule-cell">{formatSchedule(item.schedule, config.emptySchedule)}</td>
                             <td className="text-center">
-                                <Button variant="outline-dark" onClick={() => getInfoOfClass(item.classId)}>Chi tiết</Button>
+                                <Button variant="outline-dark" onClick={() => handleAction(item.classId)}>{config.actionLabel}</Button>
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </Table>
 
-            <ClassInfoModal show={showModal} handleClose={() => setShowModal(false)} selectedClass={selectedClass} formatSchedule={formatSchedule} />
+            <ClassInfoModal show={showModal} handleClose={() => setShowModal(false)} selectedClass={selectedClass} />
         </div>
     );
 }
-export default StudyPage;
+
+export default TimetablePage;

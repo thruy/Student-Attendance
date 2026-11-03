@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import authService from "../services/authService";
-import { Alert, Card, CardBody, CardFooter, CardHeader, Col, Container, Row, Spinner, Button, Modal, Form } from "react-bootstrap";
+import { Alert, Card, CardBody, CardFooter, CardHeader, Container, Spinner, Button, Modal, Form } from "react-bootstrap";
+import { useAuth } from "../context/AuthContext";
+import ProfileInfo, { formatName } from '../components/ProfileInfo';
+import { getProfileLabels } from '../utils/profileLabels';
 
 function UserProfilePage() {
+    const { role } = useAuth();
+    const labels = getProfileLabels(role);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -23,28 +28,6 @@ function UserProfilePage() {
         };
         fetchUserProfile();
     }, []);
-
-    const formatName = (name) => name?.toLowerCase().split(" ")
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" ");
-
-    const formatDate = (dateString) => {
-        if (!dateString) return null;
-        return new Date(dateString).toLocaleDateString("vi-VN");
-    };
-
-    const InfoRow = ({ label, value }) => (
-        <Row className="mb-3 align-items-center">
-            <Col md={4} className="fw-bold">
-                {label}
-            </Col>
-            <Col md={8}>
-                <div className="info-value">
-                    {value || <span className="text-muted">Chưa cập nhật</span>}
-                </div>
-            </Col>
-        </Row>
-    );
 
     const handleUpdate = async (event) => {
         event.preventDefault();
@@ -76,21 +59,7 @@ function UserProfilePage() {
                         </Alert>
                     )}
                     <Container>
-                        <InfoRow label="Họ và tên:" value={formatName(user?.name)} />
-                        <InfoRow label="Email:" value={user?.email} />
-                        <InfoRow label="Mã số sinh viên:" value={user?.code} />
-                        <InfoRow label="Ngày sinh:" value={formatDate(user?.dob)} />
-                        <InfoRow label="Giới tính:" value={user?.gender} />
-                        <InfoRow label="Dân tộc:" value={user?.ethnic} />
-                        <InfoRow label="Đại học:" value={user?.university} />
-                        <InfoRow label="Khoa/Viện:" value={user?.school} />
-                        <InfoRow label="Ngành:" value={user?.branch} />
-                        <InfoRow label="Lớp:" value={user?.className} />
-                        <InfoRow label="Khóa:" value={user?.schoolYear} />
-                        <InfoRow label="Hệ đào tạo:" value={user?.trainingSystem} />
-                        <InfoRow label="Quê quán:" value={user?.hometown} />
-                        <InfoRow label="Số căn cước công dân:" value={user?.identificationNumber} />
-                        <InfoRow label="Số điện thoại:" value={user?.phone} />
+                        <ProfileInfo role={role} profile={user} />
                     </Container>
                 </CardBody>
 
@@ -111,7 +80,7 @@ function UserProfilePage() {
                             <Form.Control value={formatName(user?.name)} type="text" autoFocus disabled />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Mã số sinh viên</Form.Label>
+                            <Form.Label>{labels.code}</Form.Label>
                             <Form.Control value={user?.code} type="text" autoFocus disabled />
                         </Form.Group>
                         <Form.Group className="mb-3">
@@ -127,19 +96,21 @@ function UserProfilePage() {
                             <Form.Control value={formData?.ethnic} type="text" autoFocus onChange={(e) => setFormData({ ...formData, ethnic: e.target.value })} />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Khoa/Viện</Form.Label>
+                            <Form.Label>{labels.school}</Form.Label>
                             <Form.Control value={formData?.school} type="text" placeholder="Khoa/Viện/Trường" autoFocus onChange={(e) => setFormData({ ...formData, school: e.target.value })} />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Ngành học</Form.Label>
+                            <Form.Label>{labels.branch}</Form.Label>
                             <Form.Control value={formData?.branch} type="text" autoFocus onChange={(e) => setFormData({ ...formData, branch: e.target.value })} />
                         </Form.Group>
+                        {role === 'student' && (
+                            <Form.Group className="mb-3">
+                                <Form.Label>Lớp</Form.Label>
+                                <Form.Control value={formData?.className} type="text" onChange={(e) => setFormData({ ...formData, className: e.target.value })} />
+                            </Form.Group>
+                        )}
                         <Form.Group className="mb-3">
-                            <Form.Label>Lớp</Form.Label>
-                            <Form.Control value={formData?.className} type="text" autoFocus onChange={(e) => setFormData({ ...formData, className: e.target.value })} />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Hệ đào tạo</Form.Label>
+                            <Form.Label>{labels.trainingSystem}</Form.Label>
                             <Form.Select value={formData?.trainingSystem} onChange={(e) => setFormData({ ...formData, trainingSystem: e.target.value })}>
                                 <option value="Cử nhân">Cử nhân</option>
                                 <option value="Kỹ sư">Kỹ sư</option>

@@ -1,13 +1,14 @@
 import { useAuth } from '../context/AuthContext'
 
-function SupportPage() {
+// trang tạm cho các chức năng chưa phát triển
+function PlaceholderPage({ title, description }) {
     const { user } = useAuth();
 
     return (
         <div>
-            <h2>Hỗ trợ sinh viên</h2>
+            <h2>{title}</h2>
             {user ? (
-                <p>Chào {user.name}, bạn đang ở trang hỗ trợ.</p>
+                <p>Chào {user.name}, {description}</p>
             ) : (
                 <p>Đang tải...</p>
             )}
@@ -15,4 +16,4 @@ function SupportPage() {
     );
 }
 
-export default SupportPage;
+export default PlaceholderPage;

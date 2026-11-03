@@ -1,20 +1,8 @@
-import { Modal, Row, Col, Table } from 'react-bootstrap';
+import { Modal, Table } from 'react-bootstrap';
 import '../pages/timetable.css';
+import ClassInfoRows from './ClassInfoRows';
 
-function ClassInfoModal({ show, handleClose, selectedClass, formatSchedule }) {
-    const InfoRow = ({ label, value }) => (
-        <Row className="mb-3 align-items-center">
-            <Col md={4} className="fw-bold">
-                {label}
-            </Col>
-            <Col md={8}>
-                <div className="info-value">
-                    {value || <span className="text-muted">Chưa cập nhật</span>}
-                </div>
-            </Col>
-        </Row>
-    );
-
+function ClassInfoModal({ show, handleClose, selectedClass }) {
     return (
         <Modal show={show} onHide={handleClose} backdrop="static" keyboard={false} centered size="lg">
             <Modal.Header closeButton>
@@ -24,14 +12,7 @@ function ClassInfoModal({ show, handleClose, selectedClass, formatSchedule }) {
                 {selectedClass && (
                     <>
                         <h4>{selectedClass.subjectCode} - {selectedClass.name}</h4>
-                        <InfoRow label="Mã lớp học" value={selectedClass.classCode} />
-                        <InfoRow label="Loại lớp" value={selectedClass.type} />
-                        <InfoRow label="Học kỳ" value={selectedClass.semester} />
-                        <InfoRow label="Lịch học" value={formatSchedule(selectedClass.schedule)} />
-                        <InfoRow label="Giảng viên" value={selectedClass.teacher.name} />
-                        <InfoRow label="Email giảng viên" value={selectedClass.teacher.email} />
-                        <InfoRow label="Mã giảng viên" value={selectedClass.teacher.code} />
-                        <InfoRow label="Số lượng sinh viên" value={selectedClass.students.length} />
+                        <ClassInfoRows classInfo={selectedClass} />
                         <h5 className="mt-4">Danh sách sinh viên</h5>
                         <Table bordered hover responsive className="timetable-table">
                             <thead>

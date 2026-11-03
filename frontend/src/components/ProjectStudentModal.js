@@ -1,8 +1,9 @@
-import { Modal, Button, Table, Form, Spinner, Container, Row, Col } from 'react-bootstrap';
+import { Modal, Button, Table, Form, Spinner, Container } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import adminService from '../services/adminService';
 import { Trash3, PersonAdd } from 'react-bootstrap-icons';
 import '../pages/timetable.css';
+import InfoRow from './InfoRow';
 
 function ProjectStudentModal({ show, onHide, projectInfo }) {
     const [allStudents, setAllStudents] = useState([]);
@@ -40,19 +41,6 @@ function ProjectStudentModal({ show, onHide, projectInfo }) {
 
         return () => { clearTimeout(timer); };
     }, [inputValue]);
-
-    const InfoRow = ({ label, value }) => (
-        <Row className="mb-3 align-items-center">
-            <Col md={4} className="fw-bold">
-                {label}
-            </Col>
-            <Col md={8}>
-                <div className="info-value">
-                    {value || <span className="text-muted">Chưa cập nhật</span>}
-                </div>
-            </Col>
-        </Row>
-    );
 
     const projectStudentIds = projectStudents.map(s => s.id);
     const availableStudents = allStudents.filter(
