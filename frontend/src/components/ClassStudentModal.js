@@ -1,7 +1,7 @@
 import { Modal, Button, Table, Form, Spinner, Container } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import adminService from '../services/adminService';
-import { Trash3, PersonAdd } from 'react-bootstrap-icons';
+import { Trash3 } from 'react-bootstrap-icons';
 import '../pages/timetable.css';
 import InfoRow from './InfoRow';
 import ClassInfoRows from './ClassInfoRows';

@@ -66,7 +66,7 @@ function ProjectAddModal({ show, onHide, onSave }) {
 
             <Modal.Footer>
                 <Button variant="danger" onClick={onHide}> Hủy </Button>
-                <Button variant="success" onClick={onSave(formData)}> Thêm lớp đồ án </Button>
+                <Button variant="success" onClick={() => onSave(formData)}> Thêm lớp đồ án </Button>
             </Modal.Footer>
         </Modal>
     )

@@ -1,8 +1,7 @@
 import { useAuth } from '../context/AuthContext'
-import { Container, Row, Col, Button, Card } from "react-bootstrap";
+import { Container, Row, Col, Card } from "react-bootstrap";
 import { Calendar2Check, CheckCircle, FileText, Calendar3 } from "react-bootstrap-icons";
 import './Intro.css'
-import { Link } from "react-router-dom";
 
 function Main() {
     const { user } = useAuth();

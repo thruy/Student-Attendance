@@ -1,57 +1,43 @@
-import { useAuth } from '../context/AuthContext'
 import { useEffect, useState } from 'react';
 import adminService from '../services/adminService';
 import { Table, Spinner, Alert, Button, Form, Row, Col, InputGroup, Pagination, FormLabel } from 'react-bootstrap';
 import { Trash3, Pen, InfoCircle, JournalPlus, Search, PersonFillGear } from 'react-bootstrap-icons'
-import { useNavigate } from 'react-router-dom';
 import ProjectAddModal from '../components/ProjectAddModal';
 import './timetable.css';
 
 function ProjectManagePage() {
-    const { user } = useAuth();
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [limit] = useState(8);
-    const [limit1] = useState(1000);
     const [totalPages, setTotalPages] = useState(1);
     const [inputValue, setInputValue] = useState('');
-    const [chosenProject, setChosenProject] = useState(null);
-    const [showEdit, setShowEdit] = useState(false);
     const [showAdd, setShowAdd] = useState(false);
     const [selectedSemester, setSelectedSemester] = useState("20251");
-    const [teachers, setTeachers] = useState([]);
-    const [showAddStudents, setShowAddStudents] = useState(false);
-    const navigate = useNavigate();
     const semesters = ['20252', '20251', '20243', '20242', '20241', '20233', '20232', '20231'];
 
-    const fetchProjects = async () => {
-        try {
-            const res = await adminService.getAllProjects({
-                page,
-                limit,
-                search,
-                semester: selectedSemester
-            });
-            setProjects(res.projects);
-            setTotalPages(res.pagination.totalPages);
-        } catch (err) {
-            setError('Lỗi lấy danh sách lớp học');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchAllTeacher = async () => {
-        const data = await adminService.getAllTeacher({ page, limit1, search });
-        setTeachers(data.teachers);
-    }
-
     useEffect(() => {
+        const fetchProjects = async () => {
+            try {
+                const res = await adminService.getAllProjects({
+                    page,
+                    limit,
+                    search,
+                    semester: selectedSemester
+                });
+                setProjects(res.projects);
+                setTotalPages(res.pagination.totalPages);
+            } catch (err) {
+                setError('Lỗi lấy danh sách lớp học');
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchProjects();
-    }, [page, search, selectedSemester]);
+    }, [limit, page, search, selectedSemester]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -64,7 +50,7 @@ function ProjectManagePage() {
 
     const handleCreateProject = async (form) => {
         try {
-            const response = await adminService.createProject(form);
+            await adminService.createProject(form);
             setShowAdd(false);
             const res = await adminService.getAllProjects({ page, limit, search, semester: selectedSemester });
             setProjects(res.projects);

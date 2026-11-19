@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Form, Modal, Button, ModalBody } from "react-bootstrap";
-import adminService from "../services/adminService";
 
 const days = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
 const semesters = ['20251', '20243', '20242', '20241', '20233', '20232', '20231'];

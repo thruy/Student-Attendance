@@ -1,4 +1,3 @@
-import { useAuth } from '../context/AuthContext';
 import { useEffect, useState } from 'react';
 import adminService from '../services/adminService';
 import { Table, Spinner, Alert, Button, Form, Row, Col, InputGroup, Pagination, FormLabel } from 'react-bootstrap';
@@ -48,7 +47,7 @@ function ClassManagePage() {
         };
 
         fetchClasses();
-    }, [page, search, selectedSemester]);
+    }, [limit, page, search, selectedSemester]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -59,18 +58,18 @@ function ClassManagePage() {
         return () => { clearTimeout(timer); };
     }, [inputValue]);
 
-    const fetchAllTeacher = async () => {
-        const data = await adminService.getAllTeacher({ page, limit1, search });
-        setTeachers(data.teachers);
-    }
-
     useEffect(() => {
+        const fetchAllTeacher = async () => {
+            const data = await adminService.getAllTeacher({ page: 1, limit1, search: '' });
+            setTeachers(data.teachers);
+        }
+
         fetchAllTeacher();
-    }, []);
+    }, [limit1]);
 
     const handleCreateClass = async (form) => {
         try {
-            const response = await adminService.createClass(form);
+            await adminService.createClass(form);
             setShowAdd(false);
             const res = await adminService.getAllClasses({ page, limit, search });
             setClasses(res.classes);
