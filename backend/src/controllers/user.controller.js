@@ -4,6 +4,7 @@ const User = require('../models/Users');
 const Classes = require('../models/Classes');
 const Attendances = require('../models/Attendances');
 const Projects = require('../models/Project');
+const ExamClasses = require('../models/ExamClasses');
 
 const DEFAULT_PASSWORD = '123456';
 
@@ -234,10 +235,15 @@ const deleteStudent = async (req, res) => {
             { $pull: { members: { studentId: id } } },
             { session }
         );
+        await ExamClasses.updateMany(
+            { 'rooms.students': id },
+            { $pull: { 'rooms.$[].students': id } },
+            { session }
+        );
 
         await student.deleteOne({ session });
         await session.commitTransaction();
-        res.status(200).json({ message: 'Đã xóa sinh viên và gỡ khỏi lớp học, đồ án, điểm danh' });
+        res.status(200).json({ message: 'Đã xóa sinh viên và gỡ khỏi lớp học, đồ án, điểm danh, lớp thi' });
     } catch (err) {
         await session.abortTransaction();
         console.error(err);
@@ -247,7 +253,7 @@ const deleteStudent = async (req, res) => {
     }
 };
 
-// xóa giảng viên: xóa luôn đồ án, lớp học và phiên điểm danh của các lớp đó
+// xóa giảng viên: xóa luôn đồ án, lớp học, phiên điểm danh và lớp thi của các lớp đó, gỡ khỏi danh sách coi thi
 const deleteTeacher = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -266,7 +272,13 @@ const deleteTeacher = async (req, res) => {
         const classIds = classes.map(c => c._id);
         if (classIds.length > 0) {
             await Attendances.deleteMany({ classId: { $in: classIds } }, { session });
+            await ExamClasses.deleteMany({ classId: { $in: classIds } }, { session });
         }
+        await ExamClasses.updateMany(
+            { 'rooms.invigilators': id },
+            { $pull: { 'rooms.$[].invigilators': id } },
+            { session }
+        );
 
         const classResult = await Classes.deleteMany({ teacherId: id }, { session });
         await teacher.deleteOne({ session });

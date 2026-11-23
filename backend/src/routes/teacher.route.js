@@ -3,6 +3,8 @@ const route = express.Router();
 const classController = require('../controllers/class.controller');
 const attendanceController = require('../controllers/attendance.controller');
 const projectController = require('../controllers/project.controller');
+const examController = require('../controllers/exam.controller');
+const { saveExamValidate } = require('../validation/examValidate');
 const { verifyToken } = require('../middleware/auth.middleware');
 const { authorize } = require('../middleware/role.middleware');
 
@@ -14,6 +16,9 @@ route.get('/timetable/:classId/attendance', attendanceController.getClassAttenda
 route.post('/timetable/attendance/save', attendanceController.saveAttendance);
 route.post('/timetable/:classId/qr-session', attendanceController.startQrSession);
 route.post('/timetable/:classId/qr-session/end', attendanceController.endQrSession);
+route.get('/timetable/:classId/exam', examController.getClassExam);
+route.put('/timetable/:classId/exam', saveExamValidate, examController.saveClassExam);
+route.delete('/timetable/:classId/exam', examController.deleteClassExam);
 
 route.get('/projects', projectController.getAllProjects);
 route.get('/projects/:projectId', projectController.getProjectDetail);

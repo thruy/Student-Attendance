@@ -26,6 +26,21 @@ const endQrSession = async (classId) => {
     return response.data;
 }
 
+const getClassExam = async (classId) => {
+    const response = await axios.get(`${API_URL}/timetable/${classId}/exam`, { withCredentials: true });
+    return response.data;
+}
+
+const saveClassExam = async (classId, payload) => {
+    const response = await axios.put(`${API_URL}/timetable/${classId}/exam`, payload, { withCredentials: true });
+    return response.data;
+}
+
+const deleteClassExam = async (classId) => {
+    const response = await axios.delete(`${API_URL}/timetable/${classId}/exam`, { withCredentials: true });
+    return response.data;
+}
+
 const getAllProjects = async ({ page, limit, search, semester }) => {
     const res = await axios.get(`${API_URL}/projects`, { params: { page, limit, search, semester }, withCredentials: true });
     return res.data;
@@ -59,6 +74,7 @@ const updateTitleForStudent = async (projectId, studentId, title) => {
 
 const teacherService = {
     getTeacherTimetable, getAttendancePageData, saveAttendance, startQrSession, endQrSession,
+    getClassExam, saveClassExam, deleteClassExam,
     getAllProjects, getProjectDetail, uploadReport, gradeStudent, updateTitleForStudent
 };
 export default teacherService;

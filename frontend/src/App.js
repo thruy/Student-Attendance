@@ -18,6 +18,8 @@ import ClassManagePage from './pages/ClassManagePage';
 import ProjectManagePage from './pages/ProjectManagePage';
 import AdminAttendancePage from './pages/AdminAttendancePage';
 import AttendanceVerifyPage from './pages/AttendanceVerifyPage';
+import ExamRoomPage from './pages/ExamRoomPage';
+import ExamSchedulePage from './pages/ExamSchedulePage';
 
 // các trang chưa phát triển
 const projectPage = <PlaceholderPage title="Trang đồ án" description="bạn đang ở trang đồ án." />;
@@ -45,6 +47,7 @@ function App() {
           <Route path='/student' element={<RoleRoute allowedRoles={['student']}><MainLayout /></RoleRoute>}>
             <Route index element={<Main />} />
             <Route path='study' element={<TimetablePage role="student" />} />
+            <Route path='exam' element={<ExamSchedulePage />} />
             <Route path='project' element={projectPage} />
             <Route path='scholarship' element={scholarshipPage} />
             <Route path='support' element={supportPage} />
@@ -58,6 +61,7 @@ function App() {
             <Route index element={<Main />} />
             <Route path='teaching' element={<TimetablePage role="teacher" />} />
             <Route path="teaching/attendance/:classId" element={<AttendancePage />} />
+            <Route path="teaching/exam/:classId" element={<ExamRoomPage role="teacher" />} />
             <Route path='project' element={projectPage} />
             <Route path='support' element={supportPage} />
             <Route path='contact' element={contactPage} />
@@ -73,6 +77,7 @@ function App() {
             <Route path='teacher' element={<UserManagePage key="teacher" role="teacher" />} />
             <Route path='class' element={<ClassManagePage />} />
             <Route path="class/:classId" element={<AdminAttendancePage />} />
+            <Route path="class/:classId/exam" element={<ExamRoomPage role="admin" />} />
             <Route path='project' element={<ProjectManagePage />} />
             <Route path='scholarship' element={scholarshipManagePage} />
             <Route path='profile' element={<UserProfilePage />} />

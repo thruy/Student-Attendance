@@ -1,5 +1,5 @@
 import { Button, Container, Spinner, Alert } from "react-bootstrap";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import teacherService from "../services/teacherService";
 import ClassDetailCard from "../components/ClassDetailCard";
 import AttendanceTable from "../components/AttendanceTable";
@@ -13,6 +13,7 @@ const QR_POLLING_INTERVAL = 4000;
 
 function AttendancePage() {
     const { classId } = useParams();
+    const navigate = useNavigate();
     const fetchData = useCallback(() => teacherService.getAttendancePageData(classId), [classId]);
     const { classInfo, students, attendances, qrSession, attendanceDates, attendanceMap, loading, loadData } = useClassAttendance(fetchData);
 
@@ -67,6 +68,7 @@ function AttendancePage() {
                 <Container className="mt-4">
                     <Button variant="dark" onClick={() => setEditMode(true)} disabled={qrActive}>Điểm danh thủ công</Button>
                     <Button variant="dark" className="ms-2" onClick={() => setShowQrModal(true)} disabled={qrActive}>Điểm danh tự động</Button>
+                    <Button variant="dark" className="ms-2" onClick={() => navigate(`/teacher/teaching/exam/${classId}`)}>Chia lớp thi</Button>
                     <ManualAttendancePicker show={editMode && !qrActive} students={students} attendances={attendances} onSave={handleSaveAttendance} />
                 </Container>
 

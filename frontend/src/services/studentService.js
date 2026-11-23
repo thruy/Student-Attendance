@@ -37,5 +37,10 @@ const checkInByQr = async ({ token, lat, lng, accuracy }) => {
     return response.data;
 }
 
-const studentService = { getStudentTimetable, getInfoOfClass, getStudentProjects, uploadReport, getQrSessionInfo, checkInByQr };
+const getMyExams = async () => {
+    const response = await axios.get(`${API_URL}/exams`, { withCredentials: true });
+    return response.data;
+}
+
+const studentService = { getStudentTimetable, getInfoOfClass, getStudentProjects, uploadReport, getQrSessionInfo, checkInByQr, getMyExams };
 export default studentService;

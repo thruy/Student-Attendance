@@ -4,6 +4,8 @@ const userController = require('../controllers/user.controller');
 const classController = require('../controllers/class.controller');
 const attendanceController = require('../controllers/attendance.controller');
 const projectController = require('../controllers/project.controller');
+const examController = require('../controllers/exam.controller');
+const { saveExamValidate } = require('../validation/examValidate');
 const { verifyToken } = require('../middleware/auth.middleware');
 const { authorize } = require('../middleware/role.middleware');
 const { editUserValidate, addUserValidate, createClassValidate, updateClassValidate } = require('../validation/adminValidate');
@@ -39,6 +41,9 @@ router.post('/classes/:classId/students', classController.addStudentsToClass);
 router.delete('/classes/:classId/students/:studentId', classController.removeStudentFromClass);
 router.post('/classes/:classId/attendance', attendanceController.saveAttendance);
 router.delete('/classes/:classId/attendance/:date', attendanceController.deleteAttendance);
+router.get('/classes/:classId/exam', examController.getClassExam);
+router.put('/classes/:classId/exam', saveExamValidate, examController.saveClassExam);
+router.delete('/classes/:classId/exam', examController.deleteClassExam);
 
 //project
 router.get('/projects', projectController.getAllProjects);

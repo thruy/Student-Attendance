@@ -114,6 +114,22 @@ const deleteClass = async (classId) => {
     return res.data;
 };
 
+//exam
+const getClassExam = async (classId) => {
+    const res = await axios.get(`${API_URL}/classes/${classId}/exam`, { withCredentials: true });
+    return res.data;
+};
+
+const saveClassExam = async (classId, payload) => {
+    const res = await axios.put(`${API_URL}/classes/${classId}/exam`, payload, { withCredentials: true });
+    return res.data;
+};
+
+const deleteClassExam = async (classId) => {
+    const res = await axios.delete(`${API_URL}/classes/${classId}/exam`, { withCredentials: true });
+    return res.data;
+};
+
 //projects
 const createProject = async (data) => {
     const response = await axios.post(`${API_URL}/projects`, data, { withCredentials: true });
@@ -187,6 +203,7 @@ const adminService = {
 
     getAllClasses, getClassDetail, createClass, updateClass, deleteClass,
     getStudentsForClassModal, addStudentsToClass, removeStudentFromClass, saveAttendance, deleteAttendance,
+    getClassExam, saveClassExam, deleteClassExam,
 
     getAllProjects, getProjectDetail, createProject, updateProjectInfo, deleteProject,
     getStudentsForProjectModal, getTeachersForProjectModal, addStudentToProject, removeStudentFromProject,

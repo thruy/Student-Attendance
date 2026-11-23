@@ -1,6 +1,7 @@
 const User = require('../models/Users');
 const Classes = require('../models/Classes');
 const Attendances = require('../models/Attendances');
+const ExamClasses = require('../models/ExamClasses');
 const { formatClassDetail, findAccessibleClass } = require('../utils/class');
 
 // thời khóa biểu của người đang đăng nhập (sinh viên hoặc giảng viên)
@@ -171,10 +172,11 @@ const deleteClass = async (req, res) => {
         }
 
         await Attendances.deleteMany({ classId });
+        await ExamClasses.deleteMany({ classId });
         await cls.deleteOne();
 
         res.status(200).json({
-            message: 'Đã xóa lớp học và toàn bộ phiên điểm danh liên quan'
+            message: 'Đã xóa lớp học, toàn bộ phiên điểm danh và lớp thi liên quan'
         });
     } catch (err) {
         console.error(err);
@@ -234,6 +236,8 @@ const removeStudentFromClass = async (req, res) => {
         }
 
         await cls.save();
+        // gỡ sinh viên khỏi lớp thi của lớp này
+        await ExamClasses.updateOne({ classId }, { $pull: { 'rooms.$[].students': studentId } });
         res.status(200).json({ message: 'Đã xóa sinh viên khỏi lớp' });
     } catch (err) {
         console.error(err);

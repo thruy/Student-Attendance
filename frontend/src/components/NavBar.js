@@ -24,6 +24,7 @@ const NAV_LINKS = {
     ],
     student: [
         { to: 'study', label: 'Học tập' },
+        { to: 'exam', label: 'Lịch thi' },
         { to: 'project', label: 'Đồ án' },
         { to: 'scholarship', label: 'Học bổng' },
         { to: 'contact', label: 'Hỗ trợ' }

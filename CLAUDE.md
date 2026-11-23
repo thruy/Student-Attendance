@@ -53,6 +53,12 @@ Optional backend env vars: `QR_SESSION_MINUTES` (default 5), `QR_RADIUS_METERS` 
 - A QR session is active iff `qrToken` set, `endedAt == null`, and `expiresAt > now` (`activeQrFilter` / `isQrActive`). Check-in uses an atomic `updateOne` with `$elemMatch` to avoid races between concurrent students.
 - Manual saves go through `mergeManualRecords`, which preserves QR check-in metadata for students whose status didn't change.
 
+### Exam classes (chia lớp thi)
+- One `ExamClasses` document per class (`classId` unique — each class has exactly one exam), with embedded `rooms[]` (`examCode`, `room`, `startTime`/`endTime`, `invigilators` = teacher `Users` refs, `students`). Saving overwrites the whole document (`PUT .../exam`, upsert); there is no draft/publish state — students see their room (`GET /api/students/exams`) as soon as it's saved.
+- `exam.controller.js` is mounted on teacher (`/timetable/:classId/exam`) and admin (`/classes/:classId/exam`) routers, scoped via `findAccessibleClass`. On save it checks every student belongs to the class and appears in at most one room, and that invigilators are teachers. Unassigned students are allowed.
+- The even split (ceil(n/a) rooms, sizes differ by ≤1) and Vietnamese name ordering (given name → family name → MSSV) live in `frontend/src/utils/exam.js` and run client-side only; `ExamRoomPage` (shared by teacher/admin via `role` prop) edits the draft before saving.
+- Deleting a class/teacher removes its `ExamClasses`; removing/deleting a student or deleting a teacher `$pull`s them from `rooms.$[].students` / `rooms.$[].invigilators`.
+
 ### Frontend layout
 - `services/{auth,student,teacher,admin}Service.js` wrap axios calls with hard-coded `http://localhost:8000/api/...` base URLs (one per role prefix).
 - `hooks/useClassAttendance.js` loads class info + attendances and builds `attendanceMap[date].recordMap[studentId]`; it's shared by the teacher `AttendancePage` and `AdminAttendancePage`. The `fetchData` argument must be stable (`useCallback`).

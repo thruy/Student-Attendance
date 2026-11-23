@@ -1,5 +1,5 @@
 import { Button, Container, Form, Spinner, Alert } from "react-bootstrap";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import adminService from "../services/adminService";
 import ClassDetailCard from "../components/ClassDetailCard";
 import AttendanceTable from "../components/AttendanceTable";
@@ -9,6 +9,7 @@ import { useCallback, useState } from "react";
 
 function AdminAttendancePage() {
     const { classId } = useParams();
+    const navigate = useNavigate();
     const fetchData = useCallback(() => adminService.getClassDetail(classId), [classId]);
     const { classInfo, students, attendances, attendanceDates, attendanceMap, loading, loadData } = useClassAttendance(fetchData);
 
@@ -52,6 +53,7 @@ function AdminAttendancePage() {
                     <Button variant="dark" onClick={() => setMode('manual')}>Điểm danh thủ công</Button>
                     <Button variant="dark" className="ms-2" disabled>Điểm danh tự động</Button>
                     <Button variant="dark" className="ms-2" onClick={() => setMode('delete')}>Xóa phiên điểm danh</Button>
+                    <Button variant="dark" className="ms-2" onClick={() => navigate(`/admin/class/${classId}/exam`)}>Chia lớp thi</Button>
                     <ManualAttendancePicker show={mode === 'manual'} students={students} attendances={attendances} onSave={handleSaveAttendance} />
                     {mode === 'delete' && (
                         <div className="d-flex align-items-center gap-3 mt-3">
