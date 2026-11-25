@@ -91,13 +91,18 @@ const usersSchema = new mongoose.Schema({
         match: [/^\d+$/]
     },
 
+    // ảnh khuôn mặt sinh viên tự tải lên để điểm danh; dữ liệu sinh trắc học nên mặc định không trả về
+    // lấy ra bằng .select('+faceData'), photoPath là đường dẫn nội bộ trên server (không public)
     faceData: {
-        embeddings: {
-            type: [Number]
-        },
-        registeredAt: {
-            type: Date
-        }
+        type: new mongoose.Schema({
+            embedding: { type: [Number] },
+            // embedding chỉ so được với embedding cùng mô hình và bộ phát hiện
+            model: { type: String },
+            detector: { type: String },
+            photoPath: { type: String },
+            registeredAt: { type: Date }
+        }, { _id: false }),
+        select: false
     }
 
 }, {

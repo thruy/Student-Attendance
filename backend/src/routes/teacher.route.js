@@ -6,6 +6,7 @@ const projectController = require('../controllers/project.controller');
 const examController = require('../controllers/exam.controller');
 const examAttendanceController = require('../controllers/examAttendance.controller');
 const { saveExamValidate } = require('../validation/examValidate');
+const { photoUpload } = require('../middleware/upload.middleware');
 const { verifyToken } = require('../middleware/auth.middleware');
 const { authorize } = require('../middleware/role.middleware');
 
@@ -27,6 +28,7 @@ route.get('/exams/:classId/rooms/:examCode/attendance', examAttendanceController
 route.post('/exams/:classId/rooms/:examCode/attendance', examAttendanceController.saveRoomAttendance);
 route.post('/exams/:classId/rooms/:examCode/qr-session', examAttendanceController.startRoomQrSession);
 route.post('/exams/:classId/rooms/:examCode/qr-session/end', examAttendanceController.endRoomQrSession);
+route.post('/exams/:classId/rooms/:examCode/face-checkin', photoUpload, examAttendanceController.faceCheckIn);
 
 route.get('/projects', projectController.getAllProjects);
 route.get('/projects/:projectId', projectController.getProjectDetail);

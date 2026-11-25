@@ -11,7 +11,7 @@ const examDateKey = (room) => dateKeyInVN(room.startTime);
 const isExamAttendanceLocked = async (classId) => !!(await Attendances.exists({ classId, examCode: { $ne: null } }));
 
 // tìm lớp thi và kiểm tra quyền: admin, cán bộ coi thi của lớp thi được điểm danh; giảng viên của lớp chỉ được xem
-// permissions: QR chỉ trong ngày thi; thủ công thì cán bộ coi thi chỉ trong ngày thi, admin bất kỳ lúc nào
+// permissions: QR và khuôn mặt chỉ trong ngày thi; thủ công thì cán bộ coi thi chỉ trong ngày thi, admin bất kỳ lúc nào
 const findAccessibleExamRoom = async (classId, examCode, user) => {
     if (!mongoose.isValidObjectId(classId)) return { status: 404, message: 'Không tìm thấy lớp học' };
     const [cls, exam] = await Promise.all([Classes.findById(classId), ExamClasses.findOne({ classId })]);
@@ -32,7 +32,8 @@ const findAccessibleExamRoom = async (classId, examCode, user) => {
     const permissions = {
         edit: canEdit,
         manual: canEdit && (isAdmin || isExamDay),
-        qr: canEdit && isExamDay
+        qr: canEdit && isExamDay,
+        face: canEdit && isExamDay
     };
     return { cls, exam, room, canEdit, permissions };
 };

@@ -5,6 +5,7 @@ const Classes = require('../models/Classes');
 const Attendances = require('../models/Attendances');
 const Projects = require('../models/Project');
 const ExamClasses = require('../models/ExamClasses');
+const { removeFacePhoto } = require('../utils/face');
 
 const DEFAULT_PASSWORD = '123456';
 
@@ -73,11 +74,19 @@ const getUserDetail = (role) => async (req, res) => {
     const { detailKey, label } = ROLES[role];
     try {
         const { id } = req.params;
-        const user = await User.findOne({ _id: id, role });
+        const user = await User.findOne({ _id: id, role }).select('-password +faceData');
         if (!user) {
             return res.status(404).json({ message: `Không tìm thấy ${label}` });
         }
-        res.status(200).json({ [detailKey]: user });
+        // chỉ trả trạng thái đăng ký khuôn mặt, không trả embedding/đường dẫn ảnh
+        const { faceData, ...detail } = user.toObject();
+        res.status(200).json({
+            [detailKey]: {
+                ...detail,
+                faceRegistered: !!faceData?.embedding?.length,
+                faceRegisteredAt: faceData?.registeredAt || null
+            }
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Lỗi server' });
@@ -218,7 +227,7 @@ const deleteStudent = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const student = await User.findOne({ _id: id, role: 'student' }, null, { session });
+        const student = await User.findOne({ _id: id, role: 'student' }, '+faceData', { session });
         if (!student) {
             await session.abortTransaction();
             return res.status(404).json({ message: 'Không tìm thấy sinh viên' });
@@ -243,6 +252,8 @@ const deleteStudent = async (req, res) => {
 
         await student.deleteOne({ session });
         await session.commitTransaction();
+        // file ảnh không nằm trong transaction, xóa sau khi đã commit
+        await removeFacePhoto(student.faceData?.photoPath).catch(err => console.error('Lỗi khi xóa ảnh khuôn mặt:', err));
         res.status(200).json({ message: 'Đã xóa sinh viên và gỡ khỏi lớp học, đồ án, điểm danh, lớp thi' });
     } catch (err) {
         await session.abortTransaction();

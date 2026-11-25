@@ -158,6 +158,24 @@ const endExamQrSession = async (classId, examCode) => {
     return res.data;
 };
 
+// photo: Blob JPEG chụp từ camera
+const faceCheckIn = async (classId, examCode, photo) => {
+    const formData = new FormData();
+    formData.append('photo', photo, 'frame.jpg');
+    const res = await axios.post(`${examRoomUrl(classId, examCode)}/face-checkin`, formData, { withCredentials: true });
+    return res.data;
+};
+
+//student face
+// dùng trực tiếp trong <img src>, cookie đăng nhập được gửi kèm
+const studentFacePhotoUrl = (studentId, version) =>
+    `${API_URL}/students/${studentId}/face/photo${version ? `?v=${encodeURIComponent(version)}` : ''}`;
+
+const deleteStudentFace = async (studentId) => {
+    const res = await axios.delete(`${API_URL}/students/${studentId}/face`, { withCredentials: true });
+    return res.data;
+};
+
 //projects
 const createProject = async (data) => {
     const response = await axios.post(`${API_URL}/projects`, data, { withCredentials: true });
@@ -232,7 +250,8 @@ const adminService = {
     getAllClasses, getClassDetail, createClass, updateClass, deleteClass,
     getStudentsForClassModal, addStudentsToClass, removeStudentFromClass, saveAttendance, deleteAttendance,
     getClassExam, saveClassExam, deleteClassExam,
-    getExamRoomAttendance, saveExamRoomAttendance, deleteExamRoomAttendance, startExamQrSession, endExamQrSession,
+    getExamRoomAttendance, saveExamRoomAttendance, deleteExamRoomAttendance, startExamQrSession, endExamQrSession, faceCheckIn,
+    studentFacePhotoUrl, deleteStudentFace,
 
     getAllProjects, getProjectDetail, createProject, updateProjectInfo, deleteProject,
     getStudentsForProjectModal, getTeachersForProjectModal, addStudentToProject, removeStudentFromProject,

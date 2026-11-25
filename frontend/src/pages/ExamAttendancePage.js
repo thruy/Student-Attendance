@@ -8,6 +8,7 @@ import AttendanceTable from "../components/AttendanceTable";
 import AttendanceModal from "../components/AttendanceModal";
 import QrSessionStartModal from "../components/QrSessionStartModal";
 import QrSessionPanel from "../components/QrSessionPanel";
+import FaceCheckInPanel from "../components/FaceCheckInPanel";
 import { compareVietnameseName, formatDateTime, formatTime } from "../utils/exam";
 import { todayInVN } from "../utils/date";
 import './timetable.css';
@@ -28,7 +29,7 @@ const permissionNote = (permissions, examDate, role) => {
     const today = todayInVN();
     if (today < examDate) return `Chưa đến ngày thi (${examDate}), chưa thể điểm danh.`;
     return role === 'admin'
-        ? 'Đã qua ngày thi, không thể điểm danh bằng QR. Admin vẫn có thể điểm danh thủ công.'
+        ? 'Đã qua ngày thi, không thể điểm danh bằng QR hoặc khuôn mặt. Admin vẫn có thể điểm danh thủ công.'
         : 'Đã qua ngày thi, không thể điểm danh.';
 };
 
@@ -44,6 +45,7 @@ function ExamAttendancePage({ role }) {
     const [showManual, setShowManual] = useState(false);
     const [showQrModal, setShowQrModal] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const [showFace, setShowFace] = useState(false);
 
     const loadData = useCallback(async () => {
         const res = await service.getExamRoomAttendance(classId, examCode);
@@ -129,6 +131,11 @@ function ExamAttendancePage({ role }) {
         loadData().catch(err => console.error('Lỗi khi tải dữ liệu điểm danh:', err));
     }, [loadData]);
 
+    const handleFaceCapture = useCallback(
+        (photo) => service.faceCheckIn(classId, examCode, photo),
+        [service, classId, examCode]
+    );
+
     if (loading) {
         return (
             <div>
@@ -164,12 +171,14 @@ function ExamAttendancePage({ role }) {
                         <InfoRow label="Thời gian" value={`${formatDateTime(room.startTime)} - ${formatTime(room.endTime)}`} />
                         <InfoRow label="Cán bộ coi thi" value={room.invigilators.map(t => t.name).join(', ')} />
                         <InfoRow label="Có mặt" value={`${presentCount}/${students.length} sinh viên`} />
+                        <InfoRow label="Đã đăng ký khuôn mặt" value={`${data.faceRegisteredCount}/${students.length} sinh viên`} />
                     </Container>
 
                     <Container className="mt-4">
                         <Button variant="outline-dark" onClick={() => navigate(-1)}>Quay lại</Button>
-                        <Button variant="dark" className="ms-2" onClick={() => setShowManual(true)} disabled={!permissions.manual || qrActive}>Điểm danh thủ công</Button>
-                        <Button variant="dark" className="ms-2" onClick={() => setShowQrModal(true)} disabled={!permissions.qr || qrActive}>Điểm danh tự động</Button>
+                        <Button variant="dark" className="ms-2" onClick={() => setShowManual(true)} disabled={!permissions.manual || qrActive || showFace}>Điểm danh thủ công</Button>
+                        <Button variant="dark" className="ms-2" onClick={() => setShowQrModal(true)} disabled={!permissions.qr || qrActive || showFace}>Điểm danh tự động</Button>
+                        <Button variant="dark" className="ms-2" onClick={() => setShowFace(true)} disabled={!permissions.face || qrActive || showFace}>Điểm danh khuôn mặt</Button>
                         {canDelete && data.attendance && (
                             <Button variant="outline-danger" className="ms-2" onClick={handleDeleteAttendance} disabled={deleting}>
                                 {deleting ? 'Đang xóa...' : 'Xóa phiên điểm danh'}
@@ -180,6 +189,10 @@ function ExamAttendancePage({ role }) {
 
                     {data.qrSession && (
                         <QrSessionPanel session={data.qrSession} onEnd={handleEndQrSession} onExpire={handleQrExpire} />
+                    )}
+
+                    {showFace && (
+                        <FaceCheckInPanel onCapture={handleFaceCapture} onCheckedIn={handleQrExpire} onClose={() => setShowFace(false)} />
                     )}
 
                     {error && (

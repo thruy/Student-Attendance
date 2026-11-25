@@ -4,6 +4,8 @@ const classController = require('../controllers/class.controller');
 const attendanceController = require('../controllers/attendance.controller');
 const projectController = require('../controllers/project.controller');
 const examController = require('../controllers/exam.controller');
+const faceController = require('../controllers/face.controller');
+const { photoUpload } = require('../middleware/upload.middleware');
 const { verifyToken } = require('../middleware/auth.middleware');
 const { authorize } = require('../middleware/role.middleware');
 
@@ -17,5 +19,9 @@ route.put('/projects/:projectId/students/:studentId/report', projectController.u
 route.get('/attendance/qr', attendanceController.getQrSessionInfo);
 route.post('/attendance/qr', attendanceController.checkInByQr);
 route.get('/exams', examController.getMyExams);
+// ảnh khuôn mặt để điểm danh lớp thi, chỉ tải lên 1 lần
+route.get('/face', faceController.getMyFace);
+route.post('/face', photoUpload, faceController.uploadMyFace);
+route.get('/face/photo', faceController.getMyFacePhoto);
 
 module.exports = route;

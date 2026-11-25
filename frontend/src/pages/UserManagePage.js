@@ -6,6 +6,7 @@ import './timetable.css';
 import ProfileModal from '../components/ProfileModal';
 import ProfileAddModal from '../components/ProfileAddModal';
 import ProfileEditModal from '../components/ProfileEditModal';
+import AdminFacePanel from '../components/AdminFacePanel';
 import { getProfileLabels } from '../utils/profileLabels';
 
 // khác biệt giữa trang quản lý sinh viên và giảng viên
@@ -209,7 +210,14 @@ function UserManagePage({ role }) {
                     <Pagination.Next disabled={page === totalPages} onClick={() => setPage(page + 1)} />
                 </Pagination>
             </div>
-            <ProfileModal show={showDetails} onHide={() => setShowDetails(false)} role={role} profile={selectedUser} />
+            <ProfileModal show={showDetails} onHide={() => setShowDetails(false)} role={role} profile={selectedUser}>
+                {role === 'student' && selectedUser && (
+                    <AdminFacePanel
+                        student={selectedUser}
+                        onDeleted={() => setSelectedUser(prev => ({ ...prev, faceRegistered: false, faceRegisteredAt: null }))}
+                    />
+                )}
+            </ProfileModal>
             <ProfileEditModal show={showEdit} onHide={() => setShowEdit(false)} role={role} profile={editingUser} onSave={handleUpdate} />
             <ProfileAddModal show={showAdd} onHide={() => setShowAdd(false)} role={role} onSave={handleCreate} />
         </div>

@@ -6,6 +6,8 @@ const attendanceController = require('../controllers/attendance.controller');
 const projectController = require('../controllers/project.controller');
 const examController = require('../controllers/exam.controller');
 const examAttendanceController = require('../controllers/examAttendance.controller');
+const faceController = require('../controllers/face.controller');
+const { photoUpload } = require('../middleware/upload.middleware');
 const { saveExamValidate } = require('../validation/examValidate');
 const { verifyToken } = require('../middleware/auth.middleware');
 const { authorize } = require('../middleware/role.middleware');
@@ -21,6 +23,8 @@ router.put('/students/:id', editUserValidate, userController.updateUser('student
 router.put('/students/:id/reset-password', userController.resetPassword);
 router.post('/students', addUserValidate, userController.createUser('student'));
 router.delete('/students/:id', userController.deleteStudent);
+router.get('/students/:id/face/photo', faceController.getStudentFacePhoto);
+router.delete('/students/:id/face', faceController.deleteStudentFace);
 
 //teacher
 router.get('/teachers', userController.getAllUsers('teacher'));
@@ -48,6 +52,7 @@ router.put('/classes/:classId/exam', saveExamValidate, examController.saveClassE
 router.delete('/classes/:classId/exam', examController.deleteClassExam);
 router.get('/classes/:classId/exam/rooms/:examCode/attendance', examAttendanceController.getRoomAttendance);
 router.post('/classes/:classId/exam/rooms/:examCode/attendance', examAttendanceController.saveRoomAttendance);
+router.post('/classes/:classId/exam/rooms/:examCode/face-checkin', photoUpload, examAttendanceController.faceCheckIn);
 router.delete('/classes/:classId/exam/rooms/:examCode/attendance', examAttendanceController.deleteRoomAttendance);
 router.post('/classes/:classId/exam/rooms/:examCode/qr-session', examAttendanceController.startRoomQrSession);
 router.post('/classes/:classId/exam/rooms/:examCode/qr-session/end', examAttendanceController.endRoomQrSession);

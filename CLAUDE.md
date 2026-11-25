@@ -8,6 +8,7 @@ Student attendance / class management web app for HUST (Đại học Bách Khoa 
 
 - `backend/` — Express 5 + Mongoose (CommonJS), REST API on port 8000
 - `frontend/` — Create React App (React 19, react-router-dom 7, react-bootstrap, axios), port 3000
+- `face-service/` — tiny Flask service wrapping the deepface library (Docker, `docker-compose.yml` at repo root), only used for face check-in
 
 UI text, API error messages, and code comments are in Vietnamese — keep new ones consistent with that.
 
@@ -23,6 +24,9 @@ cd frontend && npm start       # dev server on http://localhost:3000
 cd frontend && npm run build
 cd frontend && npm test        # Jest via react-scripts (no test files exist yet)
 cd frontend && npm test -- --watchAll=false src/path/to/File.test.js   # single test
+
+# face recognition service (needs FACE_SERVICE_KEY in root .env and backend/.env)
+docker compose up -d --build face-service   # 127.0.0.1:5005, GET /health
 ```
 
 Backend has no tests or linter. Frontend lint is the CRA built-in ESLint (`react-app` config), surfaced during `npm start`/`build`.
@@ -47,7 +51,7 @@ Optional backend env vars: `QR_SESSION_MINUTES` (default 5), `QR_RADIUS_METERS` 
 - Classes store their schedule (`dayOfWeek` in Vietnamese, `HH:mm` times) plus an explicit `date[]` list of session dates.
 
 ### Attendance model
-- One `Attendances` document per `(classId, date)` with an embedded `records[]` array (`status: 'yes' | 'no' | null`, `method: manual|qr|face`). The separate `AttendanceRecords` model is unused legacy. `faceData` on Users is reserved for a future face check-in method.
+- One `Attendances` document per `(classId, date)` with an embedded `records[]` array (`status: 'yes' | 'no' | null`, `method: manual|qr|face`). The separate `AttendanceRecords` model is unused legacy. Face check-in exists only for exam rooms (see below).
 - `examCode` distinguishes the two kinds of session in the same collection: `null` (or missing) = a class session, a string = the single attendance session of that exam room (partial unique index on `(classId, examCode)`). Every class-session query in `attendance.controller.js` must include `examCode: null` (`CLASS_SESSION`), otherwise exam sessions leak into class attendance.
 - Dates are compared as `YYYY-MM-DD` keys; "today" is computed in `Asia/Ho_Chi_Minh` (`utils/attendance.js#todayInVN` / `dateKeyInVN`).
 - **QR check-in flow:** teacher starts a session (`POST /api/teachers/timetable/:classId/qr-session`, today only, optional teacher geolocation) → backend stores a random `qrToken`, `expiresAt`, optional `location`/`radius` on that day's Attendances doc → frontend shows a QR encoding `${FRONTEND_URL}/attendance/verify?token=...` → student opens `AttendanceVerifyPage`, which calls `GET/POST /api/students/attendance/qr`. If the session has a location, the student's browser geolocation is required and checked with Haversine distance against `radius`.
@@ -62,6 +66,13 @@ Optional backend env vars: `QR_SESSION_MINUTES` (default 5), `QR_RADIUS_METERS` 
 - Each room's `startTime`/`endTime` must fall on the same VN day (`examValidate`); that day is the exam date (`utils/exam.js#examDateKey`).
 - **Exam attendance** (`examAttendance.controller.js`, teacher `/exams/:classId/rooms/:examCode/...`, admin `/classes/:classId/exam/rooms/:examCode/...`): access via `utils/exam.js#findAccessibleExamRoom` — admin and the room's invigilators can take attendance, the class's teacher can only view. QR only on the exam date (admin too); manual: invigilators only on the exam date, admin any time. Teachers find their rooms via `GET /api/teachers/exams` (`InvigilationPage`, nav "Coi thi"); `ExamAttendancePage` is shared by teacher/admin via `role` prop.
 - Once any exam attendance exists for a class (`isExamAttendanceLocked`), `PUT`/`DELETE .../exam` return 409 and `ExamRoomPage` becomes read-only (`attendanceLocked`). Only admin can delete an exam attendance session (`DELETE /api/admin/classes/:classId/exam/rooms/:examCode/attendance`, mirroring class-session deletion which is also admin-only); deleting the last one unlocks the exam split.
+
+### Face check-in (điểm danh khuôn mặt, exam rooms only)
+- `face-service/app.py` exposes only `POST /embed` (raw JPEG bytes, `Authorization: Bearer FACE_SERVICE_KEY`, `?anti_spoofing=1`) → one 512-d embedding, fixed **Facenet512 + RetinaFace**, ONNX engine; errors are 422 `{ code: BAD_IMAGE | NO_FACE | MULTIPLE_FACES | SPOOF }`. It never accepts paths/URLs. Runs with 1 gunicorn worker/thread (RetinaFace isn't thread-safe); deepface is pinned to a commit in `requirements.txt`.
+- Matching lives in Node (`utils/face.js`): cosine distance against the **room's** students only; a match needs `distance <= FACE_MATCH_THRESHOLD` (0.30) and a gap of `FACE_MATCH_MARGIN` (0.05) to the runner-up. Embeddings are only compared when `model`/`detector` match (`isComparable`) — changing the model means re-registering.
+- `Users.faceData` (`embedding`, `model`, `detector`, `photoPath`, `registeredAt`) is `select: false`; read it with `.select('+faceData')` and never send `embedding`/`photoPath` to clients. Photos are stored outside any public folder (`FACE_UPLOAD_DIR`, default `backend/uploads/faces`, gitignored) and served only through authenticated endpoints with `Cache-Control: private, no-store` (student: own photo `GET /api/students/face/photo`; admin: `GET /api/admin/students/:id/face/photo`).
+- Students upload once (`POST /api/students/face`, multipart `photo`, JPEG only — the frontend re-encodes via canvas in `utils/camera.js`); only admin can delete (`DELETE /api/admin/students/:id/face`) so they can re-upload. Uploads go through `middleware/upload.middleware.js#photoUpload` (multer memory storage, 5MB).
+- `POST .../rooms/:examCode/face-checkin` (teacher + admin, `permissions.face` = same rule as QR) embeds the frame with anti-spoofing, then `findOrCreateRoomAttendance` + atomic `$elemMatch` update (`method: 'face'`, `distance` = cosine). Unmatched returns 200 `{ matched: false }` so `FaceCheckInPanel` keeps auto-capturing every 2s; camera frames are not stored.
 
 ### Frontend layout
 - `services/{auth,student,teacher,admin}Service.js` wrap axios calls with hard-coded `http://localhost:8000/api/...` base URLs (one per role prefix).

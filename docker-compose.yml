@@ -1,0 +1,9 @@
+services:
+  face-service:
+    build: ./face-service
+    # chỉ mở trên máy local, backend Node gọi tới qua FACE_SERVICE_URL
+    ports:
+      - "127.0.0.1:5005:5000"
+    environment:
+      FACE_SERVICE_KEY: ${FACE_SERVICE_KEY:?FACE_SERVICE_KEY is required}
+    restart: unless-stopped

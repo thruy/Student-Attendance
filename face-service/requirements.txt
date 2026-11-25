@@ -1,0 +1,4 @@
+# deepface ghim theo commit đã kiểm tra (serengil/deepface 0.0.105)
+deepface @ git+https://github.com/serengil/deepface@8cec026
+flask>=3.0,<4
+gunicorn>=22,<24

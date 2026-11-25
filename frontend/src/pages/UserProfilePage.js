@@ -4,6 +4,7 @@ import { Alert, Card, CardBody, CardFooter, CardHeader, Container, Spinner, Butt
 import { useAuth } from "../context/AuthContext";
 import ProfileInfo, { formatName } from '../components/ProfileInfo';
 import { getProfileLabels } from '../utils/profileLabels';
+import FacePhotoCard from '../components/FacePhotoCard';
 
 function UserProfilePage() {
     const { role } = useAuth();
@@ -67,6 +68,8 @@ function UserProfilePage() {
                     <Button variant="dark" onClick={() => setShowEdit(true)}>Chỉnh sửa thông tin</Button>
                 </CardFooter>
             </Card>
+
+            {role === 'student' && <FacePhotoCard />}
 
             <Modal show={showEdit} onHide={() => setShowEdit(false)} backdrop="static" keyboard={false} centered size="lg">
                 <Modal.Header closeButton>

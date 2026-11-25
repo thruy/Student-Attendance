@@ -3,8 +3,8 @@ import '../pages/timetable.css';
 import ProfileInfo from './ProfileInfo';
 import { getProfileLabels } from '../utils/profileLabels';
 
-// role: 'student' | 'teacher'
-function ProfileModal({ show, onHide, role, profile }) {
+// role: 'student' | 'teacher'; children: phần bổ sung dưới thông tin (vd ảnh khuôn mặt của sinh viên)
+function ProfileModal({ show, onHide, role, profile, children }) {
     return (
         <Modal show={show} onHide={onHide} backdrop="static" keyboard={false} centered size="lg">
             <Modal.Header closeButton>
@@ -13,6 +13,7 @@ function ProfileModal({ show, onHide, role, profile }) {
             <Modal.Body>
                 <Container>
                     <ProfileInfo role={role} profile={profile} />
+                    {children}
                 </Container>
             </Modal.Body>
         </Modal>

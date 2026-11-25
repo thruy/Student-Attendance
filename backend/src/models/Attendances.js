@@ -84,6 +84,7 @@ const attendancesSchema = new mongoose.Schema({
             lng: { type: Number },
             accuracy: { type: Number }
         },
+        // method 'qr': khoảng cách tới giảng viên (mét); method 'face': khoảng cách cosine tới ảnh đăng ký
         distance: {
             type: Number
         }

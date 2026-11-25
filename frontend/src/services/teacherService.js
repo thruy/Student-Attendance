@@ -69,6 +69,14 @@ const endExamQrSession = async (classId, examCode) => {
     return response.data;
 }
 
+// photo: Blob JPEG chụp từ camera
+const faceCheckIn = async (classId, examCode, photo) => {
+    const formData = new FormData();
+    formData.append('photo', photo, 'frame.jpg');
+    const response = await axios.post(`${examRoomUrl(classId, examCode)}/face-checkin`, formData, { withCredentials: true });
+    return response.data;
+}
+
 const getAllProjects = async ({ page, limit, search, semester }) => {
     const res = await axios.get(`${API_URL}/projects`, { params: { page, limit, search, semester }, withCredentials: true });
     return res.data;
@@ -103,7 +111,7 @@ const updateTitleForStudent = async (projectId, studentId, title) => {
 const teacherService = {
     getTeacherTimetable, getAttendancePageData, saveAttendance, startQrSession, endQrSession,
     getClassExam, saveClassExam, deleteClassExam,
-    getMyInvigilations, getExamRoomAttendance, saveExamRoomAttendance, startExamQrSession, endExamQrSession,
+    getMyInvigilations, getExamRoomAttendance, saveExamRoomAttendance, startExamQrSession, endExamQrSession, faceCheckIn,
     getAllProjects, getProjectDetail, uploadReport, gradeStudent, updateTitleForStudent
 };
 export default teacherService;
