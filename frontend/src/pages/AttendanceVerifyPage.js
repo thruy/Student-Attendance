@@ -4,6 +4,7 @@ import { Modal, Button, Alert, Spinner, Row, Col } from "react-bootstrap";
 import { useAuth } from "../context/AuthContext";
 import studentService from "../services/studentService";
 import { getCurrentPosition, formatLocation } from "../utils/geolocation";
+import { formatDateTime, formatTime } from "../utils/exam";
 
 function AttendanceVerifyPage() {
     const [searchParams] = useSearchParams();
@@ -86,8 +87,18 @@ function AttendanceVerifyPage() {
         return (
             <>
                 <InfoRow label="Lớp học">{session.subjectCode} - {session.name} ({session.classCode})</InfoRow>
-                <InfoRow label="Giảng viên">{session.teacherName}</InfoRow>
-                <InfoRow label="Ngày điểm danh">{session.date}</InfoRow>
+                {session.exam ? (
+                    <>
+                        <InfoRow label="Lớp thi">{session.exam.examCode}</InfoRow>
+                        <InfoRow label="Phòng thi">{session.exam.room}</InfoRow>
+                        <InfoRow label="Thời gian thi">{formatDateTime(session.exam.startTime)} - {formatTime(session.exam.endTime)}</InfoRow>
+                    </>
+                ) : (
+                    <>
+                        <InfoRow label="Giảng viên">{session.teacherName}</InfoRow>
+                        <InfoRow label="Ngày điểm danh">{session.date}</InfoRow>
+                    </>
+                )}
                 <hr />
                 <InfoRow label="Họ và tên">{user?.name}</InfoRow>
                 <InfoRow label="Mã sinh viên">{user?.code}</InfoRow>
@@ -103,7 +114,9 @@ function AttendanceVerifyPage() {
                 )}
 
                 {!session.active && !result && <Alert variant="secondary" className="mt-3">Phiên điểm danh đã kết thúc hoặc hết hạn.</Alert>}
-                {session.alreadyCheckedIn && !result && <Alert variant="info" className="mt-3">Bạn đã điểm danh buổi học này.</Alert>}
+                {session.alreadyCheckedIn && !result && (
+                    <Alert variant="info" className="mt-3">Bạn đã điểm danh {session.exam ? 'buổi thi' : 'buổi học'} này.</Alert>
+                )}
                 {result && <Alert variant={result.success ? 'success' : 'danger'} className="mt-3">{result.message}</Alert>}
             </>
         );

@@ -7,6 +7,12 @@ const attendancesSchema = new mongoose.Schema({
         required: true
     },
 
+    // null = buổi học của lớp, có giá trị = phiên điểm danh của lớp thi (phòng thi) có mã tương ứng
+    examCode: {
+        type: String,
+        default: null
+    },
+
     teacherId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Users',
@@ -85,5 +91,11 @@ const attendancesSchema = new mongoose.Schema({
 }, {
     timestamps: true
 });
+
+// mỗi lớp thi có đúng một phiên điểm danh
+attendancesSchema.index(
+    { classId: 1, examCode: 1 },
+    { unique: true, partialFilterExpression: { examCode: { $type: 'string' } } }
+);
 
 module.exports = mongoose.model('Attendances', attendancesSchema);

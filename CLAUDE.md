@@ -48,9 +48,10 @@ Optional backend env vars: `QR_SESSION_MINUTES` (default 5), `QR_RADIUS_METERS` 
 
 ### Attendance model
 - One `Attendances` document per `(classId, date)` with an embedded `records[]` array (`status: 'yes' | 'no' | null`, `method: manual|qr|face`). The separate `AttendanceRecords` model is unused legacy. `faceData` on Users is reserved for a future face check-in method.
-- Dates are compared as `YYYY-MM-DD` keys; "today" is computed in `Asia/Ho_Chi_Minh` (`utils/attendance.js#todayInVN`).
+- `examCode` distinguishes the two kinds of session in the same collection: `null` (or missing) = a class session, a string = the single attendance session of that exam room (partial unique index on `(classId, examCode)`). Every class-session query in `attendance.controller.js` must include `examCode: null` (`CLASS_SESSION`), otherwise exam sessions leak into class attendance.
+- Dates are compared as `YYYY-MM-DD` keys; "today" is computed in `Asia/Ho_Chi_Minh` (`utils/attendance.js#todayInVN` / `dateKeyInVN`).
 - **QR check-in flow:** teacher starts a session (`POST /api/teachers/timetable/:classId/qr-session`, today only, optional teacher geolocation) → backend stores a random `qrToken`, `expiresAt`, optional `location`/`radius` on that day's Attendances doc → frontend shows a QR encoding `${FRONTEND_URL}/attendance/verify?token=...` → student opens `AttendanceVerifyPage`, which calls `GET/POST /api/students/attendance/qr`. If the session has a location, the student's browser geolocation is required and checked with Haversine distance against `radius`.
-- A QR session is active iff `qrToken` set, `endedAt == null`, and `expiresAt > now` (`activeQrFilter` / `isQrActive`). Check-in uses an atomic `updateOne` with `$elemMatch` to avoid races between concurrent students.
+- A QR session is active iff `qrToken` set, `endedAt == null`, and `expiresAt > now` (`activeQrFilter` / `isQrActive`). Check-in uses an atomic `updateOne` with `$elemMatch` to avoid races between concurrent students. Opening a session (class or exam) goes through `applyQrSession` + `parseQrMinutes`. The student QR endpoints serve both kinds; for exam sessions `findQrAttendance` checks membership against the room's `students`, not the class.
 - Manual saves go through `mergeManualRecords`, which preserves QR check-in metadata for students whose status didn't change.
 
 ### Exam classes (chia lớp thi)
@@ -58,6 +59,9 @@ Optional backend env vars: `QR_SESSION_MINUTES` (default 5), `QR_RADIUS_METERS` 
 - `exam.controller.js` is mounted on teacher (`/timetable/:classId/exam`) and admin (`/classes/:classId/exam`) routers, scoped via `findAccessibleClass`. On save it checks every student belongs to the class and appears in at most one room, and that invigilators are teachers. Unassigned students are allowed.
 - The even split (ceil(n/a) rooms, sizes differ by ≤1) and Vietnamese name ordering (given name → family name → MSSV) live in `frontend/src/utils/exam.js` and run client-side only; `ExamRoomPage` (shared by teacher/admin via `role` prop) edits the draft before saving.
 - Deleting a class/teacher removes its `ExamClasses`; removing/deleting a student or deleting a teacher `$pull`s them from `rooms.$[].students` / `rooms.$[].invigilators`.
+- Each room's `startTime`/`endTime` must fall on the same VN day (`examValidate`); that day is the exam date (`utils/exam.js#examDateKey`).
+- **Exam attendance** (`examAttendance.controller.js`, teacher `/exams/:classId/rooms/:examCode/...`, admin `/classes/:classId/exam/rooms/:examCode/...`): access via `utils/exam.js#findAccessibleExamRoom` — admin and the room's invigilators can take attendance, the class's teacher can only view. QR only on the exam date (admin too); manual: invigilators only on the exam date, admin any time. Teachers find their rooms via `GET /api/teachers/exams` (`InvigilationPage`, nav "Coi thi"); `ExamAttendancePage` is shared by teacher/admin via `role` prop.
+- Once any exam attendance exists for a class (`isExamAttendanceLocked`), `PUT`/`DELETE .../exam` return 409 and `ExamRoomPage` becomes read-only (`attendanceLocked`). Only admin can delete an exam attendance session (`DELETE /api/admin/classes/:classId/exam/rooms/:examCode/attendance`, mirroring class-session deletion which is also admin-only); deleting the last one unlocks the exam split.
 
 ### Frontend layout
 - `services/{auth,student,teacher,admin}Service.js` wrap axios calls with hard-coded `http://localhost:8000/api/...` base URLs (one per role prefix).

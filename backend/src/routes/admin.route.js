@@ -5,6 +5,7 @@ const classController = require('../controllers/class.controller');
 const attendanceController = require('../controllers/attendance.controller');
 const projectController = require('../controllers/project.controller');
 const examController = require('../controllers/exam.controller');
+const examAttendanceController = require('../controllers/examAttendance.controller');
 const { saveExamValidate } = require('../validation/examValidate');
 const { verifyToken } = require('../middleware/auth.middleware');
 const { authorize } = require('../middleware/role.middleware');
@@ -41,9 +42,15 @@ router.post('/classes/:classId/students', classController.addStudentsToClass);
 router.delete('/classes/:classId/students/:studentId', classController.removeStudentFromClass);
 router.post('/classes/:classId/attendance', attendanceController.saveAttendance);
 router.delete('/classes/:classId/attendance/:date', attendanceController.deleteAttendance);
+
 router.get('/classes/:classId/exam', examController.getClassExam);
 router.put('/classes/:classId/exam', saveExamValidate, examController.saveClassExam);
 router.delete('/classes/:classId/exam', examController.deleteClassExam);
+router.get('/classes/:classId/exam/rooms/:examCode/attendance', examAttendanceController.getRoomAttendance);
+router.post('/classes/:classId/exam/rooms/:examCode/attendance', examAttendanceController.saveRoomAttendance);
+router.delete('/classes/:classId/exam/rooms/:examCode/attendance', examAttendanceController.deleteRoomAttendance);
+router.post('/classes/:classId/exam/rooms/:examCode/qr-session', examAttendanceController.startRoomQrSession);
+router.post('/classes/:classId/exam/rooms/:examCode/qr-session/end', examAttendanceController.endRoomQrSession);
 
 //project
 router.get('/projects', projectController.getAllProjects);

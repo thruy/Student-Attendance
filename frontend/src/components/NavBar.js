@@ -18,6 +18,7 @@ const NAV_LINKS = {
     ],
     teacher: [
         { to: 'teaching', label: 'Giảng dạy' },
+        { to: 'invigilation', label: 'Coi thi' },
         { to: 'project', label: 'Đồ án' },
         { to: 'contact', label: 'Liên hệ' },
         { to: 'support', label: 'Hỗ trợ' }

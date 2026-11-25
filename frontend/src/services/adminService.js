@@ -130,6 +130,34 @@ const deleteClassExam = async (classId) => {
     return res.data;
 };
 
+//exam attendance
+const examRoomUrl = (classId, examCode) => `${API_URL}/classes/${classId}/exam/rooms/${encodeURIComponent(examCode)}`;
+
+const getExamRoomAttendance = async (classId, examCode) => {
+    const res = await axios.get(`${examRoomUrl(classId, examCode)}/attendance`, { withCredentials: true });
+    return res.data;
+};
+
+const saveExamRoomAttendance = async (classId, examCode, records) => {
+    const res = await axios.post(`${examRoomUrl(classId, examCode)}/attendance`, { records }, { withCredentials: true });
+    return res.data;
+};
+
+const deleteExamRoomAttendance = async (classId, examCode) => {
+    const res = await axios.delete(`${examRoomUrl(classId, examCode)}/attendance`, { withCredentials: true });
+    return res.data;
+};
+
+const startExamQrSession = async (classId, examCode, { duration, lat, lng, accuracy }) => {
+    const res = await axios.post(`${examRoomUrl(classId, examCode)}/qr-session`, { duration, lat, lng, accuracy }, { withCredentials: true });
+    return res.data;
+};
+
+const endExamQrSession = async (classId, examCode) => {
+    const res = await axios.post(`${examRoomUrl(classId, examCode)}/qr-session/end`, {}, { withCredentials: true });
+    return res.data;
+};
+
 //projects
 const createProject = async (data) => {
     const response = await axios.post(`${API_URL}/projects`, data, { withCredentials: true });
@@ -204,6 +232,7 @@ const adminService = {
     getAllClasses, getClassDetail, createClass, updateClass, deleteClass,
     getStudentsForClassModal, addStudentsToClass, removeStudentFromClass, saveAttendance, deleteAttendance,
     getClassExam, saveClassExam, deleteClassExam,
+    getExamRoomAttendance, saveExamRoomAttendance, deleteExamRoomAttendance, startExamQrSession, endExamQrSession,
 
     getAllProjects, getProjectDetail, createProject, updateProjectInfo, deleteProject,
     getStudentsForProjectModal, getTeachersForProjectModal, addStudentToProject, removeStudentFromProject,

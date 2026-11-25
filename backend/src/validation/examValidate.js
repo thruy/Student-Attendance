@@ -1,5 +1,6 @@
 const { body } = require('express-validator');
 const { validate } = require('./validate');
+const { dateKeyInVN } = require('../utils/attendance');
 
 // lưu toàn bộ kết quả chia lớp thi của một lớp học
 const saveExamValidate = [
@@ -27,8 +28,13 @@ const saveExamValidate = [
         .isISO8601().withMessage('Thời gian kết thúc không hợp lệ')
         .custom((value, { req, path }) => {
             const index = Number(path.match(/\d+/)[0]);
-            if (new Date(value) <= new Date(req.body.rooms[index].startTime)) {
+            const startTime = new Date(req.body.rooms[index].startTime);
+            if (new Date(value) <= startTime) {
                 throw new Error('Thời gian kết thúc phải sau thời gian bắt đầu');
+            }
+            // ngày thi dùng để giới hạn thời gian điểm danh
+            if (!isNaN(startTime) && dateKeyInVN(value) !== dateKeyInVN(startTime)) {
+                throw new Error('Thời gian bắt đầu và kết thúc phải trong cùng một ngày');
             }
             return true;
         }),

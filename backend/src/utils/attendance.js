@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+
 const DEFAULT_QR_MINUTES = 5;
 const DEFAULT_QR_RADIUS = 50; // mét
 
@@ -7,8 +9,10 @@ const getQrConfig = () => ({
     frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000'
 });
 
-// ngày hôm nay theo giờ Việt Nam, dạng YYYY-MM-DD (cùng định dạng với ngày lưu trong DB)
-const todayInVN = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date());
+// ngày theo giờ Việt Nam, dạng YYYY-MM-DD (cùng định dạng với ngày lưu trong DB)
+const dateKeyInVN = (date = new Date()) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date(date));
+
+const todayInVN = () => dateKeyInVN();
 
 const toDateKey = (date) => new Date(date).toISOString().split('T')[0];
 
@@ -53,6 +57,28 @@ const formatQrSession = (attendance, totalStudents) => ({
     radius: attendance.radius
 });
 
+// thời gian hiệu lực phiên QR (phút), không hợp lệ trả về null
+const parseQrMinutes = (duration) => {
+    const minutes = duration === undefined ? getQrConfig().minutes : Number(duration);
+    return Number.isInteger(minutes) && minutes >= 1 && minutes <= 180 ? minutes : null;
+};
+
+// mở phiên QR mới trên attendance (chưa save): thêm sinh viên chưa có trong danh sách, giữ nguyên kết quả đã điểm danh trước đó
+const applyQrSession = (attendance, studentIds, { teacherId, minutes, location, now = new Date() }) => {
+    const existingIds = new Set(attendance.records.map(r => String(r.studentId)));
+    studentIds.forEach(studentId => {
+        if (!existingIds.has(String(studentId))) attendance.records.push({ studentId, status: null });
+    });
+
+    attendance.type = 'qr';
+    attendance.teacherId = teacherId;
+    attendance.qrToken = crypto.randomBytes(24).toString('base64url');
+    attendance.expiresAt = new Date(now.getTime() + minutes * 60 * 1000);
+    attendance.endedAt = null;
+    attendance.location = location || undefined;
+    attendance.radius = location ? getQrConfig().radius : undefined;
+};
+
 // điểm danh thủ công: giữ nguyên thông tin check-in (QR) của những sinh viên không bị đổi trạng thái
 const mergeManualRecords = (existingRecords, incomingRecords) => {
     const byStudent = new Map(existingRecords.map(r => [String(r.studentId), r]));
@@ -64,6 +90,6 @@ const mergeManualRecords = (existingRecords, incomingRecords) => {
 };
 
 module.exports = {
-    getQrConfig, todayInVN, toDateKey, parseLocation, hasLocation, distanceInMeters,
-    activeQrFilter, isQrActive, formatQrSession, mergeManualRecords
+    getQrConfig, dateKeyInVN, todayInVN, toDateKey, parseLocation, hasLocation, distanceInMeters,
+    activeQrFilter, isQrActive, formatQrSession, parseQrMinutes, applyQrSession, mergeManualRecords
 };

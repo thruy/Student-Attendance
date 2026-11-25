@@ -1,12 +1,15 @@
 const mongoose = require('mongoose');
-const crypto = require('crypto');
 const Classes = require('../models/Classes');
 const Attendances = require('../models/Attendances');
+const ExamClasses = require('../models/ExamClasses');
 const { formatClassDetail, findAccessibleClass } = require('../utils/class');
 const {
-    getQrConfig, todayInVN, toDateKey, parseLocation, hasLocation, distanceInMeters,
-    activeQrFilter, isQrActive, formatQrSession, mergeManualRecords
+    todayInVN, toDateKey, parseLocation, hasLocation, distanceInMeters,
+    activeQrFilter, isQrActive, formatQrSession, parseQrMinutes, applyQrSession, mergeManualRecords
 } = require('../utils/attendance');
+
+// các handler trong file này chỉ làm việc với buổi học, phiên điểm danh lớp thi có examCode riêng
+const CLASS_SESSION = { examCode: null };
 
 // thông tin lớp + toàn bộ phiên điểm danh + phiên QR đang chạy (admin, giảng viên)
 const getClassAttendance = async (req, res) => {
@@ -15,7 +18,7 @@ const getClassAttendance = async (req, res) => {
         const { cls, status, message } = await findAccessibleClass(classId, req.user, { populate: true });
         if (!cls) { return res.status(status).json({ message }); }
 
-        const attendances = await Attendances.find({ classId });
+        const attendances = await Attendances.find({ classId, ...CLASS_SESSION });
         const activeQr = attendances.find(a => isQrActive(a));
         res.status(200).json({
             class: formatClassDetail(cls),
@@ -37,7 +40,7 @@ const saveAttendance = async (req, res) => {
         const { cls, status, message } = await findAccessibleClass(classId, req.user);
         if (!cls) { return res.status(status).json({ message }); }
 
-        let attendance = await Attendances.findOne({ classId, date });
+        let attendance = await Attendances.findOne({ classId, date, ...CLASS_SESSION });
         if (!attendance) {
             attendance = await Attendances.create({
                 classId,
@@ -67,7 +70,7 @@ const deleteAttendance = async (req, res) => {
         const { cls, status, message } = await findAccessibleClass(classId, req.user);
         if (!cls) { return res.status(status).json({ message }); }
 
-        const attendance = await Attendances.findOne({ classId, date });
+        const attendance = await Attendances.findOne({ classId, date, ...CLASS_SESSION });
         if (!attendance) {
             return res.status(404).json({ message: 'Không tìm thấy phiên điểm danh' });
         }
@@ -99,14 +102,11 @@ const startQrSession = async (req, res) => {
         const location = parseLocation(lat, lng, accuracy);
         if ((lat != null || lng != null) && !location) { return res.status(400).json({ message: 'Tọa độ không hợp lệ' }); }
 
-        const config = getQrConfig();
-        const minutes = duration === undefined ? config.minutes : Number(duration);
-        if (!Number.isInteger(minutes) || minutes < 1 || minutes > 180) {
-            return res.status(400).json({ message: 'Thời gian hiệu lực phải từ 1 đến 180 phút' });
-        }
+        const minutes = parseQrMinutes(duration);
+        if (!minutes) { return res.status(400).json({ message: 'Thời gian hiệu lực phải từ 1 đến 180 phút' }); }
 
         const now = new Date();
-        let attendance = await Attendances.findOne({ classId, date: today });
+        let attendance = await Attendances.findOne({ classId, date: today, ...CLASS_SESSION });
         if (attendance && isQrActive(attendance, now)) {
             return res.status(200).json({ message: 'Phiên điểm danh QR đang diễn ra', session: formatQrSession(attendance, cls.students.length) });
         }
@@ -114,19 +114,7 @@ const startQrSession = async (req, res) => {
             attendance = new Attendances({ classId, teacherId, date: today, records: [] });
         }
 
-        // thêm sinh viên chưa có trong danh sách, giữ nguyên kết quả đã điểm danh trước đó
-        const existingIds = new Set(attendance.records.map(r => String(r.studentId)));
-        cls.students.forEach(studentId => {
-            if (!existingIds.has(String(studentId))) attendance.records.push({ studentId, status: null });
-        });
-
-        attendance.type = 'qr';
-        attendance.teacherId = teacherId;
-        attendance.qrToken = crypto.randomBytes(24).toString('base64url');
-        attendance.expiresAt = new Date(now.getTime() + minutes * 60 * 1000);
-        attendance.endedAt = null;
-        attendance.location = location || undefined;
-        attendance.radius = location ? config.radius : undefined;
+        applyQrSession(attendance, cls.students, { teacherId, minutes, location, now });
         await attendance.save();
 
         res.status(201).json({ message: 'Đã tạo phiên điểm danh QR', session: formatQrSession(attendance, cls.students.length) });
@@ -141,7 +129,7 @@ const endQrSession = async (req, res) => {
         const { cls, status, message } = await findAccessibleClass(classId, req.user);
         if (!cls) { return res.status(status).json({ message }); }
 
-        const active = await Attendances.findOne({ classId, ...activeQrFilter() });
+        const active = await Attendances.findOne({ classId, ...CLASS_SESSION, ...activeQrFilter() });
         if (!active) { return res.status(404).json({ message: 'Không có phiên điểm danh QR nào đang diễn ra' }); }
 
         active.endedAt = new Date();
@@ -154,7 +142,7 @@ const endQrSession = async (req, res) => {
 
 // ===== điểm danh QR: sinh viên =====
 
-// tìm phiên điểm danh theo token QR và kiểm tra sinh viên có thuộc lớp không
+// tìm phiên điểm danh theo token QR và kiểm tra sinh viên có thuộc lớp (buổi học) hoặc lớp thi (phiên thi) không
 const findQrAttendance = async (token, studentId) => {
     if (!token || typeof token !== 'string') return { status: 400, message: 'Thiếu mã QR' };
     const attendance = await Attendances.findOne({ qrToken: token });
@@ -162,16 +150,29 @@ const findQrAttendance = async (token, studentId) => {
 
     const cls = await Classes.findById(attendance.classId).populate('teacherId', 'name');
     if (!cls) return { status: 404, message: 'Không tìm thấy lớp học' };
+
+    if (attendance.examCode) {
+        const exam = await ExamClasses.findOne({ classId: attendance.classId });
+        const room = exam?.rooms.find(r => r.examCode === attendance.examCode);
+        if (!room) return { status: 404, message: 'Không tìm thấy lớp thi' };
+        if (!room.students.some(id => String(id) === String(studentId))) {
+            return { status: 403, message: 'Bạn không thuộc lớp thi này' };
+        }
+        return { attendance, cls, room };
+    }
+
     if (!cls.students.some(id => String(id) === String(studentId))) {
         return { status: 403, message: 'Bạn không thuộc lớp học này' };
     }
     return { attendance, cls };
 };
 
+const sessionLabel = (attendance) => (attendance.examCode ? 'buổi thi' : 'buổi học');
+
 const getQrSessionInfo = async (req, res) => {
     try {
         const studentId = req.user.userId;
-        const { attendance, cls, status, message } = await findQrAttendance(req.query.token, studentId);
+        const { attendance, cls, room, status, message } = await findQrAttendance(req.query.token, studentId);
         if (!attendance) { return res.status(status).json({ message }); }
 
         const record = attendance.records.find(r => String(r.studentId) === String(studentId));
@@ -185,7 +186,10 @@ const getQrSessionInfo = async (req, res) => {
                 expiresAt: attendance.expiresAt,
                 active: isQrActive(attendance),
                 requiresLocation: hasLocation(attendance),
-                alreadyCheckedIn: record?.status === 'yes'
+                alreadyCheckedIn: record?.status === 'yes',
+                exam: room
+                    ? { examCode: room.examCode, room: room.room, startTime: room.startTime, endTime: room.endTime }
+                    : null
             }
         });
     } catch (err) {
@@ -207,7 +211,7 @@ const checkInByQr = async (req, res) => {
 
         const record = attendance.records.find(r => String(r.studentId) === String(studentId));
         if (record?.status === 'yes') {
-            return res.status(409).json({ message: 'Bạn đã điểm danh buổi học này rồi' });
+            return res.status(409).json({ message: `Bạn đã điểm danh ${sessionLabel(attendance)} này rồi` });
         }
 
         const location = parseLocation(lat, lng, accuracy);
@@ -251,7 +255,7 @@ const checkInByQr = async (req, res) => {
             { $set: update }
         );
         if (result.modifiedCount === 0) {
-            return res.status(409).json({ message: 'Bạn đã điểm danh buổi học này rồi hoặc phiên điểm danh đã kết thúc' });
+            return res.status(409).json({ message: `Bạn đã điểm danh ${sessionLabel(attendance)} này rồi hoặc phiên điểm danh đã kết thúc` });
         }
 
         res.status(200).json({ message: 'Điểm danh thành công', checkInTime: now, distance });

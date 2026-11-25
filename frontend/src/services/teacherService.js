@@ -41,6 +41,34 @@ const deleteClassExam = async (classId) => {
     return response.data;
 }
 
+// coi thi
+const getMyInvigilations = async () => {
+    const response = await axios.get(`${API_URL}/exams`, { withCredentials: true });
+    return response.data;
+}
+
+const examRoomUrl = (classId, examCode) => `${API_URL}/exams/${classId}/rooms/${encodeURIComponent(examCode)}`;
+
+const getExamRoomAttendance = async (classId, examCode) => {
+    const response = await axios.get(`${examRoomUrl(classId, examCode)}/attendance`, { withCredentials: true });
+    return response.data;
+}
+
+const saveExamRoomAttendance = async (classId, examCode, records) => {
+    const response = await axios.post(`${examRoomUrl(classId, examCode)}/attendance`, { records }, { withCredentials: true });
+    return response.data;
+}
+
+const startExamQrSession = async (classId, examCode, { duration, lat, lng, accuracy }) => {
+    const response = await axios.post(`${examRoomUrl(classId, examCode)}/qr-session`, { duration, lat, lng, accuracy }, { withCredentials: true });
+    return response.data;
+}
+
+const endExamQrSession = async (classId, examCode) => {
+    const response = await axios.post(`${examRoomUrl(classId, examCode)}/qr-session/end`, {}, { withCredentials: true });
+    return response.data;
+}
+
 const getAllProjects = async ({ page, limit, search, semester }) => {
     const res = await axios.get(`${API_URL}/projects`, { params: { page, limit, search, semester }, withCredentials: true });
     return res.data;
@@ -75,6 +103,7 @@ const updateTitleForStudent = async (projectId, studentId, title) => {
 const teacherService = {
     getTeacherTimetable, getAttendancePageData, saveAttendance, startQrSession, endQrSession,
     getClassExam, saveClassExam, deleteClassExam,
+    getMyInvigilations, getExamRoomAttendance, saveExamRoomAttendance, startExamQrSession, endExamQrSession,
     getAllProjects, getProjectDetail, uploadReport, gradeStudent, updateTitleForStudent
 };
 export default teacherService;

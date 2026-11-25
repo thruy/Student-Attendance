@@ -2,7 +2,8 @@ import { Badge, Button, Card, Col, CloseButton, Form, Row, Table } from "react-b
 import { compareVietnameseName } from "../utils/exam";
 
 // thông tin + danh sách sinh viên của một lớp thi, các thay đổi đẩy lên ExamRoomPage
-function ExamRoomCard({ index, room, rooms, studentMap, teachers, maxPerRoom, onChange, onMoveStudent, onRemove }) {
+// readOnly: lớp thi đã điểm danh, không cho sửa; onOpenAttendance: chỉ có khi lớp thi đã được lưu
+function ExamRoomCard({ index, room, rooms, studentMap, teachers, maxPerRoom, readOnly, onChange, onMoveStudent, onRemove, onOpenAttendance }) {
     const students = room.students
         .map(id => studentMap[id])
         .filter(Boolean)
@@ -29,25 +30,28 @@ function ExamRoomCard({ index, room, rooms, studentMap, teachers, maxPerRoom, on
                     </Badge>
                     {overCapacity && <span className="ms-2 text-warning-emphasis small">Vượt quá số sinh viên tối đa</span>}
                 </span>
-                <Button variant="outline-danger" size="sm" onClick={onRemove}>Xóa lớp thi</Button>
+                <span className="d-flex gap-2">
+                    {onOpenAttendance && <Button variant="dark" size="sm" onClick={onOpenAttendance}>Điểm danh</Button>}
+                    {!readOnly && <Button variant="outline-danger" size="sm" onClick={onRemove}>Xóa lớp thi</Button>}
+                </span>
             </Card.Header>
             <Card.Body>
                 <Row className="g-3">
                     <Col md={3}>
                         <Form.Label>Mã lớp thi</Form.Label>
-                        <Form.Control value={room.examCode} onChange={(e) => onChange('examCode', e.target.value)} />
+                        <Form.Control value={room.examCode} onChange={(e) => onChange('examCode', e.target.value)} disabled={readOnly} />
                     </Col>
                     <Col md={3}>
                         <Form.Label>Phòng thi</Form.Label>
-                        <Form.Control value={room.room} placeholder="VD: D9-101" onChange={(e) => onChange('room', e.target.value)} />
+                        <Form.Control value={room.room} placeholder="VD: D9-101" onChange={(e) => onChange('room', e.target.value)} disabled={readOnly} />
                     </Col>
                     <Col md={3}>
                         <Form.Label>Bắt đầu</Form.Label>
-                        <Form.Control type="datetime-local" value={room.startTime} onChange={(e) => onChange('startTime', e.target.value)} />
+                        <Form.Control type="datetime-local" value={room.startTime} onChange={(e) => onChange('startTime', e.target.value)} disabled={readOnly} />
                     </Col>
                     <Col md={3}>
                         <Form.Label>Kết thúc</Form.Label>
-                        <Form.Control type="datetime-local" value={room.endTime} onChange={(e) => onChange('endTime', e.target.value)} />
+                        <Form.Control type="datetime-local" value={room.endTime} onChange={(e) => onChange('endTime', e.target.value)} disabled={readOnly} />
                     </Col>
                     <Col md={12}>
                         <Form.Label>Cán bộ coi thi</Form.Label>
@@ -55,15 +59,17 @@ function ExamRoomCard({ index, room, rooms, studentMap, teachers, maxPerRoom, on
                             {room.invigilators.map(id => (
                                 <Badge key={id} bg="light" text="dark" className="border d-flex align-items-center gap-2 py-2">
                                     {teacherMap[id] ? `${teacherMap[id].name} (${teacherMap[id].code})` : 'Giảng viên không tồn tại'}
-                                    <CloseButton style={{ fontSize: '0.6rem' }} onClick={() => removeInvigilator(id)} />
+                                    {!readOnly && <CloseButton style={{ fontSize: '0.6rem' }} onClick={() => removeInvigilator(id)} />}
                                 </Badge>
                             ))}
-                            <Form.Select value="" onChange={(e) => addInvigilator(e.target.value)} style={{ width: '300px' }}>
-                                <option value="">+ Thêm cán bộ coi thi</option>
-                                {availableTeachers.map(t => (
-                                    <option key={t._id} value={t._id}>{t.name} - {t.code}</option>
-                                ))}
-                            </Form.Select>
+                            {!readOnly && (
+                                <Form.Select value="" onChange={(e) => addInvigilator(e.target.value)} style={{ width: '300px' }}>
+                                    <option value="">+ Thêm cán bộ coi thi</option>
+                                    {availableTeachers.map(t => (
+                                        <option key={t._id} value={t._id}>{t.name} - {t.code}</option>
+                                    ))}
+                                </Form.Select>
+                            )}
                         </div>
                     </Col>
                 </Row>
@@ -84,7 +90,7 @@ function ExamRoomCard({ index, room, rooms, studentMap, teachers, maxPerRoom, on
                                 <td>{student.name}</td>
                                 <td className="text-center">{student.code}</td>
                                 <td>
-                                    <Form.Select size="sm" value="" onChange={(e) => onMoveStudent(student.id, e.target.value)}>
+                                    <Form.Select size="sm" value="" onChange={(e) => onMoveStudent(student.id, e.target.value)} disabled={readOnly}>
                                         <option value="">-- Chọn --</option>
                                         {rooms.map((r, j) => j !== index && (
                                             <option key={r.key} value={j}>Lớp thi {j + 1}{r.examCode ? ` (${r.examCode})` : ''}</option>

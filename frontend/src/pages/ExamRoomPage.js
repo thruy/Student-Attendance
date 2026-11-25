@@ -12,13 +12,21 @@ import {
 
 // khác biệt giữa trang chia lớp thi của giảng viên và admin
 const CONFIG = {
-    teacher: { service: teacherService, backPath: (classId) => `/teacher/teaching/attendance/${classId}` },
-    admin: { service: adminService, backPath: (classId) => `/admin/class/${classId}` }
+    teacher: {
+        service: teacherService,
+        backPath: (classId) => `/teacher/teaching/attendance/${classId}`,
+        attendancePath: (classId, examCode) => `/teacher/invigilation/${classId}/${encodeURIComponent(examCode)}`
+    },
+    admin: {
+        service: adminService,
+        backPath: (classId) => `/admin/class/${classId}`,
+        attendancePath: (classId, examCode) => `/admin/class/${classId}/exam/${encodeURIComponent(examCode)}`
+    }
 };
 
 // role: 'teacher' | 'admin'
 function ExamRoomPage({ role }) {
-    const { service, backPath } = CONFIG[role];
+    const { service, backPath, attendancePath } = CONFIG[role];
     const { classId } = useParams();
     const navigate = useNavigate();
     const keyRef = useRef(0);
@@ -28,6 +36,10 @@ function ExamRoomPage({ role }) {
     const [maxPerRoom, setMaxPerRoom] = useState('');
     const [rooms, setRooms] = useState([]);
     const [hasSaved, setHasSaved] = useState(false);
+    // mã các lớp thi đã lưu, chỉ những lớp thi này mới mở được trang điểm danh
+    const [savedCodes, setSavedCodes] = useState(new Set());
+    // đã điểm danh lớp thi thì không được chia lại / xóa
+    const [locked, setLocked] = useState(false);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [errors, setErrors] = useState([]);
@@ -51,6 +63,7 @@ function ExamRoomPage({ role }) {
             students: r.students.filter(id => ids.has(id))
         })) : []);
         setHasSaved(!!exam);
+        setSavedCodes(new Set(exam ? exam.rooms.map(r => r.examCode) : []));
     }, [newRoom]);
 
     useEffect(() => {
@@ -58,6 +71,7 @@ function ExamRoomPage({ role }) {
             .then(res => {
                 setClassInfo(res.class);
                 setTeachers(res.teachers);
+                setLocked(res.attendanceLocked);
                 applyExam(res.exam, res.class.students);
             })
             .catch(err => setErrors([err.response?.data?.message || 'Lỗi khi tải thông tin lớp thi']))
@@ -176,13 +190,16 @@ function ExamRoomPage({ role }) {
         <ClassDetailCard classInfo={classInfo}>
             <Container className="mt-4">
                 <h5 className="fw-bold">Chia lớp thi</h5>
+                {locked && (
+                    <Alert variant="info">Lớp thi đã được điểm danh, không thể chia lại hoặc xóa danh sách lớp thi.</Alert>
+                )}
                 <Row className="align-items-end g-3">
                     <Col md={4}>
                         <Form.Label>Số sinh viên tối đa mỗi phòng</Form.Label>
-                        <Form.Control type="number" min={1} value={maxPerRoom} onChange={(e) => setMaxPerRoom(e.target.value)} />
+                        <Form.Control type="number" min={1} value={maxPerRoom} onChange={(e) => setMaxPerRoom(e.target.value)} disabled={locked} />
                     </Col>
                     <Col md="auto">
-                        <Button variant="dark" onClick={handleSplit}>Chia lớp thi</Button>
+                        <Button variant="dark" onClick={handleSplit} disabled={locked}>Chia lớp thi</Button>
                     </Col>
                     <Col className="text-muted">
                         Lớp có {students.length} sinh viên{rooms.length > 0 && `, đang chia thành ${rooms.length} lớp thi`}
@@ -218,7 +235,7 @@ function ExamRoomPage({ role }) {
                                             <td>{student.name}</td>
                                             <td className="text-center">{student.code}</td>
                                             <td>
-                                                <Form.Select size="sm" value="" onChange={(e) => moveStudent(student.id, e.target.value)}>
+                                                <Form.Select size="sm" value="" onChange={(e) => moveStudent(student.id, e.target.value)} disabled={locked}>
                                                     <option value="">-- Chọn --</option>
                                                     {rooms.map((r, j) => (
                                                         <option key={r.key} value={j}>Lớp thi {j + 1}{r.examCode ? ` (${r.examCode})` : ''}</option>
@@ -242,18 +259,22 @@ function ExamRoomPage({ role }) {
                         studentMap={studentMap}
                         teachers={teachers}
                         maxPerRoom={Number(maxPerRoom)}
+                        readOnly={locked}
                         onChange={(field, value) => updateRoom(index, field, value)}
                         onMoveStudent={moveStudent}
                         onRemove={() => removeRoom(index)}
+                        onOpenAttendance={savedCodes.has(room.examCode)
+                            ? () => navigate(attendancePath(classId, room.examCode))
+                            : undefined}
                     />
                 ))}
 
                 <div className="d-flex gap-2 mt-4">
                     <Button variant="outline-dark" onClick={() => navigate(backPath(classId))}>Quay lại</Button>
-                    {rooms.length > 0 && <Button variant="outline-dark" onClick={addRoom}>Thêm lớp thi</Button>}
+                    {rooms.length > 0 && !locked && <Button variant="outline-dark" onClick={addRoom}>Thêm lớp thi</Button>}
                     <div className="ms-auto d-flex gap-2">
-                        {hasSaved && <Button variant="outline-danger" onClick={handleDelete} disabled={saving}>Xóa danh sách lớp thi</Button>}
-                        <Button variant="dark" onClick={handleSave} disabled={saving || rooms.length === 0}>
+                        {hasSaved && <Button variant="outline-danger" onClick={handleDelete} disabled={saving || locked}>Xóa danh sách lớp thi</Button>}
+                        <Button variant="dark" onClick={handleSave} disabled={saving || locked || rooms.length === 0}>
                             {saving ? 'Đang lưu...' : 'Lưu'}
                         </Button>
                     </div>

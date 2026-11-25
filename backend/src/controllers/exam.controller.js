@@ -1,6 +1,9 @@
 const User = require('../models/Users');
 const ExamClasses = require('../models/ExamClasses');
 const { formatClassDetail, findAccessibleClass } = require('../utils/class');
+const { isExamAttendanceLocked } = require('../utils/exam');
+
+const LOCKED_MESSAGE = 'Lớp thi đã được điểm danh, không thể chia lại hoặc xóa';
 
 // kết quả chia lớp thi gửi về frontend, sinh viên và cán bộ coi thi chỉ gửi id
 const formatExam = (exam) => exam && ({
@@ -23,14 +26,16 @@ const getClassExam = async (req, res) => {
         const { cls, status, message } = await findAccessibleClass(classId, req.user, { populate: true });
         if (!cls) { return res.status(status).json({ message }); }
 
-        const [exam, teachers] = await Promise.all([
+        const [exam, teachers, attendanceLocked] = await Promise.all([
             ExamClasses.findOne({ classId }),
-            User.find({ role: 'teacher' }).select('_id name code email').sort({ code: 1 })
+            User.find({ role: 'teacher' }).select('_id name code email').sort({ code: 1 }),
+            isExamAttendanceLocked(classId)
         ]);
         res.status(200).json({
             class: formatClassDetail(cls),
             exam: formatExam(exam),
-            teachers
+            teachers,
+            attendanceLocked
         });
     } catch (err) {
         res.status(500).json({ message: 'Lỗi khi lấy thông tin lớp thi', error: err.message });
@@ -43,6 +48,7 @@ const saveClassExam = async (req, res) => {
         const { classId } = req.params;
         const { cls, status, message } = await findAccessibleClass(classId, req.user);
         if (!cls) { return res.status(status).json({ message }); }
+        if (await isExamAttendanceLocked(classId)) { return res.status(409).json({ message: LOCKED_MESSAGE }); }
 
         const { maxPerRoom, rooms } = req.body;
 
@@ -97,6 +103,7 @@ const deleteClassExam = async (req, res) => {
         const { classId } = req.params;
         const { cls, status, message } = await findAccessibleClass(classId, req.user);
         if (!cls) { return res.status(status).json({ message }); }
+        if (await isExamAttendanceLocked(classId)) { return res.status(409).json({ message: LOCKED_MESSAGE }); }
 
         const result = await ExamClasses.deleteOne({ classId });
         if (result.deletedCount === 0) {
@@ -141,4 +148,34 @@ const getMyExams = async (req, res) => {
     }
 };
 
-module.exports = { getClassExam, saveClassExam, deleteClassExam, getMyExams };
+// các lớp thi mà giảng viên đang đăng nhập được phân công coi thi
+const getMyInvigilations = async (req, res) => {
+    try {
+        const { userId } = req.user;
+        const exams = await ExamClasses.find({ 'rooms.invigilators': userId })
+            .populate('classId', 'name subjectCode classCode semester');
+
+        const result = exams
+            .flatMap(exam => exam.rooms
+                .filter(r => r.invigilators.some(id => String(id) === String(userId)))
+                .map(room => ({
+                    classId: exam.classId?._id,
+                    name: exam.classId?.name,
+                    subjectCode: exam.classId?.subjectCode,
+                    classCode: exam.classId?.classCode,
+                    semester: exam.classId?.semester,
+                    examCode: room.examCode,
+                    room: room.room,
+                    startTime: room.startTime,
+                    endTime: room.endTime,
+                    numberOfStudents: room.students.length
+                })))
+            .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+
+        res.status(200).json({ exams: result });
+    } catch (err) {
+        res.status(500).json({ message: 'Lỗi khi lấy lịch coi thi', error: err.message });
+    }
+};
+
+module.exports = { getClassExam, saveClassExam, deleteClassExam, getMyExams, getMyInvigilations };
