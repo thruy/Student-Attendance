@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const User = require('../models/Users');
 const Classes = require('../models/Classes');
@@ -220,94 +219,67 @@ const resetPassword = async (req, res) => {
     }
 };
 
-// xóa sinh viên: gỡ khỏi lớp học, phiên điểm danh và đồ án
+// chỉ được xóa người dùng chưa có dữ liệu phát sinh; checks = [[truy vấn exists, thông báo]], trả về thông báo đầu tiên bị vướng
+const findDeleteBlocker = async (checks) => {
+    const results = await Promise.all(checks.map(([query]) => query));
+    const index = results.findIndex(Boolean);
+    return index === -1 ? null : checks[index][1];
+};
+
+// xóa sinh viên: chặn nếu sinh viên đang thuộc lớp học, lớp thi, đồ án hoặc đã có dữ liệu điểm danh
 const deleteStudent = async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
     try {
         const { id } = req.params;
 
-        const student = await User.findOne({ _id: id, role: 'student' }, '+faceData', { session });
+        const student = await User.findOne({ _id: id, role: 'student' }, '+faceData');
         if (!student) {
-            await session.abortTransaction();
             return res.status(404).json({ message: 'Không tìm thấy sinh viên' });
         }
 
-        await Classes.updateMany({ students: id }, { $pull: { students: id } }, { session });
-        await Attendances.updateMany(
-            { 'records.studentId': id },
-            { $pull: { records: { studentId: id } } },
-            { session }
-        );
-        await Projects.updateMany(
-            { 'members.studentId': id },
-            { $pull: { members: { studentId: id } } },
-            { session }
-        );
-        await ExamClasses.updateMany(
-            { 'rooms.students': id },
-            { $pull: { 'rooms.$[].students': id } },
-            { session }
-        );
+        const blocker = await findDeleteBlocker([
+            [Classes.exists({ students: id }), 'Sinh viên đang thuộc lớp học, không thể xóa'],
+            [ExamClasses.exists({ 'rooms.students': id }), 'Sinh viên đang thuộc lớp thi, không thể xóa'],
+            [Attendances.exists({ 'records.studentId': id }), 'Sinh viên đã có dữ liệu điểm danh, không thể xóa'],
+            [Projects.exists({ 'members.studentId': id }), 'Sinh viên đang thuộc đồ án, không thể xóa']
+        ]);
+        if (blocker) {
+            return res.status(409).json({ message: blocker });
+        }
 
-        await student.deleteOne({ session });
-        await session.commitTransaction();
-        // file ảnh không nằm trong transaction, xóa sau khi đã commit
+        await student.deleteOne();
         await removeFacePhoto(student.faceData?.photoPath).catch(err => console.error('Lỗi khi xóa ảnh khuôn mặt:', err));
-        res.status(200).json({ message: 'Đã xóa sinh viên và gỡ khỏi lớp học, đồ án, điểm danh, lớp thi' });
+        res.status(200).json({ message: 'Đã xóa sinh viên' });
     } catch (err) {
-        await session.abortTransaction();
         console.error(err);
         res.status(500).json({ message: 'Lỗi server' });
-    } finally {
-        session.endSession();
     }
 };
 
-// xóa giảng viên: xóa luôn đồ án, lớp học, phiên điểm danh và lớp thi của các lớp đó, gỡ khỏi danh sách coi thi
+// xóa giảng viên: chặn nếu giảng viên đang phụ trách lớp học, đồ án, coi thi hoặc đã điểm danh
 const deleteTeacher = async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
     try {
         const { id } = req.params;
 
-        const teacher = await User.findOne({ _id: id, role: 'teacher' }, null, { session });
+        const teacher = await User.findOne({ _id: id, role: 'teacher' });
         if (!teacher) {
-            await session.abortTransaction();
             return res.status(404).json({ message: 'Không tìm thấy giảng viên' });
         }
 
-        const projectResult = await Projects.deleteMany({ teacherId: id }, { session });
-
-        const classes = await Classes.find({ teacherId: id }, '_id', { session });
-        const classIds = classes.map(c => c._id);
-        if (classIds.length > 0) {
-            await Attendances.deleteMany({ classId: { $in: classIds } }, { session });
-            await ExamClasses.deleteMany({ classId: { $in: classIds } }, { session });
+        const blocker = await findDeleteBlocker([
+            [Classes.exists({ teacherId: id }), 'Giảng viên đang phụ trách lớp học, không thể xóa'],
+            [ExamClasses.exists({ 'rooms.invigilators': id }), 'Giảng viên đang được phân công coi thi, không thể xóa'],
+            [Attendances.exists({ teacherId: id }), 'Giảng viên đã có dữ liệu điểm danh, không thể xóa'],
+            [Projects.exists({ teacherId: id }), 'Giảng viên đang phụ trách đồ án, không thể xóa']
+        ]);
+        if (blocker) {
+            return res.status(409).json({ message: blocker });
         }
-        await ExamClasses.updateMany(
-            { 'rooms.invigilators': id },
-            { $pull: { 'rooms.$[].invigilators': id } },
-            { session }
-        );
 
-        const classResult = await Classes.deleteMany({ teacherId: id }, { session });
-        await teacher.deleteOne({ session });
-        await session.commitTransaction();
-
-        res.status(200).json({
-            message: 'Đã xóa giảng viên và dữ liệu liên quan',
-            deleted: {
-                projects: projectResult.deletedCount,
-                classes: classResult.deletedCount
-            }
-        });
+        await teacher.deleteOne();
+        res.status(200).json({ message: 'Đã xóa giảng viên' });
     } catch (err) {
-        await session.abortTransaction();
         console.error(err);
         res.status(500).json({ message: 'Lỗi server' });
-    } finally {
-        session.endSession();
     }
 };
 

@@ -17,6 +17,7 @@ const CONFIG = {
         create: adminService.createStudent,
         update: adminService.updateStudent,
         resetPassword: adminService.resetStudentPassword,
+        remove: adminService.deleteStudent,
         listKey: 'students',
         detailKey: 'student',
         codeHeader: 'MSSV',
@@ -28,6 +29,7 @@ const CONFIG = {
         create: adminService.createTeacher,
         update: adminService.updateTeacher,
         resetPassword: adminService.resetTeacherPassword,
+        remove: adminService.deleteTeacher,
         listKey: 'teachers',
         detailKey: 'teacher',
         codeHeader: 'MSGV',
@@ -127,6 +129,27 @@ function UserManagePage({ role }) {
         }
     };
 
+    // backend chặn xóa nếu người dùng đã có dữ liệu phát sinh (lớp học, điểm danh, đồ án...) và trả về lý do
+    const handleDelete = async (user) => {
+        const confirm = window.confirm(
+            `Bạn có chắc chắn muốn xóa ${title} ${user.name} - ${user.code}?`
+        );
+        if (!confirm) return;
+
+        try {
+            const res = await config.remove(user._id);
+            alert(res.message || `Đã xóa ${title}`);
+            // xóa người cuối cùng của trang thì lùi về trang trước (đổi page sẽ tự tải lại danh sách)
+            if (users.length === 1 && page > 1) {
+                setPage(page - 1);
+            } else {
+                await fetchUsers();
+            }
+        } catch (err) {
+            alert(err.response?.data?.message || `Lỗi khi xóa ${title}`);
+        }
+    };
+
     return (
         <div>
             <h1 className="timetable-title">Quản lý {title}</h1>
@@ -170,7 +193,7 @@ function UserManagePage({ role }) {
                                         <Button variant='link' className="icon-btn info" onClick={() => handleViewDetail(user._id)}><InfoCircle /></Button>
                                         <Button variant='link' className="icon-btn edit" onClick={() => handleEdit(user)}><Pen /></Button>
                                         <Button variant='link' className="icon-btn reset" onClick={() => handleResetPassword(user)}><PersonFillLock /></Button>
-                                        <Button variant='link' className="icon-btn delete"><Trash3 /></Button>
+                                        <Button variant='link' className="icon-btn delete" onClick={() => handleDelete(user)}><Trash3 /></Button>
                                     </div>
                                 </td>
                             </tr>

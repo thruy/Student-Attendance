@@ -3,6 +3,11 @@ const Classes = require('../models/Classes');
 const Attendances = require('../models/Attendances');
 const ExamClasses = require('../models/ExamClasses');
 const { formatClassDetail, findAccessibleClass } = require('../utils/class');
+const { toDateKey } = require('../utils/attendance');
+const { isExamAttendanceLocked } = require('../utils/exam');
+
+// sinh viên được quản lý qua API thêm/xóa sinh viên riêng, không sửa qua updateClass
+const EDITABLE_CLASS_FIELDS = ['subjectCode', 'name', 'classCode', 'type', 'semester', 'teacherId', 'date', 'schedule'];
 
 // thời khóa biểu của người đang đăng nhập (sinh viên hoặc giảng viên)
 const getMyTimetable = async (req, res) => {
@@ -143,8 +148,19 @@ const updateClass = async (req, res) => {
                 return res.status(400).json({ message: 'Giảng viên không hợp lệ' });
             }
         }
-        Object.keys(updates).forEach(key => {
-            cls[key] = updates[key];
+
+        // không được bỏ khỏi lịch học những buổi đã có phiên điểm danh
+        if (updates.date) {
+            const newKeys = new Set(updates.date.map(toDateKey));
+            const sessions = await Attendances.find({ classId, examCode: null }, 'date');
+            const removed = [...new Set(sessions.map(a => toDateKey(a.date)))].filter(k => !newKeys.has(k)).sort();
+            if (removed.length > 0) {
+                return res.status(409).json({ message: `Buổi học ngày ${removed.join(', ')} đã có dữ liệu điểm danh, không thể bỏ khỏi lịch học` });
+            }
+        }
+
+        EDITABLE_CLASS_FIELDS.forEach(key => {
+            if (updates[key] !== undefined) cls[key] = updates[key];
         });
 
         await cls.save();
@@ -171,13 +187,20 @@ const deleteClass = async (req, res) => {
             return res.status(404).json({ message: 'Không tìm thấy lớp học' });
         }
 
-        await Attendances.deleteMany({ classId });
-        await ExamClasses.deleteMany({ classId });
-        await cls.deleteOne();
+        // chỉ được xóa lớp chưa có dữ liệu phát sinh (lớp thi hoặc phiên điểm danh, kể cả điểm danh thi)
+        const [hasExam, hasAttendance] = await Promise.all([
+            ExamClasses.exists({ classId }),
+            Attendances.exists({ classId })
+        ]);
+        if (hasExam) {
+            return res.status(409).json({ message: 'Lớp học đã được chia lớp thi, không thể xóa' });
+        }
+        if (hasAttendance) {
+            return res.status(409).json({ message: 'Lớp học đã có dữ liệu điểm danh, không thể xóa' });
+        }
 
-        res.status(200).json({
-            message: 'Đã xóa lớp học, toàn bộ phiên điểm danh và lớp thi liên quan'
-        });
+        await cls.deleteOne();
+        res.status(200).json({ message: 'Đã xóa lớp học' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Lỗi server' });
@@ -229,15 +252,31 @@ const removeStudentFromClass = async (req, res) => {
             return res.status(404).json({ message: 'Không tìm thấy lớp học' });
         }
 
-        const before = cls.students.length;
-        cls.students = cls.students.filter(id => id.toString() !== studentId);
-        if (cls.students.length === before) {
+        if (!cls.students.some(id => id.toString() === studentId)) {
             return res.status(400).json({ message: 'Sinh viên không thuộc lớp này' });
         }
 
+        // chặn nếu sinh viên đã được điểm danh (buổi học hoặc lớp thi) hoặc đang thuộc lớp thi đã bị khóa do có điểm danh
+        const [hasRecord, inExamRoom, examLocked] = await Promise.all([
+            Attendances.exists({ classId, records: { $elemMatch: { studentId, status: { $ne: null } } } }),
+            ExamClasses.exists({ classId, 'rooms.students': studentId }),
+            isExamAttendanceLocked(classId)
+        ]);
+        if (hasRecord) {
+            return res.status(409).json({ message: 'Sinh viên đã có dữ liệu điểm danh trong lớp này, không thể xóa khỏi lớp' });
+        }
+        if (inExamRoom && examLocked) {
+            return res.status(409).json({ message: 'Sinh viên đang thuộc lớp thi đã điểm danh, không thể xóa khỏi lớp' });
+        }
+
+        cls.students = cls.students.filter(id => id.toString() !== studentId);
         await cls.save();
-        // gỡ sinh viên khỏi lớp thi của lớp này
+        // gỡ sinh viên khỏi lớp thi và các bản ghi điểm danh chưa có trạng thái của lớp này
         await ExamClasses.updateOne({ classId }, { $pull: { 'rooms.$[].students': studentId } });
+        await Attendances.updateMany(
+            { classId, 'records.studentId': studentId },
+            { $pull: { records: { studentId } } }
+        );
         res.status(200).json({ message: 'Đã xóa sinh viên khỏi lớp' });
     } catch (err) {
         console.error(err);

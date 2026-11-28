@@ -1,6 +1,9 @@
 const User = require('../models/Users');
 const Projects = require('../models/Project');
 
+// thành viên đã có đề tài, báo cáo, điểm hoặc nhận xét thì coi là có dữ liệu phát sinh
+const memberHasData = (m) => [m.title, m.fileUrl, m.score, m.comment, m.submittedAt].some(v => v != null && v !== '');
+
 // giảng viên chỉ thao tác trên đồ án mình phụ trách, admin thao tác trên mọi đồ án
 const projectScope = (req, projectId) => {
     const filter = { _id: projectId };
@@ -195,6 +198,10 @@ const deleteProject = async (req, res) => {
         if (!project) {
             return res.status(404).json({ message: 'Không tìm thấy lớp project' });
         }
+        // chỉ có danh sách sinh viên thì vẫn được xóa
+        if (project.members.some(memberHasData)) {
+            return res.status(409).json({ message: 'Lớp đồ án đã có đề tài, báo cáo hoặc điểm của sinh viên, không thể xóa' });
+        }
         await project.deleteOne();
         res.status(200).json({ message: 'Xóa lớp project thành công' });
     } catch (err) {
@@ -252,12 +259,15 @@ const removeStudentFromProject = async (req, res) => {
             return res.status(404).json({ message: 'Không tìm thấy project' });
         }
 
-        const before = project.members.length;
-        project.members = project.members.filter(m => m.studentId.toString() !== studentId);
-        if (project.members.length === before) {
+        const member = project.members.find(m => m.studentId.toString() === studentId);
+        if (!member) {
             return res.status(404).json({ message: 'Sinh viên không tồn tại trong lớp đồ án' });
         }
+        if (memberHasData(member)) {
+            return res.status(409).json({ message: 'Sinh viên đã có đề tài, báo cáo hoặc điểm, không thể xóa khỏi lớp đồ án' });
+        }
 
+        project.members = project.members.filter(m => m !== member);
         await project.save();
         res.json({
             message: 'Xóa sinh viên khỏi project thành công'

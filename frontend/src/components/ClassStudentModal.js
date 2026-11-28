@@ -60,8 +60,12 @@ function ClassStudentModal({ show, onHide, classInfo }) {
     };
 
     const handleRemove = async (studentId) => {
-        await adminService.removeStudentFromClass(classInfo.classId, studentId);
-        setClassStudents(prev => prev.filter(s => s.id !== studentId));
+        try {
+            await adminService.removeStudentFromClass(classInfo.classId, studentId);
+            setClassStudents(prev => prev.filter(s => s.id !== studentId));
+        } catch (err) {
+            alert(err.response?.data?.message || 'Xóa sinh viên khỏi lớp thất bại');
+        }
     };
 
     return (
